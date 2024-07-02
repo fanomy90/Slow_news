@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  redis:
+    image: redis
+    restart: always
+  cell:
+    restart: always
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    volumes:
+      - /home/projects/SAVE:/app/news/SAVE
+    ports:
+      - "9000:9000"
+  worker:
+    restart: always
+    build:
+      context: ./
+    volumes:
+      - /home/projects/SAVE:/app/puppeteer/SAVE
+    command: ['celery', '--workdir=./puppeteer', '-A', 'puppeteer', 'worker']
