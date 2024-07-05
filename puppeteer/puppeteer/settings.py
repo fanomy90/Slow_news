@@ -42,12 +42,15 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    "http://cell:9000",
-    "http://worker:9000",
-    "http://192.168.31.8:9000",
-    "http://slow_news-cell-1",
-    "http://slow_news-redis-1",
-    "http://slow_news-worker-1"]
+    # "http://cell:9000",
+    # "http://worker:9000",
+    # "http://192.168.31.8:9000",
+    # "http://slow_news-cell-1",
+    # "http://slow_news-redis-1",
+    # "http://slow_news-worker-1",
+    # "http://95.29.193.12:8082",
+    # "http://192.168.31.1:55258"
+    ]
 
 ROOT_URLCONF = 'puppeteer.urls'
 

@@ -10,6 +10,7 @@ services:
       dockerfile: ./Dockerfile
     volumes:
       - /home/projects/SAVE:/app/news/SAVE
+      - /home/projects/Slow_news/puppeteer:/app/puppeteer
     ports:
       - "9000:9000"
   worker:
