@@ -4,7 +4,7 @@ from django.views.generic import ListView
 from . import tasks
 from celery.result import AsyncResult
 from rest_framework.views import APIView
-from news.tasks import cpu_task1, cpu_task2
+# from news.tasks import cpu_task1, cpu_task2
 from django.shortcuts import render
 
 from django.contrib.auth import login, logout

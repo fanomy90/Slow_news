@@ -4,52 +4,96 @@
     <h1 align="center">{{title}}</h1>
     <br>
 <!-- Вывод состояния выполнения -->
-    <button class="header__link navigation__item" onclick="startTask('task1')">Start Task Parse</button>
+    <button class="header__link navigation__item" onclick="startTaskOnClick('task3')">download a cat</button>
     <br>
     <br>
-    <button class="header__link navigation__item" onclick="startTask('task2')">Start Task Import</button>
+    <button class="header__link navigation__item" onclick="startTask('task1')">Start Parsing</button>
+    <br>
+    <br>
+    <button class="header__link navigation__item" onclick="startTask('task2')">Start Import</button>
     <br>
     <div>
         <ul id="tasks"></ul>
     </div>
     <br>
+    {% comment %} тестовая обработка для работы с вебсокетами, нужно после тестов вынести в отдельный js скрипт {% endcomment %}
     <script>
-        let tasklist = document.getElementById("tasks")
+        //let socket;  // Объявляем переменную socket на более высоком уровне
+        const tasksList = document.getElementById("tasks");
         // Получаем имя хоста
         const host = window.location.hostname; 
         console.log(host);
+        //запуск задачи через вебсокеты
+        async function startTask(taskID) {
+            console.log(`Starting task ${taskID}...`);
+            //открываем соединение по вебсокетам, нужно заменить адрес на имя сервиса
+            const socket = new WebSocket(`ws://${host}:9000/ws/start_task/`);
+            socket.onopen = () => {
+                console.log("WebSocket opened successfully.");
+                //отправляем консумеру сообщение с названием запускаемой задачи, рассмотреть исключение отправки start_task
+                socket.send(JSON.stringify({ type: "start_task", task: taskID }));
+            };
+            //прослушиваем события от веоркера по вебсокетам
+            socket.onmessage = async (event) => {
+                console.log("Received WebSocket message:", event.data);
+                //передаем данные функции для обновления информации на странице
+                const taskWebSocket = updateStatus(event.data);
+            };
+            // закрываем вебсокет соединение
+            socket.onclose = (event) => {
+                console.error('WebSocket closed unexpectedly', event);
+            };
+            socket.onerror = (error) => {
+                console.error("Ошибка WebSocket:", error);
+            };
+        }
+        async function startTaskOnClick(taskID) {
+            await startTask(taskID);
+        }
         function deleter(el) {
-            tasklist.removeChild(el)
+            tasksList.removeChild(el);
         }
-        function checker(task_el) {
-            axios.get(`http://${host}:9000/gettask/?task_id=` + task_el.id)
-            .then((res) => {
-                if (res.data == "SUCCESS") {
-                    task_el.style.color = "green"
-                    task_el.innerHTML = task_el.id + " SUCCESS"
-                    console.log('Task ${task_el.id} finished');
-                    setTimeout(deleter, 3000, task_el)
-                } else {
-                    console.log('Task ${task_el.id} running');
-                    setTimeout(checker, 1000, task_el)
-                }
-            });
+        // Функция для обработки ошибок
+        function handleWebSocketError(event) {
+            console.error('WebSocket error:', event);
         }
-        function startTask(script_id) {
-            axios.get(`http://${host}:9000/settask/`, {
-                params: {
-                    script_id: script_id
-                }
-            })
-            .then((res) => {
-                console.log(res.data);
-                let taskitem = document.createElement("li")
-                taskitem.id = res.data
-                taskitem.innerHTML = res.data + " WORKING"
-                taskitem.style.color = "red"
-                tasklist.appendChild(taskitem)
-                setTimeout(checker, 1000, taskitem)
-            });
+
+        // Функция для обновления статуса задачи на странице
+        function updateStatus(statusData) {
+            console.log("Обновления статуса задачи:", statusData);
+            //парсим полученные сообщения содержащие id и состояние задачи и записываем в переменную data
+            const data = JSON.parse(statusData);
+            //объявим переменную для хранения сообщения при статусе PROGRESS
+            let message;
+            //делаем проверку на существование элемента списка и при необходимости создаем его
+            let taskitem = document.getElementById(data.task_id);
+            if (!taskitem) {
+                taskitem = document.createElement("li");
+                taskitem.id = data.task_id;
+                tasksList.appendChild(taskitem);
+                //return;
+            }
+            //taskitem.id = data.task_id
+            if (data.status === 'STARTED') {
+                taskitem.style.color = "red";
+                message = "Запуск";
+            }
+            if (data.status === 'PROGRESS') {
+                const taskWebSocket = comTask(data.task_id);
+                taskitem.style.color = "purple";
+                message = data.message;
+            }
+            if (data.status === 'SUCCESS') {
+                taskitem.style.color = "green"
+                message = "Успех";
+                setTimeout(() => deleter(taskitem), 3000);
+            }
+            if (data.status === 'FAILURE') {
+                taskitem.style.color = "orange"
+                message = "Ошибка";
+                setTimeout(() => deleter(taskitem), 5000);
+            }
+            taskitem.innerHTML = `ID: ${data.task_id} STATUS: ${data.status} MESSAGE: ${message}`;
         }
     </script>
 {% endblock %}
