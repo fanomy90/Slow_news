@@ -1,0 +1,57 @@
+{% extends 'news/base.html' %}
+
+{% block content %}
+    <h1 align="center">{{title}}</h1>
+    <br>
+<!-- Вывод состояния выполнения -->
+    <button class="header__link navigation__item" onclick="startTask('task1')">Start Task Parse</button>
+    <br>
+    <br>
+    <button class="header__link navigation__item" onclick="startTask('task2')">Start Task Import</button>
+    <br>
+    <div>
+        <ul id="tasks"></ul>
+    </div>
+    <br>
+    <script>
+        let tasklist = document.getElementById("tasks")
+        // Получаем имя хоста
+        const host = window.location.hostname; 
+        console.log(host);
+        function deleter(el) {
+            tasklist.removeChild(el)
+        }
+        function checker(task_el) {
+            axios.get(`http://${host}:9000/gettask/?task_id=` + task_el.id)
+            .then((res) => {
+                if (res.data == "SUCCESS") {
+                    task_el.style.color = "green"
+                    task_el.innerHTML = task_el.id + " SUCCESS"
+                    console.log('Task ${task_el.id} finished');
+                    setTimeout(deleter, 3000, task_el)
+                } else {
+                    console.log('Task ${task_el.id} running');
+                    setTimeout(checker, 1000, task_el)
+                }
+            });
+        }
+        function startTask(script_id) {
+            axios.get(`http://${host}:9000/settask/`, {
+                params: {
+                    script_id: script_id
+                }
+            })
+            .then((res) => {
+                console.log(res.data);
+                let taskitem = document.createElement("li")
+                taskitem.id = res.data
+                taskitem.innerHTML = res.data + " WORKING"
+                taskitem.style.color = "red"
+                tasklist.appendChild(taskitem)
+                setTimeout(checker, 1000, taskitem)
+            });
+        }
+    </script>
+{% endblock %}
+
+
