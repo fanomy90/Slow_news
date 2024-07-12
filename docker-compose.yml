@@ -3,6 +3,10 @@ services:
   redis:
     image: redis
     restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
   cell:
     restart: always
     build:
@@ -11,12 +15,32 @@ services:
     volumes:
       - /home/projects/SAVE:/app/news/SAVE
       - /home/projects/Slow_news/puppeteer:/app/puppeteer
+      - /home/projects/Slow_news/puppeteer/db.sqlite3:/app/puppeteer/db.sqlite3  # Монтируем SQLite файл
+      # - /home/projects/fixtures:/app/puppeteer/news/fixtures
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     ports:
       - "9000:9000"
+
   worker:
     restart: always
     build:
       context: ./
     volumes:
       - /home/projects/SAVE:/app/puppeteer/SAVE
+      - /home/projects/Slow_news/puppeteer/db.sqlite3:/app/puppeteer/db.sqlite3  # Монтируем SQLite файл
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     command: ['celery', '--workdir=./puppeteer', '-A', 'puppeteer', 'worker']
+    depends_on:
+      - redis
+      - cell
+  # контейнер для мониторинга и управления задачами
+  # flower:
+  #   image: mher/flower
+  #   command: ['flower', '--broker=redis://redis:6379/0', '--port=5555']
+  #   restart: always
+  #   ports:
+  #     - "5555:5555"
+  #   depends_on:
+  #     - redis

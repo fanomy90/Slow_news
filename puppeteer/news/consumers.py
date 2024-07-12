@@ -3,7 +3,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from celery.result import AsyncResult
 import uuid
 import asyncio
-from .tasks import download_a_cat, cpu_task1, download_a_news
+from .tasks import download_a_cat, cpu_task1, download_a_news, import_news_task
 # from . import tasks
 
 # тестовая обработка работы с задачами
@@ -26,9 +26,7 @@ class SaveConsumer(AsyncWebsocketConsumer):
             if task == "task1":
                 download_a_news.apply_async(args=[], task_id=task_id)
             elif task == "task2":
-                # нерабочий пример задачи с передачей сообщений статуса
-                # cpu_task2.apply_async(args=[], task_id=task_id)
-                cpu_task1.apply_async(args=[], task_id=task_id)
+                import_news_task.apply_async(args=[], task_id=task_id)
 
             elif task == "task3":
                 download_a_cat.apply_async(args=[], task_id=task_id)
