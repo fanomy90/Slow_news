@@ -7,7 +7,6 @@ from random import randint
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 import asyncio
-
 import json
 import datetime
 from bs4 import BeautifulSoup
@@ -15,30 +14,23 @@ from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files import File
-from news  .models import News, Category
 from django.utils.text import slugify
-
 from news.management.commands import load_test3
 from news.task.parser2 import parser_test
-from news.task.loader1 import loader_test1
-from news.task.loader2 import loader_test2
+from news.task.parser_cisoclub import cisoclub_news
 
 import os
 from celery import shared_task
 from django.core.management import call_command #возможный косяк из за чего не запускались команды
 from django.conf import settings #для генерации имен файлов
 import logging
-# @shared_task()
-# def import_news_task():
-#     load_test3.Command().handle()
-#     #now = datetime.datetime.now()
-#     #return f"{now} import cisoclub complete"
-#     return True
+
 logger = logging.getLogger(__name__)
 
 @shared_task()
 def download_a_news():
-    parser_test()
+    #parser_test()
+    cisoclub_news()
     return True
 
 @shared_task
@@ -67,22 +59,6 @@ def import_news_task():
         # logger.error(f'An error occurred: {e}')
         print(f'An error occurred: {e}')
         return f'An error occurred: {e}'
-
-# @shared_task()
-# def import_news_task():
-#     input_dir = settings.BASE_DIR / 'news' / 'fixtures'
-#     input_path = input_dir / 'news.json'
-#     if not os.path.exists(input_path):
-#         print(str(now()) + ' Файл для загрузки не найден по пути: ' + str(input_path))
-#         return False
-#     try:
-#         # Запускаем команду dumpdata
-#         call_command('loaddata', 'news.json')
-#         print(str(now()) + ' тестовый импорт выполнен')
-#     except Exception as e:
-#         print(str(now()) + ' тестовый импорт завершился с ошибкой: ' + str(e))
-#         return False
-#     return True
 
 
 

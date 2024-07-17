@@ -1,4 +1,4 @@
-# Задача парсинга
+# Старый парсер - сейас не работает
 url = 'https://cisoclub.ru/category/news/'
 
 def download_a_news():

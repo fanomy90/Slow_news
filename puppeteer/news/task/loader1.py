@@ -1,3 +1,4 @@
+#тестовый скрипт загрузки дампа данных в бд
 import os
 from django.core.management import call_command
 from django.utils.timezone import now
