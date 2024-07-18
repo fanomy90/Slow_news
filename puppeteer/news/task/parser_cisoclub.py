@@ -2,7 +2,8 @@ import os
 import uuid #для генерации случайных имен файлов
 from django.utils.timezone import now
 import json
-import datetime
+from datetime import datetime, timedelta
+import re
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
@@ -14,7 +15,7 @@ from django.core.management import call_command
 
 
 url = 'https://cisoclub.ru/category/news/'
-now = datetime.datetime.now()
+now = datetime.now()
 output_dir = '/app/puppeteer/SAVE'
 output_path = os.path.join(output_dir, 'news.json')
 output_path_history = os.path.join(output_dir, 'news_history.json')
@@ -49,9 +50,43 @@ def get_existing_titles(data):
         if item['model'] == 'news.news' and 'fields' in item and 'title' in item['fields']:
             titles.add(item['fields']['title'])
     return titles
+#преобразование даты в нормальный вид
+def parse_date(date_str):
+    # Удаляем лишние пробелы и символы переноса строки
+    date_str = date_str.strip()
+
+    # Проверка на слово "Вчера"
+    if "Вчера" in date_str:
+        print('проверка на Вчера')
+        return (datetime.now() - timedelta(days=1)).date()
+
+    # Проверка на наличие времени (формат HH:MM)
+    time_match = re.search(r'\b\d{2}:\d{2}\b', date_str)
+    if time_match:
+        print('проверка на Время')
+        return datetime.now().date()
+
+    # Проверка на формат "17 июля" (пример: день и месяц)
+    month_mapping = {
+        'января': 1, 'февраля': 2, 'марта': 3, 'апреля': 4,
+        'мая': 5, 'июня': 6, 'июля': 7, 'августа': 8,
+        'сентября': 9, 'октября': 10, 'ноября': 11, 'декабря': 12
+    }
+    date_match = re.search(r'\b(\d{1,2})\s([а-яА-Я]+)\b', date_str)
+    if date_match:
+        print('проверка на Дату')
+        day = int(date_match.group(1))
+        month_str = date_match.group(2)
+        month = month_mapping.get(month_str)
+        if month:
+            year = datetime.now().year
+            return datetime(year, month, day).date()
+
+    # Возвращаем None, если не удалось распознать формат
+    return None
 #основной скрипт парсера
 def cisoclub_news():
-    # now = datetime.datetime.now()
+    # now = datetime.now()
     if not os.path.exists(output_dir):
         #os.makedirs(output_dir)
         print(str(now) + ' не найдена директория для сохранения: ' + output_dir)
@@ -114,7 +149,12 @@ def cisoclub_news():
                 if post_response.status_code == 200:
                     post_src = post_response.text
                     post_soup = BeautifulSoup(post_src, 'lxml')
-                    date = post_soup.find("div", class_='postDate').text
+
+                    #date = post_soup.find("div", class_='postDate').text
+
+                    date_str = post_soup.find("div", class_='postDate').text
+                    date = parse_date(date_str)
+
                     title = post_soup.find("h1", class_='postContentTitle').text
                     content = post_soup.find("div", class_='articleContent').text
                     author = post_soup.find("div", class_='author_info_text').text
@@ -131,10 +171,13 @@ def cisoclub_news():
                                 "title": title,
                                 "slug": slug,
                                 "content": content,
-                                "time_create": datetime.datetime.now().isoformat(),
-                                "time_update": datetime.datetime.now().isoformat(),
+                                "time_create": datetime.now().isoformat(),
+                                "time_update": datetime.now().isoformat(),
                                 "is_published": True,
-                                "cat": 1
+                                "cat": 1,
+                                "date": date.isoformat(),  # Преобразование даты в строку ISO формата
+                                "author": author,
+                                "image": image_url
                             }
                         }
                         data.append(news_post)
@@ -155,7 +198,7 @@ def cisoclub_news():
             print(str(now) + ' посты новостей cisoclub сохранены в файл: ' + str(output_path))
         # with open(output_path_history, 'w', encoding='utf-8') as json_file:
         #     json.dump(combined_data, json_file, ensure_ascii=False, indent=2)
-        #     # print(f'{datetime.datetime.now()} посты новостей cisoclub сохранены в файл {output_path}')
+        #     # print(f'{datetime.now()} посты новостей cisoclub сохранены в файл {output_path}')
         #     print(str(now) + ' дополнен файл постов новостей cisoclub: ' + str(output_path_history))
         return True
     except Exception as e:

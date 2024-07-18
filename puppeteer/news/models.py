@@ -12,6 +12,11 @@ class News(models.Model):
     is_published = models.BooleanField(default=True, verbose_name='Опубликовано')
     #внешний ключ для связи с первичной моделью Category как cat_id (id добавляется атоматом)
     cat = models.ForeignKey('Category', on_delete=models.PROTECT, verbose_name='Категория')
+    #новые поля
+    date = models.DateField(verbose_name='Дата статьи')
+    author = models.CharField(max_length=255, blank=True, null=True, verbose_name='Автор')
+    #image = models.ImageField(upload_to='news_image', blank=True, null=True, verbose_name='Изображение')
+    image = models.CharField(max_length=255, blank=True, null=True, verbose_name='Изображение')
     def __str__(self):
         return self.title
     def get_absolute_url(self):

@@ -3,7 +3,7 @@ from .models import *
 #вспомогательный класс для админ панели
 class NewsAdmin(admin.ModelAdmin):
     #вывод дополнительных полей для отображения записей БД в админке
-    list_display = ('id', 'slug', 'title', 'time_create', 'is_published')
+    list_display = ('id', 'slug', 'title', 'time_create', 'is_published', 'date', 'author', 'image')
     #Доп поля с ссылками для перехода для редактирования записи БД
     list_display_links = ('id', 'title')
     #Доп поля по которым можно произвести поиск
