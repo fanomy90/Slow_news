@@ -52,9 +52,39 @@ def get_existing_titles(data):
     return titles
 #преобразование даты в нормальный вид
 def parse_date(date_str):
-    # Удаляем лишние пробелы и символы переноса строки
     date_str = date_str.strip()
+    print(f'Парсинг даты: {date_str}')
 
+    if not date_str:
+        print('Дата не найдена, возвращаем None')
+        return None
+
+    # Проверка на наличие тега <timeago>
+    if 'timeago' in date_str:
+        # Извлечение значения атрибута datetime
+        datetime_match = re.search(r'datetime="([^"]+)"', date_str)
+        if datetime_match:
+            datetime_str = datetime_match.group(1)
+            try:
+                # Убираем часть строки, которая вызывает ошибку
+                datetime_str = datetime_str.split(' GMT')[0]
+                parsed_date = datetime.strptime(datetime_str, '%a %b %d %Y %H:%M:%S')
+                return parsed_date.date()
+            except ValueError as e:
+                print(f'Ошибка парсинга времени из timeago: {e}')
+                return None
+
+    # Проверка на фразы типа "X час(ов) назад"
+    hours_ago_match = re.search(r'(\d+)\sчас(а|ов)\sназад', date_str)
+    if hours_ago_match:
+        hours_ago = int(hours_ago_match.group(1))
+        return (datetime.now() - timedelta(hours=hours_ago)).date()
+
+    # Проверка на слово "Сегодня"
+    if "Сегодня" in date_str:
+        print('проверка на Сегодня')
+        return datetime.now().date()
+    
     # Проверка на слово "Вчера"
     if "Вчера" in date_str:
         print('проверка на Вчера')
@@ -66,7 +96,7 @@ def parse_date(date_str):
         print('проверка на Время')
         return datetime.now().date()
 
-    # Проверка на формат "17 июля" (пример: день и месяц)
+    # Проверка на формат типа "17 июля" (пример: день и месяц)
     month_mapping = {
         'января': 1, 'февраля': 2, 'марта': 3, 'апреля': 4,
         'мая': 5, 'июня': 6, 'июля': 7, 'августа': 8,
@@ -82,39 +112,23 @@ def parse_date(date_str):
             year = datetime.now().year
             return datetime(year, month, day).date()
 
-    # Возвращаем None, если не удалось распознать формат
+    print(f'Не удалось распознать дату: {date_str}')
     return None
+
+
 #основной скрипт парсера
 def cisoclub_news():
-    # now = datetime.now()
     if not os.path.exists(output_dir):
-        #os.makedirs(output_dir)
         print(str(now) + ' не найдена директория для сохранения: ' + output_dir)
     try:
         headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36 OPR/68.0.3618.125'
         }
 
-        #анализ старого файла
-        # if not os.path.exists(output_path_history):
-        #     print(str(now) + ' не найдена файл с историческими данными: ' + output_path_history)
-        #     try:
-        #         # Запускаем команду dumpdata
-        #         call_command('dumpdata', 'news', indent=2, output=output_path_history)
-        #         print(str(now) + ' получены исторически данные: ' + output_path_history)
-        #     except Exception as e:
-        #         print(str(now()) + ' получение исторических данных завершилось с ошибкой: ' + str(e))
-
-        #если файл есть то добавить логику сравнения файла с базой
-        #как вариант в будущем делать запросы к бд а не выгружать каждый раз файл
         existing_data = load_existing_data(output_path_history)
         max_existing_pk = get_max_pk(existing_data)
         existing_titles = get_existing_titles(existing_data)
-        #статические данные парсера
-        href = []
-        cat_id = 1
-        category_name = "Безопасность"
-        category_slug = "security"
+
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             src = response.text
@@ -123,7 +137,6 @@ def cisoclub_news():
             news_links = []
             news_data = []
             base_url = 'https://cisoclub.ru'
-            #делаем начальное значение pk постов в новом наборе учитывая максимальный pk из старого файла
             news_pk = max_existing_pk + 1
             categories = {
                 "model": "news.category",
@@ -141,8 +154,7 @@ def cisoclub_news():
                     if not href.startswith('/category/') and not href.startswith('/author/'):
                         full_url = base_url + href
                         news_links.append(full_url)
-                    #else:
-                    #    print('в блоке: ' + str(wrapper) + 'нет ссылки для анализа')
+
             print('получены ссылки для анализа: ' + ', '.join(news_links))
             for news_link in news_links:
                 post_response = requests.get(news_link, headers=headers)
@@ -150,10 +162,17 @@ def cisoclub_news():
                     post_src = post_response.text
                     post_soup = BeautifulSoup(post_src, 'lxml')
 
-                    #date = post_soup.find("div", class_='postDate').text
+                    post_date_div = post_soup.find("div", class_='postDate')
+                    date_str = post_date_div.text if post_date_div else ''
+                    timeago_tag = post_date_div.find('timeago')
+                    if timeago_tag:
+                        date_str = str(timeago_tag)
 
-                    date_str = post_soup.find("div", class_='postDate').text
                     date = parse_date(date_str)
+
+                    if date is None:
+                        print(f'Пропуск новости с некорректной датой: {date_str}')
+                        continue  # Пропускаем новость с некорректной датой
 
                     title = post_soup.find("h1", class_='postContentTitle').text
                     content = post_soup.find("div", class_='articleContent').text
@@ -182,24 +201,19 @@ def cisoclub_news():
                         }
                         data.append(news_post)
                         news_pk += 1
-                        #existing_titles.add(title)  # Добавляем заголовок в набор существующих заголовков
                     else:
                         print(f'Дубликат найден и пропущен: {title}')
                 else:
                     print('полученная ссылка: ' + str(news_link) + ' не доступна для анализа')
                     return False
-                # создаем полный набор постов из старого и нового набора
-                #combined_data = existing_data + data
         else:
             print('ссылка сайта: ' + str(base_url) + ' не доступна для анализа')
             return False
+
         with open(output_path, 'w', encoding='utf-8') as json_file:
             json.dump(data, json_file, ensure_ascii=False, indent=2)
             print(str(now) + ' посты новостей cisoclub сохранены в файл: ' + str(output_path))
-        # with open(output_path_history, 'w', encoding='utf-8') as json_file:
-        #     json.dump(combined_data, json_file, ensure_ascii=False, indent=2)
-        #     # print(f'{datetime.now()} посты новостей cisoclub сохранены в файл {output_path}')
-        #     print(str(now) + ' дополнен файл постов новостей cisoclub: ' + str(output_path_history))
+
         return True
     except Exception as e:
         print(str(now) + ' получение новостей с сайта cisoclub завершилось с ошибкой: ' + str(e))

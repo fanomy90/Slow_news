@@ -103,17 +103,36 @@
                         <div class="image-slider__wrapper swiper-wrapper">
                             {% for p in posts %}
                                 <div class="image-slider__slide swiper-slide">
-                                    <div class="image-slider__image">
-                                        <a href="{{ p.get_absolute_url }}">
-                                        <p class="first">Категория: {{p.cat}}</p>
-                                        <p class="last">Дата: {{p.time_update|date:"d-m-Y H:i:s"}}</p>
-                                        {% if p.photo %}
-                                            <p><img class="img-article-left thumb" src="{{p.photo.url}}"></p>
-                                        {% endif %}
-                                        <br>
-                                        <p>{{p.title}}</p>
-                                        </a>
-                                    </div>
+                                    <!--Если есть картинка для новости то делаем ее фоном для карточки слайдера-->
+                                    {% if p.image %}
+                                        <div class="image-slider__image" style="background-image: url('{{ p.image }}');">
+                                            <a href="{{ p.get_absolute_url }}">
+                                                <div class="image-slider__content">
+                                                    {% comment %} <p class="first">Категория: {{ p.cat }}</p>
+                                                    <p class="last">Дата: {{ p.date }}</p>
+                                                    <br> {% endcomment %}
+                                                    <p>{{ p.title }}</p>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    <!--Если картинки для новости нет то выводим по старому приницпу-->
+                                    {% else %}
+                                        <div class="image-slider__image">
+                                            <a href="{{ p.get_absolute_url }}">
+                                            <p class="first">Категория: {{p.cat}}</p>
+                                            <p class="last">Дата: {{p.date}}</p>
+                                            {% comment %} <p class="last">Дата: {{p.time_update|date:"d-m-Y H:i:s"}}</p> {% endcomment %}
+                                            {% if p.photo %}
+                                                <p><img class="img-article-left thumb" src="{{p.photo.url}}"></p>
+                                            {% endif %}
+                                            {% if p.image %}
+                                                <p><img class="img-article-left thumb" src="{{p.image}}"></p>
+                                            {% endif %}
+                                            <br>
+                                            <p>{{p.title}}</p>
+                                            </a>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             {% endfor %}
                         </div>
@@ -133,11 +152,11 @@
     <section class="main-content">
         <div class="container main-content__container">
                 {% block content %}
-                <!--Сюда должны попасть новости из post2.html-->
+                <!--Сюда должны попасть новости из post.html-->
                 {% endblock %}
                 <!--Пагинация-->
                 {% if page_obj.has_other_pages %}
-                <nav class="list-pages">
+                    <nav class="list-pages">
                     <ul>
                     {% if page_obj.has_previous %}
                         <li class="page-num">
@@ -170,7 +189,7 @@
     <footer>
         <div class="container footer__container">
                     <div id="footer">
-                        <p>&copy; 2023 Орки сила!</p>
+                        <p>&copy; 2024 Орки сила!</p>
                     </div>
         </div>
     </footer>

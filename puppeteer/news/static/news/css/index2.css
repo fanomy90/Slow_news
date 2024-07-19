@@ -216,6 +216,7 @@ a {
     padding: 0px 0px 10px 0px;
     margin-top: 50px; /* Измените это значение на то, которое вам нужно, чтобы спустить контент ниже */
     height: 316px;
+    margin-bottom: 180px;
 }
 .slider__container {
     padding: 30px;
@@ -239,17 +240,53 @@ a {
 .image-slider__slide {
     /*border-style: solid;
     background-color: #db8ecd;*/
+
+    /* position: relative;
+    background-size: cover;
+    background-position: center;*/
+    color: red;
+    background-color: #db8ecd;
 }
+
+.image-slider__content {
+    padding: 10px;
+    /* position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 10px;
+    box-sizing: border-box; */
+    /* размер выводимого слайдера задается ниже */
+    width: 300px;
+    height: 300px; 
+}
+
 .image-slider__wrapper {
     position: relative;
 }
 .image-slider__slide {
+
 }
 .image-slider__image {
+    position: relative;
     text-align: center;
+    
 }
 .image-slider__image img{
-    max-width: 100%;
+    /* max-width: 100%; */
+    width: 100%;
+    display: block;
+}
+.image-slider__image .text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* Теневая тень */
+    z-index: 1;
 }
 /*стрелочки*/
 .image-slider .swiper-button-prev:after,
@@ -278,7 +315,7 @@ a {
 }
 /*прогрессбар*/
 .image-slider .swiper-pagination-progressbar-fill {
- 5   color: red;
+    color: red;
 }
 
 

@@ -1,11 +1,28 @@
 {% extends 'news/base.html' %}
 
 {% block content %}
+
+<div class="article-panel">
+    <p class="first">Категория: {{post.cat}}</p>
+    <p class="last">Дата: {{post.date}}</p>
+</div>
+
 <h1>{{post.title}}</h1>
 
 {% if post.photo %}
-<p><img class="img-article-left" src="{{post.photo.url}}"></p>
+    <p><img class="img-article-left" src="{{post.photo.url}}"></p>
+{% endif %}
+{% if post.image %}
+    <p><img class="img-article-left" src="{{post.image}}"></p>
 {% endif %}
 
 {{post.content|linebreaks}}
+
+{% if post.author %}
+<br>
+    {% autoescape on %}
+        {{post.author|linebreaks}}
+    {% endautoescape %}
+{% endif %}
+
 {% endblock %}

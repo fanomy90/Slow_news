@@ -26,7 +26,7 @@ class News(models.Model):
         verbose_name = 'Новости'
         verbose_name_plural = 'Новости'
         #сортировка по времени создания и заголовку, она применится и на основной части сайта
-        ordering = ['id', 'time_create', 'title']
+        ordering = ['-id', 'time_create', 'title']
 
 #сделаем нормализацию - привяжем вторичную модель по категориям
 class Category(models.Model):

@@ -95,7 +95,7 @@ class NewsCategory(DataMixin, ListView):
         context = super().get_context_data(**kwargs)
         #показываем карусель
         show_slider_header = True
-        # вызываем метод из базового класса DataMixit файла utils
+        # вызываем метод из базового класса DataMixin файла utils
         cat_selected = context['posts'][0].cat  # Присваиваем объект категории
         c_def = self.get_user_context(
             title='Категория - '+str(context['posts'][0].cat),
@@ -119,6 +119,8 @@ class ShowPost(DataMixin, DetailView):
         cat_selected = post.cat
         c_def = self.get_user_context(
                 title=context['post'],
+
+
                 cat_selected=cat_selected, # Преобразуем cat_selected в целое число
                 show_slider_header=show_slider_header) 
         return dict(list(context.items()) + list(c_def.items()))
