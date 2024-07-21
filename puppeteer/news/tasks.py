@@ -18,6 +18,9 @@ from django.utils.text import slugify
 from news.management.commands import load_test3
 from news.task.parser2 import parser_test
 from news.task.parser_cisoclub import cisoclub_news
+from news.task.parser_cisoclub_public import cisoclub_public
+from news.task.parser_cisoclub_review import cisoclub_review
+
 
 import os
 from celery import shared_task
@@ -31,6 +34,18 @@ logger = logging.getLogger(__name__)
 def download_a_news():
     #parser_test()
     cisoclub_news()
+    return True
+
+@shared_task()
+def download_a_post():
+    #parser_test()
+    cisoclub_public()
+    return True
+
+@shared_task()
+def download_a_review():
+    #parser_test()
+    cisoclub_review()
     return True
 
 @shared_task

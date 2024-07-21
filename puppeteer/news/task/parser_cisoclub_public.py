@@ -1,5 +1,5 @@
 import os
-import uuid  # для генерации случайных имен файлов
+import uuid #для генерации случайных имен файлов
 from django.utils.timezone import now
 import json
 from datetime import datetime, timedelta
@@ -13,12 +13,19 @@ import requests
 from bs4 import BeautifulSoup
 from django.core.management import call_command
 
-url = 'https://cisoclub.ru/category/news/'
+
+url = 'https://cisoclub.ru/category/public/'
 now = datetime.now()
 output_dir = '/app/puppeteer/SAVE'
 output_path = os.path.join(output_dir, 'news.json')
 output_path_history = os.path.join(output_dir, 'news_history.json')
-
+#загрузим старый файл для анализа
+# def load_existing_data(file_path):
+#     if os.path.exists(file_path):
+#         with open(file_path, 'r', encoding='utf-8') as json_file:
+#             return json.load(json_file)
+#     return []
+#загрузим старые данные из бд для анализа
 def load_existing_data(file_path):
     print(str(now) + ' получим исторические данные')
     try:
@@ -27,23 +34,23 @@ def load_existing_data(file_path):
         with open(file_path, 'r', encoding='utf-8') as json_file:
             return json.load(json_file)
     except Exception as e:
-        print(str(now) + ' получение исторических данных завершилось с ошибкой: ' + str(e))
+        print(str(now()) + ' получение исторических данных завершилось с ошибкой: ' + str(e))
         return []
-
+#получим максимальный pk постов из старого файла
 def get_max_pk(data):
     max_pk = 0
     for item in data:
         if 'pk' in item and isinstance(item['pk'], int) and item['pk'] > max_pk:
             max_pk = item['pk']
     return max_pk
-
+#получим заголовки новостей из старого файла
 def get_existing_titles(data):
     titles = set()
     for item in data:
         if item['model'] == 'news.news' and 'fields' in item and 'title' in item['fields']:
             titles.add(item['fields']['title'])
     return titles
-
+#преобразование даты в нормальный вид
 def parse_date(date_str):
     date_str = date_str.strip()
     print(f'Парсинг даты: {date_str}')
@@ -52,11 +59,14 @@ def parse_date(date_str):
         print('Дата не найдена, возвращаем None')
         return None
 
+    # Проверка на наличие тега <timeago>
     if 'timeago' in date_str:
+        # Извлечение значения атрибута datetime
         datetime_match = re.search(r'datetime="([^"]+)"', date_str)
         if datetime_match:
             datetime_str = datetime_match.group(1)
             try:
+                # Убираем часть строки, которая вызывает ошибку
                 datetime_str = datetime_str.split(' GMT')[0]
                 parsed_date = datetime.strptime(datetime_str, '%a %b %d %Y %H:%M:%S')
                 return parsed_date.date()
@@ -64,30 +74,35 @@ def parse_date(date_str):
                 print(f'Ошибка парсинга времени из timeago: {e}')
                 return None
 
+    # Проверка на фразы типа "X час(ов) назад"
     hours_ago_match = re.search(r'(\d+)\sчас(а|ов)\sназад', date_str)
     if hours_ago_match:
         hours_ago = int(hours_ago_match.group(1))
         return (datetime.now() - timedelta(hours=hours_ago)).date()
 
+    # Проверка на слово "Сегодня"
     if "Сегодня" in date_str:
         print('проверка на Сегодня')
         return datetime.now().date()
     
+    # Проверка на слово "Вчера"
     if "Вчера" in date_str:
         print('проверка на Вчера')
         return (datetime.now() - timedelta(days=1)).date()
 
+    # Проверка на наличие времени (формат HH:MM)
     time_match = re.search(r'\b\d{2}:\d{2}\b', date_str)
     if time_match:
         print('проверка на Время')
         return datetime.now().date()
 
+    # Проверка на формат типа "17 июля" (пример: день и месяц)
     month_mapping = {
         'января': 1, 'февраля': 2, 'марта': 3, 'апреля': 4,
         'мая': 5, 'июня': 6, 'июля': 7, 'августа': 8,
         'сентября': 9, 'октября': 10, 'ноября': 11, 'декабря': 12
     }
-    date_match = re.search(r'\b(\д{1,2})\s([а-яА-Я]+)\b', date_str)
+    date_match = re.search(r'\b(\d{1,2})\s([а-яА-Я]+)\b', date_str)
     if date_match:
         print('проверка на Дату')
         day = int(date_match.group(1))
@@ -109,7 +124,9 @@ def parse_date(date_str):
     print(f'Не удалось распознать дату: {date_str}')
     return None
 
-def cisoclub_news():
+
+#основной скрипт парсера
+def cisoclub_public():
     if not os.path.exists(output_dir):
         print(str(now) + ' не найдена директория для сохранения: ' + output_dir)
     try:
@@ -132,10 +149,10 @@ def cisoclub_news():
             news_pk = max_existing_pk + 1
             categories = {
                 "model": "news.category",
-                "pk": 1,
+                "pk": 3,
                 "fields": {
-                    "name": "Безопасность",
-                    "slug": "security"
+                    "name": "Статьи",
+                    "slug": "public"
                 }
             }
             data = [categories] if not existing_data else []
@@ -155,13 +172,10 @@ def cisoclub_news():
                     post_soup = BeautifulSoup(post_src, 'lxml')
 
                     post_date_div = post_soup.find("div", class_='postDate')
-                    if post_date_div:
-                        date_str = post_date_div.text
-                        timeago_tag = post_date_div.find('timeago')
-                        if timeago_tag:
-                            date_str = str(timeago_tag)
-                    else:
-                        date_str = ''
+                    date_str = post_date_div.text if post_date_div else ''
+                    timeago_tag = post_date_div.find('timeago')
+                    if timeago_tag:
+                        date_str = str(timeago_tag)
 
                     date = parse_date(date_str)
 
@@ -169,37 +183,13 @@ def cisoclub_news():
                         print(f'Пропуск новости с некорректной датой: {date_str}')
                         continue  # Пропускаем новость с некорректной датой
 
-                    title = post_soup.find("h1", class_='postContentTitle')
-                    if title:
-                        title = title.text
-                    else:
-                        print(f'Пропуск новости без заголовка: {news_link}')
-                        continue  # Пропускаем новость без заголовка
-
-                    content = post_soup.find("div", class_='articleContent')
-                    if content:
-                        content = content.text
-                    else:
-                        print(f'Пропуск новости без содержания: {news_link}')
-                        continue  # Пропускаем новость без содержания
-
-                    author = post_soup.find("div", class_='author_info_text')
-                    if author:
-                        author = author.text
-                    else:
-                        print(f'Пропуск новости без автора: {news_link}')
-                        continue  # Пропускаем новость без автора
-
+                    title = post_soup.find("h1", class_='postContentTitle').text
+                    content = post_soup.find("div", class_='articleContent').text
+                    author = post_soup.find("div", class_='author_info_text').text
                     image = post_soup.find("div", class_='imageWrapper')
-                    if image:
-                        image2 = image.find('img', src=True)
-                        if image2:
-                            image_url = base_url + image2['src']
-                        else:
-                            image_url = None
-                    else:
-                        image_url = None
-
+                    image2 = image.find('img', src=True)
+                    image3 = image2['src']
+                    image_url = base_url + image3
                     slug = news_link.replace('https://', '').replace('/', '').replace('.', '-')
                     if title not in existing_titles:
                         news_post = {
@@ -212,8 +202,8 @@ def cisoclub_news():
                                 "time_create": datetime.now().isoformat(),
                                 "time_update": datetime.now().isoformat(),
                                 "is_published": True,
-                                "cat": 1,
-                                "date": date.isoformat(),
+                                "cat": 3,
+                                "date": date.isoformat(),  # Преобразование даты в строку ISO формата
                                 "author": author,
                                 "image": image_url
                             }

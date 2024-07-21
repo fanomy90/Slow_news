@@ -3,7 +3,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from celery.result import AsyncResult
 import uuid
 import asyncio
-from .tasks import download_a_cat, cpu_task1, download_a_news, import_news_task
+from .tasks import download_a_cat, cpu_task1, download_a_news, import_news_task, download_a_post, download_a_review
 # from . import tasks
 
 # тестовая обработка работы с задачами
@@ -30,6 +30,10 @@ class SaveConsumer(AsyncWebsocketConsumer):
 
             elif task == "task3":
                 download_a_cat.apply_async(args=[], task_id=task_id)
+            elif task == "task4":
+                download_a_post.apply_async(args=[], task_id=task_id)
+            elif task == "task5":
+                download_a_review.apply_async(args=[], task_id=task_id)
             self.task_status[task_id] = "PENDING"
             while True:
                 status = AsyncResult(task_id).state

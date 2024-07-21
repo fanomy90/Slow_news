@@ -4,13 +4,20 @@
     <h1 align="center">{{title}}</h1>
     <br>
 <!-- Вывод состояния выполнения -->
-    <button class="header__link navigation__item" onclick="startTaskOnClick('task3')">download a cat</button>
+    {% comment %} <button class="header__link navigation__item" onclick="startTaskOnClick('task3')">download a cat</button>
+    <br> {% endcomment %}
+    <br>
+    <button class="header__link navigation__item" onclick="startTask('task1')">Start Parsing News</button>
     <br>
     <br>
-    <button class="header__link navigation__item" onclick="startTask('task1')">Start Parsing</button>
+    <button class="header__link navigation__item" onclick="startTask('task4')">Start Parsing Public</button>
+    <br>
+    <br>
+    <button class="header__link navigation__item" onclick="startTask('task5')">Start Parsing Review</button>
     <br>
     <br>
     <button class="header__link navigation__item" onclick="startTask('task2')">Start Import</button>
+    <br>
     <br>
     <div>
         <ul id="tasks"></ul>
