@@ -13,8 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.core.management import call_command
 
-url = 'https://cisoclub.ru/category/news/'
-base_url = 'https://cisoclub.ru'
+url = 'https://cisoclub.ru/category/interviews/'
 now = datetime.now()
 output_dir = '/app/puppeteer/SAVE'
 output_path = os.path.join(output_dir, 'news.json')
@@ -88,12 +87,14 @@ def parse_date(date_str):
         'мая': 5, 'июня': 6, 'июля': 7, 'августа': 8,
         'сентября': 9, 'октября': 10, 'ноября': 11, 'декабря': 12
     }
-    date_match = re.search(r'\b(\д{1,2})\s([а-яА-Я]+)\b', date_str)
+    
+    date_match = re.search(r'\b(\d{1,2})\s([а-яА-Я]+)\b', date_str)
     if date_match:
         print('проверка на Дату')
         day = int(date_match.group(1))
         month_str = date_match.group(2)
         month = month_mapping.get(month_str)
+        print(f'Распознанная дата: день={day}, месяц={month_str}, номер месяца={month}')
         if month:
             year = datetime.now().year
             return datetime(year, month, day).date()
@@ -110,7 +111,7 @@ def parse_date(date_str):
     print(f'Не удалось распознать дату: {date_str}')
     return None
 
-def cisoclub_news():
+def cisoclub_interviews():
     if not os.path.exists(output_dir):
         print(str(now) + ' не найдена директория для сохранения: ' + output_dir)
     try:
@@ -129,14 +130,14 @@ def cisoclub_news():
             post_wrappers = soup.find_all("div", class_='postWrapper')
             news_links = []
             news_data = []
-            # base_url = 'https://cisoclub.ru'
+            base_url = 'https://cisoclub.ru'
             news_pk = max_existing_pk + 1
             categories = {
                 "model": "news.category",
-                "pk": 1,
+                "pk": 5,
                 "fields": {
-                    "name": "Безопасность",
-                    "slug": "security"
+                    "name": "Интервью",
+                    "slug": "interviews"
                 }
             }
             data = [categories] if not existing_data else []
@@ -201,6 +202,30 @@ def cisoclub_news():
                     else:
                         image_url = None
 
+                    # Обновленное условие для поиска видео
+                    video_div = post_soup.find("div", class_='articleVideo')
+                    if video_div:
+                        print(f'Найден articleVideo: {video_div}')
+                        print(f'Содержимое articleVideo: {video_div.prettify()}')
+                        iframe = video_div.find('iframe', src=True)
+                        if iframe:
+                            video_url = iframe['src']
+                            print(f'Найдено видео: {video_url}')
+                        else:
+                            video_url = None
+                            print('Iframe не найден внутри articleVideo')
+                    else:
+                        video_url = None
+                        print('articleVideo не найден на странице')
+
+                    # Выяснилось что статьи с видео переносятся в раздел https://cisoclub.ru/category/podcasts/ - нужно добавить задачу для этого раздела и проверить скрипт
+                    image_src = None
+                    if image_url is None and video_url:
+                        image_src == video_url
+
+                    # Заменим установку поля image на корректное значение
+                    # image_src = image_url if image_url else video_url
+
                     slug = news_link.replace('https://', '').replace('/', '').replace('.', '-')
                     if title not in existing_titles:
                         news_post = {
@@ -213,10 +238,12 @@ def cisoclub_news():
                                 "time_create": datetime.now().isoformat(),
                                 "time_update": datetime.now().isoformat(),
                                 "is_published": True,
-                                "cat": 1,
+                                "cat": 5,
                                 "date": date.isoformat(),
                                 "author": author,
-                                "image": image_url
+                                # "image": image_url,
+                                # "video": video_url,
+                                "image": video_url
                             }
                         }
                         data.append(news_post)

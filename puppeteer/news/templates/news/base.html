@@ -70,8 +70,8 @@
                     <div class="header__burger">
                         <span></span>
                     </div>
-                    <nav class="header__menu navigation"><!--navigation не используется-->
-                        <ul class="header__list navigation__list"><!--header__list и navigation__list можно объединить в css-->
+                    <nav class="header__menu navigation">
+                        <ul class="header__list navigation__list">
                             {% for m in menu %}
                                 <li><button class="header__link navigation__item" onclick="window.location.href='{% url m.url_name %}'">{{m.title}}</button></li>
                             {% endfor %}
@@ -103,20 +103,16 @@
                         <div class="image-slider__wrapper swiper-wrapper">
                             {% for p in posts %}
                                 <div class="image-slider__slide swiper-slide">
+                                    <div class="slider-panel">
+                                        <p>{{ p.title }}</p>
+                                    </div>
                                     <!--Если есть картинка для новости то делаем ее фоном для карточки слайдера-->
                                     {% if p.image %}
-                                        <div class="image-slider__image" style="background-image: url('{{ p.image }}');">
-                                            <a href="{{ p.get_absolute_url }}">
-                                                <div class="image-slider__content">
-                                                    {% comment %} <p class="first">Категория: {{ p.cat }}</p>
-                                                    <p class="last">Дата: {{ p.date }}</p>
-                                                    <br> {% endcomment %}
-                                                    <p>{{ p.title }}</p>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    <!--Если картинки для новости нет то выводим по старому приницпу-->
+                                        <a href="{{ p.get_absolute_url }}" class="image-slider__link">
+                                            <div class="image-slider__image" style="background-image: url('{{ p.image }}');"></div>
+                                        </a>
                                     {% else %}
+
                                         <div class="image-slider__image">
                                             <a href="{{ p.get_absolute_url }}">
                                             <p class="first">Категория: {{p.cat}}</p>
@@ -140,7 +136,7 @@
                         <div class="swiper-button-prev"></div>
                         <div class="swiper-button-next"></div>
                         <!--Пагинация-->
-                        <div class="swiper-pagination"></div>
+                        {% comment %} <div class="swiper-pagination"></div> {% endcomment %}
                         <!--Полоса прокрутки
                         <div class="swiper-scrollbar"></div>-->
                     </div>

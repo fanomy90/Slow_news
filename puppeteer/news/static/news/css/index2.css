@@ -58,14 +58,14 @@ a {
 }
 .logo-area {
     width: 100%;
-    max-width: 310px;
+    /* max-width: 310px; */
     margin: 0 auto;
     overflow: hidden; /* Обрезаем изображение, если оно выходит за пределы контейнера */
     text-align: center;
 }
 .logo-area img {
     width: 100%;
-    max-width: 310px;
+    /* max-width: 310px; */
     height: auto; /* Чтобы контейнер не превышал ширину экрана */
     overflow: hidden; /* Обрезаем изображение, если оно выходит за пределы контейнера */
 }
@@ -76,8 +76,6 @@ a {
 	}
 }
 /*фигачим навигацию со скролом*/
-.navigation {
-}
 .navigation-header__container {
     padding: 0;
     min-width: 100vw;
@@ -147,6 +145,9 @@ a {
         height: 20px;
         margin-left: 0; /* Задайте желаемый отступ слева */
         z-index: 1000;
+        cursor: pointer;
+        position: relative;
+        z-index: 10; /* Чтобы бургер был поверх меню */
     }
     /*рисуем кнопку*/
     .header__burger span {
@@ -192,7 +193,7 @@ a {
         left: 10px;
         right: 10px;
         /*width: calc(100vw / 2 - var(--container) / 2);*/
-        height: 335px; /*высота выдвигаемого меню*/
+        height: 400px; /*высота выдвигаемого меню*/
         overflow: auto;
         transition: all 0.6s ease 0s;
         background-color: #18b5a4;
@@ -200,8 +201,11 @@ a {
     }
     .header__menu.active {
         /*нужно подбирать разрешение и сдвиг*/
-        top: 170px;
+        /* top: 225px; */
+        margin-top: 100px;
+        /* top: 70px; */
         position: absolute;
+
         z-index: 1000;
     }
     .header__list {
@@ -216,10 +220,13 @@ a {
     padding: 0px 0px 10px 0px;
     margin-top: 50px; /* Измените это значение на то, которое вам нужно, чтобы спустить контент ниже */
     height: 316px;
-    margin-bottom: 180px;
+    margin-top: 0px;
+    /* отступ после слайдера */
+    margin-bottom: 260px; 
+    
 }
 .slider__container {
-    padding: 30px;
+    /* padding: 30px; */
     min-height: 100%;
     position: relative;
 }
@@ -234,59 +241,46 @@ a {
     color: black;
     margin: 0px 0px 10px 0px;
 }
-.image-slider {
-    padding: 30px 0 70px 0;
-}
-.image-slider__slide {
-    /*border-style: solid;
-    background-color: #db8ecd;*/
 
-    /* position: relative;
-    background-size: cover;
-    background-position: center;*/
-    color: red;
-    background-color: #db8ecd;
+.image-slider__slide {
+    width: 100%;
 }
+
+.image-slider__image {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover; /* Изображение будет масштабироваться, чтобы покрыть весь контейнер */
+    width: 100%;
+    height: 440px; /* Убедитесь, что высота установлена правильно */
+    position: relative;
+    overflow: hidden; /* Скрывает избыточные части изображения */
+}
+
+.image-slider__image img{
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+
 
 .image-slider__content {
-    padding: 10px;
-    /* position: absolute;
+    position: absolute;
     bottom: 0;
     left: 0;
-    width: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    padding: 10px;
-    box-sizing: border-box; */
-    /* размер выводимого слайдера задается ниже */
-    width: 300px;
-    height: 300px; 
+    width: 100%; /* Ширина на всю ширину слайда */
+    background: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+    color: white; /* Белый текст */
+    padding: 10px; /* Отступы */
+    box-sizing: border-box; /* Включить отступы в общую ширину */
+    height: auto; /* Высота автоматическая */
 }
 
 .image-slider__wrapper {
-    position: relative;
-}
-.image-slider__slide {
-
-}
-.image-slider__image {
-    position: relative;
-    text-align: center;
-    
-}
-.image-slider__image img{
-    /* max-width: 100%; */
+    /* position: relative;
+    border-radius: 15px; */
+    display: flex;
     width: 100%;
-    display: block;
-}
-.image-slider__image .text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* Теневая тень */
-    z-index: 1;
 }
 /*стрелочки*/
 .image-slider .swiper-button-prev:after,
@@ -297,10 +291,11 @@ a {
 }
 /*буллеты*/
 .swiper-pagination {
-    position: absolute;
-    bottom: 1500px; /* Регулируйте это значение в зависимости от вашего дизайна */
-    text-align: center;
+    /* position: absolute; */
+    bottom: 0px; /* Регулируйте это значение в зависимости от вашего дизайна */
+    /* text-align: center; */
 }
+
 .image-slider .swiper-pagination-bullet {
     width: 20px;
     height: 20px;
@@ -318,14 +313,20 @@ a {
     color: red;
 }
 
-
-
 img.img-article-left {
 	max-width: 300px;
 	height: auto;
 	float: left;
 	padding: 0 10px 10px 0;
 }
+
+img.img-article-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
 img.img-article-left.thumb {
 	max-width: 150px;
 	height: auto;
@@ -347,7 +348,20 @@ div.article-panel {
     box-sizing: border-box;
     overflow: hidden;
     color: white;
+
 }
+
+div.slider-panel {
+    background: red;
+    padding: 5px 10px 5px 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+    color: white;
+    text-align: center;
+    /* border-top-left-radius: 15px;
+    border-top-right-radius: 15px; */
+}
+
 div.article-panel p.first {
     margin: 0;
     float: left;
@@ -432,17 +446,22 @@ ul.list-articles li {
 	text-decoration: underline;
 	color: #aaa;
 }
+.header__menu.active {
+    top: 225px;
+}
 /*делаем адаптивность*/
 @media (min-width: 415px) {
     .logo-area {
-        max-width: 400px;
+        /* max-width: 400px; */
+        width: 100%;
     }
     .logo-area img {
-        max-width: 405px;
+        /* max-width: 405px; */
+        width: 100%;
     }
     .header__menu.active {
         /*нужно подбирать разрешение и сдвиг*/
-        top: 204px;
+        top: 225px;
     }
     p {
         font-size: 16px;
@@ -459,10 +478,12 @@ ul.list-articles li {
         padding-top: 10px;
     }
     .logo-area {
-        max-width: 700px;
+        /* max-width: 700px; */
+        width: 100%;
     }
     .logo-area img {
-        max-width: 705px;
+        /* max-width: 705px; */
+        width: 100%;
     }
     .header__menu {
         height: 320px;
@@ -499,13 +520,15 @@ ul.list-articles li {
         font-weight: 700;
     }
     .logo-area {
-        max-width: 100%;
+        /* max-width: 100%; */
+        width: 100%;
     }
     .logo-area img {
-        max-width: 100%;
+        /* max-width: 100%; */
+        width: 100%;
     }
     .navigation__list {
-        height: 90px;
+        /* height: 90px; */
 
         scrollbar-color: red white; /* Для Firefox где red - это цвет полосы прокрутки, а green - это цвет трека (фона полосы прокрутки) */
     }
@@ -524,7 +547,10 @@ ul.list-articles li {
     }
     .navigation-header .navigation-header__container .header__body .header__menu{
         height: 42px;
+        position: relative; /* Позволяет позиционировать меню относительно этого элемента */
+        /* margin-bottom: 20px; */
     }
+
     .navigation__list {
         column-gap: 12px;
         justify-content: space-between;
@@ -562,6 +588,7 @@ ul.list-articles li {
     }
     .navigation-header .navigation-header__container .header__body .header__menu{
         height: 54px;
+        /* margin-bottom: 100px; */
     }
     .navigation {
         margin-bottom: 10px;
@@ -621,3 +648,4 @@ tr {
 .horizont {
     display: table-row;
 }
+

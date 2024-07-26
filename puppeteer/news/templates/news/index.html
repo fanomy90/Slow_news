@@ -11,7 +11,7 @@
                                 <p><img class="img-article-left thumb" src="{{p.photo.url}}"></p>
                             {% endif %}
                             {% if p.image %}
-                                <p><img class="img-article-left thumb" src="{{p.image}}"></p>
+                                <img class="img-article-center thumb" src="{{p.image}}">
                             {% endif %}
 
 
@@ -19,7 +19,7 @@
                             {% comment %} <p class="last">Дата: {{p.time_update|date:"d-m-Y H:i:s"}}</p> {% endcomment %}
                             {% comment %} <p class="last">Дата: {{p.date}}</p> {% endcomment %}
                             {% autoescape on %}
-                            {{p.content|linebreaks|truncatewords:50}}
+                                {{p.content|linebreaks|truncatewords:50}}
                             {% endautoescape %}
                             {% comment %} {% if p.author %}
                                 <br>

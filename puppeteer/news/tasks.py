@@ -20,6 +20,7 @@ from news.task.parser2 import parser_test
 from news.task.parser_cisoclub import cisoclub_news
 from news.task.parser_cisoclub_public import cisoclub_public
 from news.task.parser_cisoclub_review import cisoclub_review
+from news.task.parser_cisoclub_interviews import cisoclub_interviews
 
 
 import os
@@ -46,6 +47,12 @@ def download_a_post():
 def download_a_review():
     #parser_test()
     cisoclub_review()
+    return True
+
+@shared_task()
+def download_a_interviews():
+    #parser_test()
+    cisoclub_interviews()
     return True
 
 @shared_task
