@@ -1,10 +1,10 @@
 {% extends 'news/base.html' %}
 
 {% block content %}
-
+<br>
 <div class="article-panel">
-    <p class="first">Категория: {{post.cat}}</p>
-    <p class="last">Дата: {{post.date}}</p>
+    <p class="first">{{post.cat}}</p>
+    <p class="last">{{post.date}}</p>
 </div>
 
 <h1>{{post.title}}</h1>
@@ -13,10 +13,12 @@
     <p><img class="img-article-left" src="{{post.photo.url}}"></p>
 {% endif %}
 {% if post.image %}
-    <p><img class="img-article-left" src="{{post.image}}"></p>
+    <p><img class="img-article-center" src="{{post.image}}"></p>
 {% endif %}
 
-{{post.content|linebreaks}}
+<div class="news-content">
+    {{ post.content|linebreaks }}
+</div>
 
 {% if post.author %}
 <br>

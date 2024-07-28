@@ -28,27 +28,30 @@
     <header class="header-area">
         <div class="top-header">
             <div class="container top-header__container">
-                    <!--Breaking News Area-->
-                        <div class="breaking-news-area">
-                            <h5 class="breaking-news-title">Slowpoke news
-                                {% if request.user.is_authenticated %}
-                                    <p class="last"> {{user.username}} | <a href="{% url 'logout' %}">Выйти</a></p>
-                                {% else %}
-                                    <p class="last"><a href="{% url 'register' %}">Регистрация</a> | <a href="{% url 'login' %}">Войти</a></p>
-                                {% endif %}
-                            </h5>
-                            <!--Убрал пока вывод о сайте и обратная связь, думаю добавить виджетов с курсом валюты и погоду
-                            <div class="ticker">
-                                <ul class="title__element" id="top-mainmenu">
-                                {% block mainmenu %}
-                                    <li><a href="{% url 'home' %}"><div class="logo"></div></a></liss=>
-                                {% for m in menu %}
-                                    <li><a href="{% url m.url_name %}">{{m.title}}</a></li>
-                                {% endfor %}
-                                {% endblock mainmenu %}
-                                </ul>
-                            </div>-->
-                        </div>
+                <!--Breaking News Area-->
+                <div class="breaking-news-area">
+                    <div class="header__burger">
+                        <span></span>
+                    </div>
+                    <h5 class="breaking-news-title">Slowpoke news
+                        {% if request.user.is_authenticated %}
+                            <p class="last"> {{user.username}} | <a href="{% url 'logout' %}">Выйти</a></p>
+                        {% else %}
+                            <p class="last"><a href="{% url 'register' %}">Регистрация</a> | <a href="{% url 'login' %}">Войти</a></p>
+                        {% endif %}
+                    </h5>
+                    <!--Убрал пока вывод о сайте и обратная связь, думаю добавить виджетов с курсом валюты и погоду
+                    <div class="ticker">
+                        <ul class="title__element" id="top-mainmenu">
+                        {% block mainmenu %}
+                            <li><a href="{% url 'home' %}"><div class="logo"></div></a></liss=>
+                        {% for m in menu %}
+                            <li><a href="{% url m.url_name %}">{{m.title}}</a></li>
+                        {% endfor %}
+                        {% endblock mainmenu %}
+                        </ul>
+                    </div>-->
+                </div>
             </div>
         </div>
         <!--Middle header Area-->
@@ -67,10 +70,8 @@
         <div class="navigation-header">
             <div class="container navigation-header__container">
                 <div class="header__body">
-                    <div class="header__burger">
-                        <span></span>
-                    </div>
                     <nav class="header__menu navigation">
+                        {% comment %} сымитируем загулшку на весь экран {% endcomment %}
                         <ul class="header__list navigation__list">
                             {% for m in menu %}
                                 <li><button class="header__link navigation__item" onclick="window.location.href='{% url m.url_name %}'">{{m.title}}</button></li>
@@ -103,30 +104,18 @@
                         <div class="image-slider__wrapper swiper-wrapper">
                             {% for p in posts %}
                                 <div class="image-slider__slide swiper-slide">
-                                    <div class="slider-panel">
-                                        <p>{{ p.title }}</p>
+                                    <div class="article-panel">
+                                        <p class="first">{{p.cat}}</p>
+                                        <p class="last">{{p.date}}</p>
                                     </div>
                                     <!--Если есть картинка для новости то делаем ее фоном для карточки слайдера-->
                                     {% if p.image %}
                                         <a href="{{ p.get_absolute_url }}" class="image-slider__link">
                                             <div class="image-slider__image" style="background-image: url('{{ p.image }}');"></div>
+                                            {% comment %} <p><img class="img-article-center" src="{{p.image}}"></p> {% endcomment %}
                                         </a>
-                                    {% else %}
-
-                                        <div class="image-slider__image">
-                                            <a href="{{ p.get_absolute_url }}">
-                                            <p class="first">Категория: {{p.cat}}</p>
-                                            <p class="last">Дата: {{p.date}}</p>
-                                            {% comment %} <p class="last">Дата: {{p.time_update|date:"d-m-Y H:i:s"}}</p> {% endcomment %}
-                                            {% if p.photo %}
-                                                <p><img class="img-article-left thumb" src="{{p.photo.url}}"></p>
-                                            {% endif %}
-                                            {% if p.image %}
-                                                <p><img class="img-article-left thumb" src="{{p.image}}"></p>
-                                            {% endif %}
-                                            <br>
-                                            <p>{{p.title}}</p>
-                                            </a>
+                                        <div class="slider-panel-bottom">
+                                            <p>{{ p.title|truncatewords:10 }}</p>
                                         </div>
                                     {% endif %}
                                 </div>
@@ -190,9 +179,6 @@
         </div>
     </footer>
     <!-- Конец footer'а и страницы -->
-
-
-
     <!--Подключаем JQuery для работы бургер меню-->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
     <!--Подключаем файл скрипта для работы меню-->

@@ -47,6 +47,13 @@ a {
     background: #3F4137;
     color: #aaa;
     padding: 5px 10px 5px 10px;
+    position: fixed; /* Закрепляет элемент относительно окна просмотра */
+    top: 0; /* Располагает элемент вверху страницы */
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    /* padding: 5px 10px; */
+    box-sizing: border-box;
 }
 /*нужно сделать space between*/
 .breaking-news-area p.last {
@@ -55,6 +62,7 @@ a {
 .breaking-news-title p a {
     color: #aaa; /* Задаем белый цвет текста */
     text-decoration: none; /* Убираем подчеркивание */
+    /* position: fixed; */
 }
 .logo-area {
     width: 100%;
@@ -62,6 +70,7 @@ a {
     margin: 0 auto;
     overflow: hidden; /* Обрезаем изображение, если оно выходит за пределы контейнера */
     text-align: center;
+    padding-top: 36px;
 }
 .logo-area img {
     width: 100%;
@@ -129,17 +138,27 @@ a {
     /*font-size: 18px;*/
     text-decoration: none;
 }
+.breaking-news-area {
+    display: flex;
+    justify-content: space-between; /* Распределяет элементы по ширине контейнера с равными промежутками */
+    align-items: center; /* Выравнивание элементов по центру по вертикали */
+}
+.breaking-news-title {
+    flex: 1; /* Позволяет заголовку занимать доступное пространство */
+    text-align: center; /* Центрирование текста в заголовке */
+}
 /*делаем адаптивную кнопку меню*/
 @media (max-width: 767px) {
     body {
         overflow-x: hidden; /* Убрать горизонтальную прокрутку на маленьких экранах */
+        background-color: rgb(224, 224, 224);
     }
     /*скрываем меню для остальных разрешений*/
     .header__burger {
         display: block;
         position: relative;
         /*отредактировать положение*/
-        top: 10px;
+        top: 0px;
         left: 10px;
         width: 30px;
         height: 20px;
@@ -152,7 +171,7 @@ a {
     /*рисуем кнопку*/
     .header__burger span {
         position: absolute;
-        background-color: black;
+        background-color: white;
         left: 0;
         width: 100%;
         height: 2px;
@@ -162,7 +181,7 @@ a {
     .header__burger:before,
     .header__burger:after {
         content: '';
-        background-color: black;
+        background-color: white;
         position: absolute;
         width: 100%;
         height: 2px;
@@ -193,36 +212,41 @@ a {
         left: 10px;
         right: 10px;
         /*width: calc(100vw / 2 - var(--container) / 2);*/
-        height: 400px; /*высота выдвигаемого меню*/
-        overflow: auto;
+        /*height: 400px;*/ /*высота выдвигаемого меню*/
+        /* height: 100vh; */
+        /* overflow: auto; */
         transition: all 0.6s ease 0s;
-        background-color: #18b5a4;
-        padding: 15px 10px 20px 10px;
+        background-color: rgba(224, 224, 224, 0.8);
+        /* padding: 15px 10px 20px 10px; */
     }
     .header__menu.active {
         /*нужно подбирать разрешение и сдвиг*/
         /* top: 225px; */
-        margin-top: 100px;
+        /* margin-top: 100px; */
+        margin-top: -195px;
         /* top: 70px; */
         position: absolute;
-
+        height: 100vh;
         z-index: 1000;
+        overflow-y: auto;
+        height: 100vh;
+        position: fixed;
+        /* transform: translateY(-100%); */
     }
     .header__list {
         display: table-row;
         position: relative;
         bottom: 0;
     }
-
 }
 /*Делаем карусель .wrapper*/
 .slider-header {
     padding: 0px 0px 10px 0px;
     margin-top: 50px; /* Измените это значение на то, которое вам нужно, чтобы спустить контент ниже */
-    height: 316px;
+    /* height: 316px; */
     margin-top: 0px;
     /* отступ после слайдера */
-    margin-bottom: 260px; 
+    /* margin-bottom: 260px;  */
     
 }
 .slider__container {
@@ -232,38 +256,39 @@ a {
 }
 .slider-header {
     padding: 0px 0px 10px 0px;
-    height: 316px;
+    /* height: 316px; */
 }
 .slider-title {
+    padding-top: 10px;
     font-size: 15px;
     font-weight: 700;
     text-align: center;
     color: black;
     margin: 0px 0px 10px 0px;
 }
-
 .image-slider__slide {
     width: 100%;
+    position: relative;
+    overflow: hidden;
 }
-
+.image-slider__link {
+    display: block;
+    position: relative; /* Это позволит использовать position: absolute для вложенных элементов */
+}
 .image-slider__image {
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover; /* Изображение будет масштабироваться, чтобы покрыть весь контейнер */
     width: 100%;
-    height: 440px; /* Убедитесь, что высота установлена правильно */
+    height: 340px; /* Убедитесь, что высота установлена правильно */
     position: relative;
     overflow: hidden; /* Скрывает избыточные части изображения */
 }
-
 .image-slider__image img{
     width: 100%;
     height: auto;
     display: block;
 }
-
-
-
 .image-slider__content {
     position: absolute;
     bottom: 0;
@@ -275,7 +300,6 @@ a {
     box-sizing: border-box; /* Включить отступы в общую ширину */
     height: auto; /* Высота автоматическая */
 }
-
 .image-slider__wrapper {
     /* position: relative;
     border-radius: 15px; */
@@ -295,7 +319,6 @@ a {
     bottom: 0px; /* Регулируйте это значение в зависимости от вашего дизайна */
     /* text-align: center; */
 }
-
 .image-slider .swiper-pagination-bullet {
     width: 20px;
     height: 20px;
@@ -312,24 +335,31 @@ a {
 .image-slider .swiper-pagination-progressbar-fill {
     color: red;
 }
-
 img.img-article-left {
 	max-width: 300px;
+    max-height: 300px;
 	height: auto;
 	float: left;
 	padding: 0 10px 10px 0;
 }
-
 img.img-article-center {
     display: block;
     margin-left: auto;
     margin-right: auto;
     width: 100%;
 }
-
 img.img-article-left.thumb {
 	max-width: 150px;
 	height: auto;
+}
+/* стилизация текста внутри странице новостей */
+.news-content {
+    text-align: justify;
+    line-height: 1.4;
+}
+.news-content p {
+    text-indent: 20px; /* Отступ первой строки */
+    margin-bottom: 0.5em; /* Отступ между абзацами */
 }
 p.link-read-post {
     padding: 15px 20px 0 0;
@@ -348,10 +378,8 @@ div.article-panel {
     box-sizing: border-box;
     overflow: hidden;
     color: white;
-
 }
-
-div.slider-panel {
+div.slider-panel-title {
     background: red;
     padding: 5px 10px 5px 10px;
     box-sizing: border-box;
@@ -361,7 +389,22 @@ div.slider-panel {
     /* border-top-left-radius: 15px;
     border-top-right-radius: 15px; */
 }
-
+div.slider-panel-bottom {
+    background: #3F4137;
+    color: #aaa;
+    padding: 0px 10px 5px 0px;
+    box-sizing: border-box;
+    overflow: hidden;
+    /* color: white; */
+    text-align: center;
+    /* border-top-left-radius: 15px;
+    border-top-right-radius: 15px; */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
 div.article-panel p.first {
     margin: 0;
     float: left;
@@ -384,7 +427,6 @@ ul.list-articles li {
 	vertical-align: top;
 }
 .table-page tr {height: 100%;}
-
 .clear {clear: both;}
 /*Описываем пагинацию*/
 #nav ul {
@@ -472,7 +514,7 @@ ul.list-articles li {
 }
 @media (min-width: 705px) {
     .slider-header {
-        height: 289.23px;
+        /* height: 289.23px; */
     }
     .main-content {
         padding-top: 10px;
@@ -487,10 +529,6 @@ ul.list-articles li {
     }
     .header__menu {
         height: 320px;
-    }
-    .header__menu.active {
-        /*нужно подбирать разрешение и сдвиг*/
-        top: 314px;
     }
     h1 {
         font-size: 26px;
@@ -511,9 +549,14 @@ ul.list-articles li {
     }
     body {
         overflow-x: hidden;
+        background-color: rgb(224, 224, 224);
     }
     .main-content {
         padding-top: 35px;
+    }    
+    .breaking-news-title {
+        flex: 1;
+        text-align: left;
     }
     .slider-title {
         font-size: 18px;
@@ -529,7 +572,6 @@ ul.list-articles li {
     }
     .navigation__list {
         /* height: 90px; */
-
         scrollbar-color: red white; /* Для Firefox где red - это цвет полосы прокрутки, а green - это цвет трека (фона полосы прокрутки) */
     }
     /*для Chrome, Safari*/
@@ -550,7 +592,6 @@ ul.list-articles li {
         position: relative; /* Позволяет позиционировать меню относительно этого элемента */
         /* margin-bottom: 20px; */
     }
-
     .navigation__list {
         column-gap: 12px;
         justify-content: space-between;
@@ -559,7 +600,6 @@ ul.list-articles li {
     .header__list li {
         margin: 0px 0px 0px 0px;
     }
-
     h1 {
         font-size: 30px;
         }
@@ -583,6 +623,7 @@ ul.list-articles li {
         width: 1024px;
     }
     .slider-title {
+        padding-bottom: 10px;
         font-size: 26px;
         font-weight: 700;
     }
@@ -623,6 +664,7 @@ tbody {
     display: table-row-group;
     vertical-align: middle;
     border-color: inherit;
+    
 }
 tr {
     display: table-row;
@@ -648,4 +690,3 @@ tr {
 .horizont {
     display: table-row;
 }
-
