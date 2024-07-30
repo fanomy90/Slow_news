@@ -1,30 +1,32 @@
 {% extends 'news/base.html' %}
-
+{% load news_tags %}
 {% block content %}
 <br>
-<div class="article-panel">
-    <p class="first">{{post.cat}}</p>
-    <p class="last">{{post.date}}</p>
+<div class="postWrapper">
+    {% comment %} <div class="article-panel"> {% endcomment %}
+    <div class="article-panel" style="{% tag_color post.cat %}">
+        <p class="first">{{post.cat}}</p>
+        <p class="last">{{post.date}}</p>
+    </div>
+    {% if post.photo %}
+        <p><img class="img-article-left" src="{{post.photo.url}}"></p>
+    {% endif %}
+    {% if post.image %}
+        <p><img class="img-article-center" src="{{post.image}}"></p>
+    {% endif %}
+    <div class="news-title">
+        <h1>{{post.title}}</h1>
+    </div>
+    <div class="news-content">
+        {{ post.content|linebreaks }}
+    </div>
+    {% comment %} <div class="news-author"> {% endcomment %}
+    <div class="news-panel-bottom">
+        {% if post.author %}
+            {% autoescape on %}
+                {{post.author|linebreaks}}
+            {% endautoescape %}
+        {% endif %}
+    </div>
 </div>
-
-<h1>{{post.title}}</h1>
-
-{% if post.photo %}
-    <p><img class="img-article-left" src="{{post.photo.url}}"></p>
-{% endif %}
-{% if post.image %}
-    <p><img class="img-article-center" src="{{post.image}}"></p>
-{% endif %}
-
-<div class="news-content">
-    {{ post.content|linebreaks }}
-</div>
-
-{% if post.author %}
-<br>
-    {% autoescape on %}
-        {{post.author|linebreaks}}
-    {% endautoescape %}
-{% endif %}
-
 {% endblock %}

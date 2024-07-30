@@ -1,46 +1,63 @@
 {% extends 'news/base.html' %}
+{% load news_tags %}
 {% block content %}
                 <ul class="list-articles">
                     {% for p in posts %}
-                        <li>
-                            <div class="article-panel">
-                                <p class="first">{{p.cat}}</p>
-                                <p class="last">{{p.date}}</p>
-                            </div>
-                            {% if p.photo %}
-                                <p><img class="img-article-left thumb" src="{{p.photo.url}}"></p>
-                            {% endif %}
-                            
-                            {% if p.image %}
-                                <a href="{{ p.get_absolute_url }}" class="image-slider__link">
-                                    {% comment %} <div class="image-slider__image" style="background-image: url('{{ p.image }}');"></div> {% endcomment %}
-                                    <p><img class="img-article-center" src="{{p.image}}"></p>
-                                </a>
-                            {% endif %}
-
-                            <h2>{{p.title}}</h2>
-                            {% comment %} <p class="last">Дата: {{p.time_update|date:"d-m-Y H:i:s"}}</p> {% endcomment %}
-                            {% comment %} <p class="last">Дата: {{p.date}}</p> {% endcomment %}
-                            <div class="news-content">
-                                {% autoescape on %}
-                                    {{p.content|linebreaks|truncatewords:35}}
-                                {% endautoescape %}
-                            </div>
-                            {% comment %} <div class="news-content">
-                                {{ p.content|linebreaksbr|truncatewords:50}}
-                            </div> {% endcomment %}
-
-                            {% comment %} {% if p.author %}
-                                <br>
-                                {% autoescape on %}
-                                    {{p.author|linebreaks|truncatewords:50}}
-                                {% endautoescape %}
-                            {% endif %} {% endcomment %}
-                            <div class="clear"></div>
-                            <p class="link-read-post"><a href="{{ p.get_absolute_url }}">Читать пост</a></p>
+                            <li>
+                                <div class="postWrapper">
+                                    {% comment %} <div class="article-panel"> {% endcomment %}
+                                    <div class="article-panel" style="{% tag_color p.cat %}">
+                                    {% comment %} <div class="article-panel" style="{% background_color 'Обзоры' %}"> {% endcomment %}
+                                        <p class="first">{{p.cat}}</p>
+                                        <p class="last">{{p.date}}</p>
+                                    </div>
+                                    {% if p.photo %}
+                                        <p><img class="img-article-left thumb" src="{{p.photo.url}}"></p>
+                                    {% endif %}
+                                    {% if p.image %}
+                                        <a href="{{ p.get_absolute_url }}" class="image-slider__link">
+                                            {% comment %} <div class="image-slider__image" style="background-image: url('{{ p.image }}');"></div> {% endcomment %}
+                                            <p><img class="img-article-center" src="{{p.image}}"></p>
+                                        </a>
+                                    {% endif %}
+                                    <div class="news-title">
+                                        <a href="{{ p.get_absolute_url }}">
+                                            <h2>{{p.title}}</h2>
+                                        </a>
+                                    </div>
+                                    {% comment %} <p class="last">Дата: {{p.time_update|date:"d-m-Y H:i:s"}}</p> {% endcomment %}
+                                    {% comment %} <p class="last">Дата: {{p.date}}</p> {% endcomment %}
+                                    <div class="news-content">
+                                        {% autoescape on %}
+                                            <a href="{{ p.get_absolute_url }}">
+                                                {{p.content|linebreaks|truncatewords:35}}
+                                            </a>
+                                        {% endautoescape %}
+                                    </div>
+                                    {% comment %} <div class="news-content">
+                                        {{ p.content|linebreaksbr|truncatewords:50}}
+                                    </div> {% endcomment %}
+                                    {% comment %} {% if p.author %}
+                                        <br>
+                                        {% autoescape on %}
+                                            {{p.author|linebreaks|truncatewords:50}}
+                                        {% endautoescape %}
+                                    {% endif %} {% endcomment %}
+                                    <div class="clear"></div>
+                                    <div class="news-panel-bottom">
+                                        {% if p.author %}
+                                            {% autoescape on %}
+                                                {{p.author|trim_author|linebreaks|truncatewords:50}}
+                                            {% endautoescape %}
+                                        {% else %}
+                                            <p class="link-read-post"><a href="{{ p.get_absolute_url }}">Читать пост</a></p>
+                                        {% endif %}
+                                    
+                                    </div>
+                                </div>
+                            </li>
                             <br>
-                        </li>
-                        <br>
-                    {% endfor %}
+                        {% endfor %}
+                    
                 </ul>
 {% endblock %}

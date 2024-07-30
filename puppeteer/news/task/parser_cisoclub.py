@@ -64,33 +64,33 @@ def parse_date(date_str):
             except ValueError as e:
                 print(f'Ошибка парсинга времени из timeago: {e}')
                 return None
-
+    # проверка часов нгазад
     hours_ago_match = re.search(r'(\d+)\sчас(а|ов)\sназад', date_str)
     if hours_ago_match:
         hours_ago = int(hours_ago_match.group(1))
         return (datetime.now() - timedelta(hours=hours_ago)).date()
-
-    if "Сегодня" in date_str:
-        print('проверка на Сегодня')
-        return datetime.now().date()
-    
-    if "Вчера" in date_str:
-        print('проверка на Вчера')
-        return (datetime.now() - timedelta(days=1)).date()
-
+    # проверка на время
     time_match = re.search(r'\b\d{2}:\d{2}\b', date_str)
     if time_match:
         print('проверка на Время')
         return datetime.now().date()
-
+    # проверка на сегодня
+    if "Сегодня" in date_str:
+        print('проверка на Сегодня')
+        return datetime.now().date()
+    # проверка на вчера
+    if "Вчера" in date_str:
+        print('проверка на Вчера')
+        return (datetime.now() - timedelta(days=1)).date()
+    # проверка на формат типа "26 июля"
     month_mapping = {
         'января': 1, 'февраля': 2, 'марта': 3, 'апреля': 4,
         'мая': 5, 'июня': 6, 'июля': 7, 'августа': 8,
         'сентября': 9, 'октября': 10, 'ноября': 11, 'декабря': 12
     }
-    date_match = re.search(r'\b(\д{1,2})\s([а-яА-Я]+)\b', date_str)
+    date_match = re.search(r'(\d{1,2})\s([а-яА-Я]+)', date_str)
     if date_match:
-        print('проверка на Дату')
+        print('проверка на Дату формата "дд месяц"')
         day = int(date_match.group(1))
         month_str = date_match.group(2)
         month = month_mapping.get(month_str)

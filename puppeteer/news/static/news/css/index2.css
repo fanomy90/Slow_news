@@ -11,9 +11,9 @@
 	margin: 0px;
 	padding: 0px;
 }
-*, :after, :before {
+/* *, :after, :before {
 	box-sizing: border-box;
-}
+} */
 .clear {clear: both;}
 .header {
 	display: block;
@@ -34,6 +34,13 @@ a {
     text-decoration: none;
     color: inherit;
 }
+/* зададим основные области сайта */
+/* .main {
+    display: flex;
+}
+.content {
+    flex-grow: 1;
+} */
 /*Фигачим шапку сайта*/
 .logo {
     background-image: url('../images/logo.png');
@@ -42,18 +49,21 @@ a {
     width: 70px;
     height: 60px;
 }
+.top-header__container {
+    position: fixed; /* Закрепляет элемент относительно окна просмотра */
+        top: 0; /* Располагает элемент вверху страницы */
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
 /*задаем цвет шапки*/
 .breaking-news-area {
     background: #3F4137;
     color: #aaa;
     padding: 5px 10px 5px 10px;
-    position: fixed; /* Закрепляет элемент относительно окна просмотра */
-    top: 0; /* Располагает элемент вверху страницы */
-    left: 0;
-    right: 0;
-    z-index: 1000;
     /* padding: 5px 10px; */
     box-sizing: border-box;
+    border-radius: 0 0 8px 8px;
 }
 /*нужно сделать space between*/
 .breaking-news-area p.last {
@@ -70,10 +80,10 @@ a {
     margin: 0 auto;
     overflow: hidden; /* Обрезаем изображение, если оно выходит за пределы контейнера */
     text-align: center;
-    padding-top: 36px;
+    padding: 5px;
 }
 .logo-area img {
-    width: 100%;
+    width: 95%;
     /* max-width: 310px; */
     height: auto; /* Чтобы контейнер не превышал ширину экрана */
     overflow: hidden; /* Обрезаем изображение, если оно выходит за пределы контейнера */
@@ -85,9 +95,16 @@ a {
 	}
 }
 /*фигачим навигацию со скролом*/
+.headerWrapper {
+    background-color: rgb(224, 224, 224);
+    /* background: #fff; */
+    /* padding: 0 20px 0 20px; */
+    border-radius: 8px;
+}
+
 .navigation-header__container {
-    padding: 0;
-    min-width: 100vw;
+    padding-top: 50px;
+    /* min-width: 100vw; */
 }
 .navigation__list {
     display: flex;
@@ -99,7 +116,7 @@ a {
 }
 .navigation__item {
     background-color: #ffffff;
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 7px 8px;
     font-size: 12px;
     font-weight: 600;
@@ -151,7 +168,9 @@ a {
 @media (max-width: 767px) {
     body {
         overflow-x: hidden; /* Убрать горизонтальную прокрутку на маленьких экранах */
-        background-color: rgb(224, 224, 224);
+        /* цывет фона сайта */
+        /* background-color: rgb(224, 224, 224); */
+        background-color: rgb(201, 201, 201);
     }
     /*скрываем меню для остальных разрешений*/
     .header__burger {
@@ -216,7 +235,9 @@ a {
         /* height: 100vh; */
         /* overflow: auto; */
         transition: all 0.6s ease 0s;
-        background-color: rgba(224, 224, 224, 0.8);
+        background-color: rgba(63, 65, 55, 0.8);
+        /* background-color: rgba(224, 224, 224, 0.8); */
+        /* background: #3F4137; */
         /* padding: 15px 10px 20px 10px; */
     }
     .header__menu.active {
@@ -283,6 +304,7 @@ a {
     height: 340px; /* Убедитесь, что высота установлена правильно */
     position: relative;
     overflow: hidden; /* Скрывает избыточные части изображения */
+    border-radius: 0 0 8px 8px;
 }
 .image-slider__image img{
     width: 100%;
@@ -352,15 +374,52 @@ img.img-article-left.thumb {
 	max-width: 150px;
 	height: auto;
 }
+
+/* стилизация области постов на странице каталога новостей */
+.postWrapper {
+    /* background: #fff; */
+    background-color: rgb(224, 224, 224);
+    /* padding: 0 20px 0 20px; */
+    border-radius: 8px;
+}
+
+.postWrapper > *:first-child  {
+    margin-top: 0; /* Убираем отступ сверху у первого дочернего элемента */
+}
 /* стилизация текста внутри странице новостей */
+.news-title {
+    padding: 10px 20px 0 20px;
+}
+.news-author {
+    padding: 20px;
+}
+
 .news-content {
     text-align: justify;
     line-height: 1.4;
+    padding: 0 20px 0 20px;
 }
 .news-content p {
     text-indent: 20px; /* Отступ первой строки */
     margin-bottom: 0.5em; /* Отступ между абзацами */
 }
+.news-panel-bottom {
+    /* background: #3F4137; */
+    background: #333671;
+    color: #aaa;
+    /* color: white; */
+    /* padding: 0px 10px 5px 0px; */
+    box-sizing: border-box;
+    overflow: hidden;
+    /* color: white; */
+
+    /* border-top-left-radius: 15px;
+    border-top-right-radius: 15px; */
+    padding: 10px 20px 10px 10px;
+	text-align: left;
+    border-radius: 0 0 8px 8px;
+}
+
 p.link-read-post {
     padding: 15px 20px 0 0;
 	text-align: left;
@@ -373,26 +432,30 @@ p.link-read-post a {
 	text-decoration: none;
 }
 div.article-panel {
-    background: red;
+    /* background: red; */
     padding: 5px 10px 5px 10px;
+    border-radius: 8px 8px 0 0;
     box-sizing: border-box;
     overflow: hidden;
     color: white;
 }
+/* лишнее - проверить */
 div.slider-panel-title {
-    background: red;
+    /* background: red;
     padding: 5px 10px 5px 10px;
     box-sizing: border-box;
     overflow: hidden;
     color: white;
-    text-align: center;
+    text-align: center; */
+
     /* border-top-left-radius: 15px;
     border-top-right-radius: 15px; */
 }
 div.slider-panel-bottom {
-    background: #3F4137;
+    /* background: #3F4137; */
+    background: #333671;
     color: #aaa;
-    padding: 0px 10px 5px 0px;
+    /* padding: 0px 10px 5px 0px; */
     box-sizing: border-box;
     overflow: hidden;
     /* color: white; */
@@ -403,7 +466,9 @@ div.slider-panel-bottom {
     bottom: 0;
     left: 0;
     width: 100%;
+    padding: 5px 10px 5px 10px;
     box-sizing: border-box;
+    border-radius: 0 0 8px 8px;
 }
 div.article-panel p.first {
     margin: 0;
@@ -418,9 +483,9 @@ ul.list-articles {
 	margin: 0;
 	padding: 0;
 }
-ul.list-articles li {
+/* ul.list-articles li {
 	border-bottom: 1px solid #ccc;
-}
+} */
 .table-page {
 	width: 100%;
 	height: 100%;
@@ -447,7 +512,7 @@ ul.list-articles li {
 }
 .list-pages a {
 	color: #000;
-	font-size: 16px;
+	font-size: 22px;
 	text-decoration: none;
 }
 .list-pages .page-num, .page-num-selected {
@@ -455,12 +520,12 @@ ul.list-articles li {
 	width: 30px;
 	height: 30px;
 	padding: 4px 0 0 0;/*положение цифр в кружках*/
-	border: 2px solid #d0d0d0;
+	/* border: 2px solid #d0d0d0;
     border-color: red;
-	border-radius: 30px;
+	border-radius: 30px; */
 }
 .list-pages .page-num:hover {
-	box-shadow: 3px 3px 1px #d0d0d0; 
+	/* box-shadow: 3px 3px 1px #d0d0d0;  */
 }
 .list-pages .page-num-selected {
 	border: none;
@@ -483,6 +548,7 @@ ul.list-articles li {
 	font-family: Verdana, Geneva, Arial, Helvetica;
 	text-align: center;
 	overflow: hidden;
+    border-radius: 8px 8px 0 0;
 }
 #footer a {
 	text-decoration: underline;
@@ -499,7 +565,7 @@ ul.list-articles li {
     }
     .logo-area img {
         /* max-width: 405px; */
-        width: 100%;
+        width: 95%;
     }
     .header__menu.active {
         /*нужно подбирать разрешение и сдвиг*/
@@ -525,7 +591,7 @@ ul.list-articles li {
     }
     .logo-area img {
         /* max-width: 705px; */
-        width: 100%;
+        width: 95%;
     }
     .header__menu {
         height: 320px;
@@ -549,7 +615,9 @@ ul.list-articles li {
     }
     body {
         overflow-x: hidden;
-        background-color: rgb(224, 224, 224);
+        /* цывет фона сайта */
+        background-color: rgb(201, 201, 201);
+        /* background-color: rgb(224, 224, 224); */
     }
     .main-content {
         padding-top: 35px;
@@ -568,7 +636,7 @@ ul.list-articles li {
     }
     .logo-area img {
         /* max-width: 100%; */
-        width: 100%;
+        width: 95%;
     }
     .navigation__list {
         /* height: 90px; */
@@ -588,14 +656,14 @@ ul.list-articles li {
         width: 100%;
     }
     .navigation-header .navigation-header__container .header__body .header__menu{
-        height: 42px;
+        height: 34px;
         position: relative; /* Позволяет позиционировать меню относительно этого элемента */
         /* margin-bottom: 20px; */
     }
     .navigation__list {
         column-gap: 12px;
         justify-content: space-between;
-        padding: 10px;
+        /* padding: 10px; */
     }
     .header__list li {
         margin: 0px 0px 0px 0px;
@@ -628,7 +696,7 @@ ul.list-articles li {
         font-weight: 700;
     }
     .navigation-header .navigation-header__container .header__body .header__menu{
-        height: 54px;
+        height: 44px;
         /* margin-bottom: 100px; */
     }
     .navigation {
@@ -671,17 +739,18 @@ tr {
     vertical-align: inherit;
     border-color: inherit;
 }
+/* Анкета обратной связи */
 .tbl {
     padding: 8px;
-    border: 1px solid #F3FFEB;
+    /* border: 1px solid #F3FFEB; */
+    /* border: 1px solid #F3FFEB; */
     border-radius: 5px;
 }
 .tbl2 {
-    
     color: #091609;
-    background-color: #FBFEFF;
+    /* background-color: #FBFEFF; */
     padding: 8px;
-    border: 1px solid #E4F5FF;
+    /* border: 1px solid #E4F5FF; */
     border-radius: 5px;
 }
 .form-error {

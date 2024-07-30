@@ -24,123 +24,141 @@
     <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
 </head>
 <body>
-    <!-- Header Area-->
-    <header class="header-area">
-        <div class="top-header">
-            <div class="container top-header__container">
-                <!--Breaking News Area-->
-                <div class="breaking-news-area">
-                    <div class="header__burger">
-                        <span></span>
+    <div class='main'>
+        <div class='leftSidebar'>
+        
+        </div>
+
+        <div class='content'>
+            <!-- Header Area-->
+            <header class="header-area">
+            <div class="top-header">
+                <div class="container top-header__container">
+                    <!--Breaking News Area-->
+                    <div class="breaking-news-area">
+                        <div class="header__burger">
+                            <span></span>
+                        </div>
+                        <h5 class="breaking-news-title">Slowpoke news
+                            {% if request.user.is_authenticated %}
+                                <p class="last"> {{user.username}} | <a href="{% url 'logout' %}">Выйти</a></p>
+                            {% else %}
+                                <p class="last"><a href="{% url 'register' %}">Регистрация</a> | <a href="{% url 'login' %}">Войти</a></p>
+                            {% endif %}
+                        </h5>
+                        <!--Убрал пока вывод о сайте и обратная связь, думаю добавить виджетов с курсом валюты и погоду
+                        <div class="ticker">
+                            <ul class="title__element" id="top-mainmenu">
+                            {% block mainmenu %}
+                                <li><a href="{% url 'home' %}"><div class="logo"></div></a></liss=>
+                            {% for m in menu %}
+                                <li><a href="{% url m.url_name %}">{{m.title}}</a></li>
+                            {% endfor %}
+                            {% endblock mainmenu %}
+                            </ul>
+                        </div>-->
                     </div>
-                    <h5 class="breaking-news-title">Slowpoke news
-                        {% if request.user.is_authenticated %}
-                            <p class="last"> {{user.username}} | <a href="{% url 'logout' %}">Выйти</a></p>
-                        {% else %}
-                            <p class="last"><a href="{% url 'register' %}">Регистрация</a> | <a href="{% url 'login' %}">Войти</a></p>
-                        {% endif %}
-                    </h5>
-                    <!--Убрал пока вывод о сайте и обратная связь, думаю добавить виджетов с курсом валюты и погоду
-                    <div class="ticker">
-                        <ul class="title__element" id="top-mainmenu">
-                        {% block mainmenu %}
-                            <li><a href="{% url 'home' %}"><div class="logo"></div></a></liss=>
-                        {% for m in menu %}
-                            <li><a href="{% url m.url_name %}">{{m.title}}</a></li>
-                        {% endfor %}
-                        {% endblock mainmenu %}
-                        </ul>
-                    </div>-->
                 </div>
             </div>
-        </div>
-        <!--Middle header Area-->
-        <div class="middle-header">
-            <div class="container middle-header__container">
-                    <!--Logo Area-->
-                        <div class="logo-area">
+            <!--Middle header Area-->
+            <div class="middle-header">
+                {% comment %} <div class="container middle-header__container">
+                        <!--Logo Area-->
+                            <div class="logo-area">
+                                <a href="{% url 'home' %}">
+                                    <img src="{% static 'news/images/top-header.jpg' %}" alt="logo">
+                                </a>
+                            </div>
+                        <!--Header Advert Area-->
+                </div> {% endcomment %}
+            </div>
+            <!--Bottom header Area - описание работы кнопки MENU-->
+            <div class="navigation-header">
+                <div class="container navigation-header__container">
+                    <div class="header__body">
+                        <div class="headerWrapper">
+                            <div class="logo-area">
                             <a href="{% url 'home' %}">
                                 <img src="{% static 'news/images/top-header.jpg' %}" alt="logo">
                             </a>
-                        </div>
-                    <!--Header Advert Area-->
-            </div>
-        </div>
-        <!--Bottom header Area - описание работы кнопки MENU-->
-        <div class="navigation-header">
-            <div class="container navigation-header__container">
-                <div class="header__body">
-                    <nav class="header__menu navigation">
-                        {% comment %} сымитируем загулшку на весь экран {% endcomment %}
-                        <ul class="header__list navigation__list">
-                            {% for m in menu %}
-                                <li><button class="header__link navigation__item" onclick="window.location.href='{% url m.url_name %}'">{{m.title}}</button></li>
-                            {% endfor %}
-                            {% if cat_selected == 0 %}
-                                <li><button class="header__link selected navigation__item">Все категории</button></li>
-                            {% else %}
-                                <li><button class="header__link navigation__item" onclick="window.location.href='{% url 'home' %}'">Все категории</button></li>
-                            {% endif %}
-                            {% for c in cats %}
-                                {% if c.news__count > 0 %}
-                                    {% if c == cat_selected %}
-                                        <li><button class="header__link selected navigation__item">{{c.name}}</button></li>
-                                    {% else %}
-                                        <li><button class="header__link navigation__item" onclick="window.location.href='{{ c.get_absolute_url }}'">{{c.name}}</button></li>
-                                    {% endif %}
+                            </div>
+                            <nav class="header__menu navigation">
+                            {% comment %} сымитируем загулшку на весь экран {% endcomment %}
+                            <ul class="header__list navigation__list">
+                                {% for m in menu %}
+                                    <li><button class="header__link navigation__item" onclick="window.location.href='{% url m.url_name %}'">{{m.title}}</button></li>
+                                {% endfor %}
+                                {% if cat_selected == 0 %}
+                                    <li><button class="header__link selected navigation__item">Все категории</button></li>
+                                {% else %}
+                                    <li><button class="header__link navigation__item" onclick="window.location.href='{% url 'home' %}'">Все категории</button></li>
                                 {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-        </div>
-        <!--Карусель с постами-->
-        {% if show_slider_header %} <!--условие чтобы скрывать карусель в шаблонах где она не нужна-->
-            <div class="slider-header">
-                <div class="container slider__container wrapper"><!--wrapper не используется-->
-                    <h2 class="slider-title">Breaking NEWS</h2>
-                    <div class="image-slider swiper-container">
-                        <div class="image-slider__wrapper swiper-wrapper">
-                            {% for p in posts %}
-                                <div class="image-slider__slide swiper-slide">
-                                    <div class="article-panel">
-                                        <p class="first">{{p.cat}}</p>
-                                        <p class="last">{{p.date}}</p>
-                                    </div>
-                                    <!--Если есть картинка для новости то делаем ее фоном для карточки слайдера-->
-                                    {% if p.image %}
-                                        <a href="{{ p.get_absolute_url }}" class="image-slider__link">
-                                            <div class="image-slider__image" style="background-image: url('{{ p.image }}');"></div>
-                                            {% comment %} <p><img class="img-article-center" src="{{p.image}}"></p> {% endcomment %}
-                                        </a>
-                                        <div class="slider-panel-bottom">
-                                            <p>{{ p.title|truncatewords:10 }}</p>
-                                        </div>
+                                {% for c in cats %}
+                                    {% if c.news__count > 0 %}
+                                        {% if c == cat_selected %}
+                                            <li><button class="header__link selected navigation__item">{{c.name}}</button></li>
+                                        {% else %}
+                                            <li><button class="header__link navigation__item" onclick="window.location.href='{{ c.get_absolute_url }}'">{{c.name}}</button></li>
+                                        {% endif %}
                                     {% endif %}
-                                </div>
-                            {% endfor %}
+                                {% endfor %}
+                            </ul>
+                            </nav>
                         </div>
-                        <!--стили для кнопок перемещения-->
-                        <div class="swiper-button-prev"></div>
-                        <div class="swiper-button-next"></div>
-                        <!--Пагинация-->
-                        {% comment %} <div class="swiper-pagination"></div> {% endcomment %}
-                        <!--Полоса прокрутки
-                        <div class="swiper-scrollbar"></div>-->
                     </div>
                 </div>
             </div>
-        {% endif %}
-    </header>
-    <!-- Блок контента -->
-    <section class="main-content">
-        <div class="container main-content__container">
-                {% block content %}
-                <!--Сюда должны попасть новости из post.html-->
-                {% endblock %}
-                <!--Пагинация-->
-                {% if page_obj.has_other_pages %}
+            <!--Карусель с постами-->
+            {% if show_slider_header %} <!--условие чтобы скрывать карусель в шаблонах где она не нужна-->
+                <div class="slider-header">
+                    <div class="container slider__container wrapper"><!--wrapper не используется-->
+                        <h2 class="slider-title">Breaking NEWS</h2>
+                        <div class="image-slider swiper-container">
+                            <div class="image-slider__wrapper swiper-wrapper">
+                                {% for p in posts %}
+                                    <div class="image-slider__slide swiper-slide">
+                                        {% comment %} <div class="article-panel" {% color_tag p.cat %}> {% endcomment %}
+                                        <div class="article-panel" style="{% tag_color p.cat %}">
+                                            <p class="first">{{p.cat}}</p>
+                                            <p class="last">{{p.date}}</p>
+                                        </div>
+                                        <!--Если есть картинка для новости то делаем ее фоном для карточки слайдера-->
+                                        {% if p.image %}
+                                            <a href="{{ p.get_absolute_url }}" class="image-slider__link">
+                                                <div class="image-slider__image" style="background-image: url('{{ p.image }}');"></div>
+                                                {% comment %} <p><img class="img-article-center" src="{{p.image}}"></p> {% endcomment %}
+                                            </a>
+                                            <div class="slider-panel-bottom">
+                                                <p>{{ p.title|truncatewords:10 }}</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <!--стили для кнопок перемещения-->
+                            {% comment %} <div class="swiper-button-prev"></div>
+                            <div class="swiper-button-next"></div> {% endcomment %}
+                            <!--Пагинация-->
+                            {% comment %} <div class="swiper-pagination"></div> {% endcomment %}
+                            <!--Полоса прокрутки
+                            <div class="swiper-scrollbar"></div>-->
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            </header>
+            <!-- Блок контента -->
+            <section class="main-content">
+                <div class="container main-content__container">
+
+                {% comment %} <div class="postWrapper"> {% endcomment %}
+                    {% block content %}
+                    <!--Сюда должны попасть новости из post.html-->
+                    {% endblock %}
+                {% comment %} </div> {% endcomment %}
+
+                    <!--Пагинация-->
+                    {% if page_obj.has_other_pages %}
                     <nav class="list-pages">
                     <ul>
                     {% if page_obj.has_previous %}
@@ -151,7 +169,7 @@
                     {% for p in paginator.page_range %}
                         {% if page_obj.number == p %}
                             <li class="page-num page-num-selected">{{ p }}</li>
-                        {% elif p >= page_obj.number|add:-1 and p <= page_obj.number|add:1 %}
+                        {% elif p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
                             <li class="page-num">
                                 <a href="?page={{ p }}">{{ p }}</a>
                             </li>
@@ -163,21 +181,28 @@
                         </li>
                     {% endif %}
                     </ul>
-                </nav>
-                {% endif %}
-                <!--Конец блока пагинации-->
-        </div>
-    </section>
-    <!-- Конец блока контента -->
-    <br>
-    <!-- Footer -->
-    <footer>
-        <div class="container footer__container">
+                    </nav>
+                    {% endif %}
+                    <!--Конец блока пагинации-->
+                </div>
+            </section>
+            <!-- Конец блока контента -->
+            <br>
+            <!-- Footer -->
+            <footer>
+                <div class="container footer__container">
                     <div id="footer">
                         <p>&copy; 2024 Орки сила!</p>
                     </div>
+                </div>
+            </footer>
         </div>
-    </footer>
+
+        <div class='rightSidebar'>
+        
+        </div>
+
+    </div>
     <!-- Конец footer'а и страницы -->
     <!--Подключаем JQuery для работы бургер меню-->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>

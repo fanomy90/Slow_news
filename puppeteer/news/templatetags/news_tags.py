@@ -26,3 +26,25 @@ def tag_menu():
             {"title": "Войти", "url_name": "login"}
             ]
     return {"menu": menu}
+
+#костыль для обрезания вывода описания автора в каталоге статей
+@register.filter
+def trim_author(text):
+    if text:
+        # Ищем индекс первого вхождения двух пробелов
+        index = text.find('  ')
+        if index != -1:
+            return text[:index]
+    return text
+
+#костыль для для установки цвета шапки статьи в зависимости от категории
+@register.simple_tag
+def tag_color(cat):
+    cat_str = str(cat)
+    colors = {
+        'Безопасность': 'green',
+        'Обзоры': 'purple',
+        'Статьи': 'red'
+    }
+    color = colors.get(cat_str, '#333671')  # Цвет по умолчанию
+    return f'background: {color};'
