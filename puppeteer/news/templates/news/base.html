@@ -13,8 +13,13 @@
 	<title>{{title}}</title>
 	<!-- предзагрузим шрифт -->
 	<link rel="preload" href="{% static 'news/fonts/roboto-v30-latin-regular.woff2' %}" as="font" crossorigin>
+    <!--дополнения для работы погоды-->
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <!-- Подключим основной файл index.css который содержит ссылки на остальные css файлы -->
-	<link type="text/css" href="{% static 'news/css/index2.css' %}" rel="stylesheet" />
+	<link type="text/css" href="{% static 'news/css/index4.css' %}" rel="stylesheet" />
     <!--Подключаем Swiper карусели с ресурса https://swiperjs.com/get-started-->
     <link href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" rel="stylesheet"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -24,56 +29,151 @@
     <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
 </head>
 <body>
-    <div class='main'>
-        <div class='leftSidebar'>
-        
+    <header class="header-area">
+        <div class="top-header">
+            <div class="container top-header__container">
+                <!--Breaking News Area-->
+                <div class="breaking-news-area">
+                    <div class="header__burger">
+                        <span></span>
+                    </div>
+                    <h5 class="breaking-news-title">Slowpoke news
+                        {% if request.user.is_authenticated %}
+                            <p class="last"> {{user.username}} | <a href="{% url 'logout' %}">Выйти</a></p>
+                        {% else %}
+                            <p class="last"><a href="{% url 'register' %}">Регистрация</a> | <a href="{% url 'login' %}">Войти</a></p>
+                        {% endif %}
+                    </h5>
+                    <!--Убрал пока вывод о сайте и обратная связь, думаю добавить виджетов с курсом валюты и погоду
+                    <div class="ticker">
+                        <ul class="title__element" id="top-mainmenu">
+                        {% block mainmenu %}
+                            <li><a href="{% url 'home' %}"><div class="logo"></div></a></liss=>
+                        {% for m in menu %}
+                            <li><a href="{% url m.url_name %}">{{m.title}}</a></li>
+                        {% endfor %}
+                        {% endblock mainmenu %}
+                        </ul>
+                    </div>-->
+                </div>
+            </div>
         </div>
+    </header>
 
-        <div class='content'>
-            <!-- Header Area-->
-            <header class="header-area">
-            <div class="top-header">
-                <div class="container top-header__container">
-                    <!--Breaking News Area-->
-                    <div class="breaking-news-area">
-                        <div class="header__burger">
-                            <span></span>
-                        </div>
-                        <h5 class="breaking-news-title">Slowpoke news
-                            {% if request.user.is_authenticated %}
-                                <p class="last"> {{user.username}} | <a href="{% url 'logout' %}">Выйти</a></p>
-                            {% else %}
-                                <p class="last"><a href="{% url 'register' %}">Регистрация</a> | <a href="{% url 'login' %}">Войти</a></p>
-                            {% endif %}
-                        </h5>
-                        <!--Убрал пока вывод о сайте и обратная связь, думаю добавить виджетов с курсом валюты и погоду
-                        <div class="ticker">
-                            <ul class="title__element" id="top-mainmenu">
-                            {% block mainmenu %}
-                                <li><a href="{% url 'home' %}"><div class="logo"></div></a></liss=>
-                            {% for m in menu %}
-                                <li><a href="{% url m.url_name %}">{{m.title}}</a></li>
-                            {% endfor %}
-                            {% endblock mainmenu %}
-                            </ul>
-                        </div>-->
+
+
+    <div class='main'>
+        <!--левый блок для отображения меню-->
+        <div class='leftSidebar'>
+            <div class="navigationWrapper">
+                <div class="navigation-header">
+                    <div class="container navigation-header__container">
+                        {% comment %} <div class="navigationWrapper"> {% endcomment %}
+                            <div class="header__body">
+                                {% comment %} <div class="navigationWrapper"> {% endcomment %}
+                                    <nav class="header__menu navigation">
+                                        {% comment %} сымитируем загулшку на весь экран {% endcomment %}
+                                        <ul class="header__list navigation__list">
+                                            {% comment %} велосипед чтобы убрать активный пункт меню для страниц регистрации и входа на сайт котрые не включены в меню сайта {% endcomment %}
+                                            {% if cat_selected == 0 and request.path != '/login/' and request.path != '/register/' %}
+                                                <li><button class="header__link selected navigation__item">Все новости</button></li>
+                                            {% else %}
+                                                <li><button class="header__link navigation__item" onclick="window.location.href='{% url 'home' %}'">Все новости</button></li>
+                                            {% endif %}
+                                            {% for c in cats %}
+                                                {% if c.news__count > 0 %}
+                                                    {% if c == cat_selected %}
+                                                        <li><button class="header__link selected navigation__item">{{c.name}}</button></li>
+                                                    {% else %}
+                                                        <li><button class="header__link navigation__item" onclick="window.location.href='{{ c.get_absolute_url }}'">{{c.name}}</button></li>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% for m in menu %}
+                                                {% comment %} <li><button class="header__link navigation__item" onclick="window.location.href='{% url m.url_name %}'">{{m.title}}</button></li> {% endcomment %}
+
+                                                {% if m == cat_selected %}
+                                                    <li><button class="header__link selected navigation__item">{{m.title}}</button></li>
+                                                {% else %}
+                                                    <li><button class="header__link navigation__item" onclick="window.location.href='{% url m.url_name %}'">{{m.title}}</button></li>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    </nav>
+                                {% comment %} </div> {% endcomment %}
+                            </div>
+                        {% comment %} </div> {% endcomment %}
                     </div>
                 </div>
             </div>
+        </div>
+        <!--основной блок с контентом-->
+        <div class='content'>
+            <!-- Header Area-->
+            {% comment %} <header class="header-area">
+                <div class="top-header">
+                    <div class="container top-header__container">
+                        <!--Breaking News Area-->
+                        <div class="breaking-news-area">
+                            <div class="header__burger">
+                                <span></span>
+                            </div>
+                            <h5 class="breaking-news-title">Slowpoke news
+                                {% if request.user.is_authenticated %}
+                                    <p class="last"> {{user.username}} | <a href="{% url 'logout' %}">Выйти</a></p>
+                                {% else %}
+                                    <p class="last"><a href="{% url 'register' %}">Регистрация</a> | <a href="{% url 'login' %}">Войти</a></p>
+                                {% endif %}
+                            </h5>
+                            <!--Убрал пока вывод о сайте и обратная связь, думаю добавить виджетов с курсом валюты и погоду
+                            <div class="ticker">
+                                <ul class="title__element" id="top-mainmenu">
+                                {% block mainmenu %}
+                                    <li><a href="{% url 'home' %}"><div class="logo"></div></a></liss=>
+                                {% for m in menu %}
+                                    <li><a href="{% url m.url_name %}">{{m.title}}</a></li>
+                                {% endfor %}
+                                {% endblock mainmenu %}
+                                </ul>
+                            </div>-->
+                        </div>
+                    </div>
+                </div> {% endcomment %}
             <!--Middle header Area-->
             <div class="middle-header">
-                {% comment %} <div class="container middle-header__container">
+                <div class="container middle-header__container">
+                    <div class="headerWrapper">
                         <!--Logo Area-->
-                            <div class="logo-area">
-                                <a href="{% url 'home' %}">
-                                    <img src="{% static 'news/images/top-header.jpg' %}" alt="logo">
-                                </a>
-                            </div>
+                        <div class="logo-area">
+                            <a href="{% url 'home' %}">
+                                <img src="{% static 'news/images/top-header.jpg' %}" alt="logo">
+                            </a>
+                        </div>
                         <!--Header Advert Area-->
-                </div> {% endcomment %}
+                    </div>
+
+                    {% comment %} добавим аккордеон с погодой для мобильных устройств {% endcomment %}
+                    <div class="accordion">
+                        <div class="news-panel-bottom weatherAccordion">
+                            <p class="first">Погода</p>
+                            <div class="last accordion-weather-image">
+                                <i class=""></i>
+                            </div>
+                            <p class="last accordionHumidity"></p>
+                            <p class="last accordionWind"></p>
+                            <p class="last accordionTemp"></p>
+                            <p class="last accordionCity"></p>
+                        </div>
+                        <div class="accordionWeather-content">
+                            {% comment %} <p>Контент погоды</p> {% endcomment %}
+                            {% include "news/includes/include_weather.html" %}
+                            <!--контент валюты-->
+                        </div>
+                    </div>
+                </div>
             </div>
             <!--Bottom header Area - описание работы кнопки MENU-->
-            <div class="navigation-header">
+            {% comment %} <div class="navigation-header">
                 <div class="container navigation-header__container">
                     <div class="header__body">
                         <div class="headerWrapper">
@@ -83,7 +183,7 @@
                             </a>
                             </div>
                             <nav class="header__menu navigation">
-                            {% comment %} сымитируем загулшку на весь экран {% endcomment %}
+                            <!--сымитируем загулшку на весь экран-->
                             <ul class="header__list navigation__list">
                                 {% for m in menu %}
                                     <li><button class="header__link navigation__item" onclick="window.location.href='{% url m.url_name %}'">{{m.title}}</button></li>
@@ -107,7 +207,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> {% endcomment %}
             <!--Карусель с постами-->
             {% if show_slider_header %} <!--условие чтобы скрывать карусель в шаблонах где она не нужна-->
                 <div class="slider-header">
@@ -146,17 +246,15 @@
                     </div>
                 </div>
             {% endif %}
-            </header>
+
             <!-- Блок контента -->
             <section class="main-content">
                 <div class="container main-content__container">
-
                 {% comment %} <div class="postWrapper"> {% endcomment %}
                     {% block content %}
                     <!--Сюда должны попасть новости из post.html-->
                     {% endblock %}
                 {% comment %} </div> {% endcomment %}
-
                     <!--Пагинация-->
                     {% if page_obj.has_other_pages %}
                     <nav class="list-pages">
@@ -187,27 +285,30 @@
                 </div>
             </section>
             <!-- Конец блока контента -->
-            <br>
-            <!-- Footer -->
-            <footer>
-                <div class="container footer__container">
-                    <div id="footer">
-                        <p>&copy; 2024 Орки сила!</p>
-                    </div>
-                </div>
-            </footer>
         </div>
-
+        <!--правый блок с дополнительной информацией, возможно уберу в будущем-->
         <div class='rightSidebar'>
-        
+            {% include "news/includes/include_weather.html" %}
+            {% comment %} место для ваоюты {% endcomment %}
         </div>
+        <br>
+
 
     </div>
+    <!-- Footer -->
+    <footer>
+        <div class="container footer__container">
+            <div id="footer">
+                <p>&copy; 2024 Орки сила!</p>
+            </div>
+        </div>
+    </footer>
     <!-- Конец footer'а и страницы -->
     <!--Подключаем JQuery для работы бургер меню-->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
     <!--Подключаем файл скрипта для работы меню-->
     <script src="{% static 'news/js/script.js' %}"></script>
+    <script src="{% static 'news/js/weather.js' %}"></script>
     <!--Подключаем Swiper карусели с ресурса https://swiperjs.com/get-started-->
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
     <script src="{% static 'news/js/script2.js' %}"></script>

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views.generic import ListView
 from . import tasks
@@ -14,7 +14,7 @@ from .models import *
 from .forms import *
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView, FormView
-
+from .utils import menu  # Импортируйте menu
 class NewsHome(DataMixin, ListView):
     model = News
     template_name = 'news/index.html'
@@ -39,9 +39,11 @@ class AboutFormView(DataMixin, FormView):
         context = super().get_context_data(**kwargs)
         #скрываем карусель
         show_slider_header = False
+        #добавляем установку активного пункта меню
+        active_menu_item = next((item for item in menu if item['url_name'] == 'about'), None)
         c_def = self.get_user_context(
                 title="О сайте",
-                #cat_selected=context['posts'][0].cat_id,
+                cat_selected=active_menu_item,
                 show_slider_header=show_slider_header) #добавил кусок после title
         return dict(list(context.items()) + list(c_def.items()))
 
@@ -75,14 +77,20 @@ class Login(DataMixin, LoginView):
         return reverse_lazy('home')
 
 class AddPage(DataMixin, ListView):
-    #model = News
+    paginate_by = None  # Отключаем пагинацию
+    model = News
     template_name = 'news/import_news_template.html'
-    #context_object_name = 'posts'
-    #context_object_name = 'object_list'  # Важно указать это поле
-    #extra_context = {'title': 'Добавление новостей'}
-    def get(self, request, *args, **kwargs):
-        context = {'title': 'Добавление новостей'}
-        return render(request, self.template_name, context)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        #скрываем карусель
+        show_slider_header = False
+        #добавляем установку активного пункта меню
+        active_menu_item = next((item for item in menu if item['url_name'] == 'add_page'), None)
+        c_def = self.get_user_context(
+                title="Добавление новостей",
+                cat_selected=active_menu_item,
+                show_slider_header=show_slider_header) #добавил кусок после title
+        return dict(list(context.items()) + list(c_def.items()))
 
 class NewsCategory(DataMixin, ListView):
     model = News
@@ -119,12 +127,9 @@ class ShowPost(DataMixin, DetailView):
         cat_selected = post.cat
         c_def = self.get_user_context(
                 title=context['post'],
-
-
                 cat_selected=cat_selected, # Преобразуем cat_selected в целое число
                 show_slider_header=show_slider_header) 
         return dict(list(context.items()) + list(c_def.items()))
-
 
 def Logout(request):
     logout(request)

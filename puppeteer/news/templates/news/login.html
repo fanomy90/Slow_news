@@ -1,31 +1,31 @@
 {% extends 'news/base.html' %}
 
 {% block content %}
-<h1 align="center">{{title}}</h1>
-
-<form method="post">
-    {% csrf_token %}
-
-<table align="center">
-    <tbody>
-        
-        {% for f in form %}
-        <tr class="horizont">
-            <td class="tbl">
-                <p><label class="form-label" for="{{ f.id_for_label }}">{{ f.label }}: </label></p>
-            </td>
-            <td class="tbl2">
-                <p>{{ f }}</p>
-                <div class="form-error"><p>{{ f.errors }}</p></div>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<div class="sub form-error">{{ form.non_field_errors }}</div>
-<div class="sub">
-    <button type="submit"><p>Войти</p></button>
+<div class="postWrapper">
+    <div class="news-content">
+        <h1 align="center">{{title}}</h1>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+    <table align="center">
+        <tbody>
+            {% for f in form %}
+            <tr class="horizont">
+                <td class="tbl">
+                    <p><label class="form-label" for="{{ f.id_for_label }}">{{ f.label }}: </label></p>
+                </td>
+                <td class="tbl2">
+                    <p class="navigation__item">{{ f }}</p>
+                    <div class="form-error"><p>{{ f.errors }}</p></div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="sub form-error">{{ form.non_field_errors }}</div>
+    <div class="sub">
+        <button class="navigation__item" type="submit"><p>Войти</p></button>
+    </div>
+    </form>
 </div>
-</form>
-
 {% endblock %}

@@ -3,10 +3,8 @@
 {% block content %}
 <br>
 <div class="postWrapper">
-    <div class="news-title">
-        <h1 align="center">{{title}}</h1>
-    </div>
     <div class="news-content">
+        <h1 align="center">{{title}}</h1>
         <h2 align="center">Добро пожаловать на мой первый личный проект!</h2>
         <br>
         <h5>Приветствую вас на моем первом личном проекте!</h5>
@@ -32,7 +30,7 @@
     </div>
     <form method="post">
         {% csrf_token %}
-        <table align="center">
+        <table>
             <tbod class="contact">
                 {% for f in form %}
                 <tr class="horizont">
@@ -40,7 +38,7 @@
                         <p><label class="form-label" for="{{ f.id_for_label }}">{{ f.label }}: </label></p>
                     </td>
                     <td class="tbl2">
-                        <p>{{ f }}</p>
+                        <p class="navigation__item">{{ f }}</p>
                         <div class="form-error"><p>{{ f.errors }}</p></div>
                     </td>
                 </tr>
@@ -49,9 +47,8 @@
         </table>
         <div class="sub">
             <div class="form-error">{{ form.non_field_errors }}</div>
-            <button type="submit"><p>Отправить</p></button>
+            <button class="navigation__item" type="submit"><p>Отправить</p></button>
         </div>
-        <br>
     </form>
 </div>
 {% endblock %}
