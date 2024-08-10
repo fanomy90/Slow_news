@@ -2,7 +2,7 @@
 new Swiper('.image-slider', {
     slidesPerView: 'auto', // Adjust this value as needed
     centeredSlides: true, // Center the active slide
-    spaceBetween: 1000,
+    spaceBetween: 20,
     loop: true,
     autoplay: {
         delay: 3000,
