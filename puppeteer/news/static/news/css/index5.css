@@ -1,0 +1,1351 @@
+@import 'normalize.css';
+@font-face {
+    font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/roboto-v30-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+/* обнуление стилей */
+@import 'default.css';
+* {
+	margin: 0px;
+	padding: 0px;
+    box-sizing: border-box;
+    outline: none;
+    border: 0;
+}
+/* *, :after, :before {
+	box-sizing: border-box;
+} */
+.clear {clear: both;}
+.header {
+	display: block;
+}
+.container {
+    min-width: 320px;
+    margin: 0 auto;
+    padding: 0px 10px;
+}
+h1 {
+    font-size: 22px;
+    }
+h2 {
+    font-size: 20px;
+    }
+/*убрали стиль подчеркивание и синий цвет у ссылок*/
+a {
+    text-decoration: none;
+    color: inherit;
+}
+.content {
+    padding-top: 50px;
+}
+/*Фигачим шапку сайта*/
+.logo {
+    background-image: url('../images/logo.png');
+    background-repeat: no-repeat;
+    background-position: 10px 5px;
+    width: 70px;
+    height: 60px;
+}
+.top-header__container {
+    position: fixed; /* Закрепляет элемент относительно окна просмотра */
+    top: 0; /* Располагает элемент вверху страницы */
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 0px 10px;
+}
+/*задаем цвет шапки*/
+.breaking-news-area {
+    background: #3F4137;
+    color: #aaa;
+    padding: 5px 10px 5px 10px;
+    /* padding: 5px 10px; */
+    box-sizing: border-box;
+    border-radius: 0 0 8px 8px;
+}
+/*нужно сделать space between*/
+.breaking-news-area p.last {
+    float: right;
+}
+.breaking-news-title p a {
+    color: #aaa; /* Задаем белый цвет текста */
+    text-decoration: none; /* Убираем подчеркивание */
+    /* position: fixed; */
+}
+.logo-area {
+    width: 100%;
+    /* max-width: 310px; */
+    margin: 0 auto;
+    overflow: hidden; /* Обрезаем изображение, если оно выходит за пределы контейнера */
+    text-align: center;
+    padding: 5px;
+}
+.logo-area img {
+    width: 95%;
+    /* max-width: 310px; */
+    height: auto; /* Чтобы контейнер не превышал ширину экрана */
+    overflow: hidden; /* Обрезаем изображение, если оно выходит за пределы контейнера */
+}
+/* скрываем аккордеон погоды */
+.accordion {
+    display: none;
+}
+@media (min-width: 320px) {
+	.top-header {
+		height: auto;
+		padding: 20px, 0px;
+	}
+}
+
+/*фигачим навигацию со скролом*/
+.headerWrapper {
+    background-color: rgb(224, 224, 224);
+    /* background: #fff; */
+    /* padding: 0 20px 0 20px; */
+    border-radius: 8px;
+}
+
+.navigation-header__container {
+    /* padding-top: 50px; */
+    /* min-width: 100vw; */
+}
+.navigation__list {
+    display: flex;
+    padding: 0 calc(100vw / 2 - var(--container) / 2);
+    overflow-x: auto;
+    overflow-y: hidden;
+    /*растояние между элементами списка в горизонтальном режиме*/
+    column-gap: 8px;
+}
+.navigation__item {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 7px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    white-space: nowrap; /*запрет переноса слов*/
+}
+/*добавление рамки при наведении на кнопки*/
+.navigation__item:hover,
+.navigation__item:focus-visible {
+    outline: 3px solid #4415d1;
+    outline-offset: -3px;
+}
+.selected {
+    /*активная кнопка недоступна и меняет цвет*/
+    pointer-events: none;
+    background-color: #db8ecd;
+}
+.selected:focus {
+    outline: none;
+}
+/*фигачим кнопку*/
+/*делаем список горизонтальным*/
+.header__list {
+    display: flex;
+}
+/*убираем точки из списка*/
+.header__list li{
+    list-style: none;
+    /*Задаем отступы*/
+    margin: 5px 0px 0px 10px;
+}
+/*задаем ситили для пунктов меню*/
+.header__link {
+    color: black;
+    text-transform: uppercase;
+    /*font-size: 18px;*/
+    text-decoration: none;
+}
+.breaking-news-area {
+    display: flex;
+    justify-content: space-between; /* Распределяет элементы по ширине контейнера с равными промежутками */
+    align-items: center; /* Выравнивание элементов по центру по вертикали */
+}
+.breaking-news-title {
+    flex: 1; /* Позволяет заголовку занимать доступное пространство */
+    text-align: center; /* Центрирование текста в заголовке */
+}
+/*делаем адаптивную кнопку меню*/
+@media (max-width: 767px) {
+    body {
+        overflow-x: hidden; /* Убрать горизонтальную прокрутку на маленьких экранах */
+        /* цвет фона сайта */
+        /* background-color: rgb(224, 224, 224); */
+        background-color: rgb(201, 201, 201);
+    }
+    /* скрываем аккордеон погоды для других разрешений */
+    .accordion {
+        display: block;
+    }
+    /* Стили для контента аккордеона */
+    .accordionWeather-content {
+        padding: 0 10px;
+        display: none; /* Скрыть по умолчанию */
+        overflow: hidden;
+        /* background-color: #f1f1f1; */
+    }
+    /* Изменение фона кнопки при наведении */
+    .news-panel-bottom.weatherAccordion:hover {
+        background-color: blue;
+    }
+    /* Плавное раскрытие */
+    .accordionWeather-content.show {
+        display: block;
+    }
+    /* скрываем блок погоды для маленьких экранов */
+    .rightSidebar {
+        display: none;
+    }
+
+    /*скрываем меню для остальных разрешений*/
+    .header__burger {
+        display: block;
+        position: relative;
+        /*отредактировать положение*/
+        top: 0px;
+        left: 10px;
+        width: 30px;
+        height: 20px;
+        margin-left: 0; /* Задайте желаемый отступ слева */
+        z-index: 1000;
+        cursor: pointer;
+        position: relative;
+        z-index: 10; /* Чтобы бургер был поверх меню */
+    }
+    /*рисуем кнопку*/
+    .header__burger span {
+        position: absolute;
+        background-color: white;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        top: 9px;
+        transition: all 0.3s ease 0s;
+    }
+    .header__burger:before,
+    .header__burger:after {
+        content: '';
+        background-color: white;
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        left: 0;
+        transition: all 0.3s ease 0s;
+    }
+    .header__burger:before {
+        top: 0;
+    }
+    .header__burger:after {
+        bottom: 0;
+    }
+    .header__burger.active span {
+        transform: scale(0);
+    }
+    .header__burger.active:before {
+        transform: rotate(45deg);
+        top: 9px;
+    }
+    .header__burger.active:after {
+        transform: rotate(-45deg);
+        bottom: 9px;
+    }
+    /*рисуем меню*/
+    .header__menu {
+        position: fixed;
+        top: -100%;
+        left: 10px;
+        right: 10px;
+        transition: all 0.6s ease 0s;
+        background-color: rgba(63, 65, 55, 0.8);
+    }
+    .header__menu.active {
+        margin-top: -195px;
+        position: absolute;
+        height: 100vh;
+        z-index: 1000;
+        overflow-y: auto;
+        height: 100vh;
+        position: fixed;
+    }
+    .header__list {
+        display: table-row;
+        position: relative;
+        bottom: 0;
+    }
+}
+/*Делаем карусель .wrapper*/
+.slider-header {
+    padding: 0px 0px 10px 0px;
+    /* margin-top: 50px; */
+    /* height: 316px; */
+    /* margin-top: 0px; */
+    /* отступ после слайдера */
+    /* margin-bottom: 260px;  */
+}
+.slider__container {
+    /* padding: 30px; */
+    min-height: 100%;
+    position: relative;
+}
+.slider-header {
+    padding: 0px 0px 10px 0px;
+    /* height: 316px; */
+}
+.slider-title {
+    padding-top: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    color: black;
+    margin: 0px 0px 10px 0px;
+}
+.image-slider {
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden; /* Скрывает выходящие за пределы элементы */
+    /* margin-right: 10px; */
+}
+
+.image-slider__slide {
+    /* width: 90%; */
+    /* position: relative;
+    overflow: hidden; */
+    box-sizing: border-box;
+    /* margin-right: 10px; */
+
+    width: calc(100% - 10px);
+}
+.image-slider__link {
+    display: block;
+    position: relative; /* Это позволит использовать position: absolute для вложенных элементов */
+}
+.image-slider__image {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover; /* Изображение будет масштабироваться, чтобы покрыть весь контейнер */
+    width: 100%;
+    height: 200px;
+    position: relative;
+    overflow: hidden; /* Скрывает избыточные части изображения */
+    border-radius: 0 0 8px 8px;
+}
+.image-slider__image img{
+    width: 100%;
+    height: auto;
+    display: block;
+}
+.image-slider__content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%; /* Ширина на всю ширину слайда */
+    background: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+    color: white; /* Белый текст */
+    padding: 10px; /* Отступы */
+    box-sizing: border-box; /* Включить отступы в общую ширину */
+    height: auto; /* Высота автоматическая */
+}
+.image-slider__wrapper {
+    display: flex;
+    width: 100%;
+    /* height: 100%; */
+}
+/*стрелочки*/
+.image-slider .swiper-button-prev:after,
+.image-slider .swiper-button-next:after {
+    color: red;
+    top: 190px;
+    font-size: 40px;
+}
+/*буллеты*/
+.swiper-pagination {
+    /* position: absolute; */
+    bottom: 0px; /* Регулируйте это значение в зависимости от вашего дизайна */
+    /* text-align: center; */
+}
+.image-slider .swiper-pagination-bullet {
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 14px;
+    background-color: red;
+}
+/*Скрол*/
+.image-slider .swiper-scrollbar-drag {
+    cursor: pointer;
+    background-color: red;
+}
+/*прогрессбар*/
+.image-slider .swiper-pagination-progressbar-fill {
+    color: red;
+}
+img.img-article-left {
+	max-width: 300px;
+    max-height: 300px;
+	height: auto;
+	float: left;
+	padding: 0 10px 10px 0;
+}
+img.img-article-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+img.img-article-left.thumb {
+	max-width: 150px;
+	height: auto;
+}
+/* стилизация области постов на странице каталога новостей */
+.postWrapper {
+    /* background: #fff; */
+    background-color: rgb(224, 224, 224);
+    /* padding: 0 20px 0 20px; */
+    border-radius: 8px;
+}
+.postWrapper > *:first-child  {
+    margin-top: 0; /* Убираем отступ сверху у первого дочернего элемента */
+}
+/* стилизация текста внутри странице новостей */
+.news-title {
+    padding: 10px 20px 0 20px;
+}
+.news-author {
+    padding: 20px;
+}
+.news-content {
+    text-align: justify;
+    line-height: 1.4;
+    padding: 10px 20px 10px 20px;
+}
+.news-content p {
+    text-indent: 20px; /* Отступ первой строки */
+    margin-bottom: 0.5em; /* Отступ между абзацами */
+}
+.news-panel-bottom {
+    /* background: #3F4137; */
+    background: #333671;
+    color: #aaa;
+    /* color: white; */
+    /* padding: 0px 10px 5px 0px; */
+    box-sizing: border-box;
+    overflow: hidden;
+    /* color: white; */
+    /* border-top-left-radius: 15px;
+    border-top-right-radius: 15px; */
+    padding: 10px 20px 10px 10px;
+	text-align: left;
+    border-radius: 0 0 8px 8px;
+}
+
+p.link-read-post {
+    padding: 15px 20px 0 0;
+	text-align: left;
+}
+p.link-read-post a {
+	padding: 10px;
+	min-width: 100px;
+	background: #333671;
+	color: #fff;
+	text-decoration: none;
+}
+div.article-panel {
+    /* background: red; */
+    padding: 5px 10px 5px 10px;
+    border-radius: 8px 8px 0 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    color: white;
+}
+/* лишнее - проверить */
+div.slider-panel-title {
+    /* background: red;
+    padding: 5px 10px 5px 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+    color: white;
+    text-align: center; */
+
+    /* border-top-left-radius: 15px;
+    border-top-right-radius: 15px; */
+}
+div.slider-panel-bottom {
+    /* background: #3F4137; */
+    background: #333671;
+    color: #aaa;
+    /* padding: 0px 10px 5px 0px; */
+    box-sizing: border-box;
+    overflow: hidden;
+    /* color: white; */
+    text-align: center;
+    /* border-top-left-radius: 15px;
+    border-top-right-radius: 15px; */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 5px 10px 5px 10px;
+    box-sizing: border-box;
+    border-radius: 0 0 8px 8px;
+}
+div.article-panel p.first {
+    margin: 0;
+    float: left;
+}
+div.article-panel p.last {
+    margin: 0;
+    float: right;
+}
+.news-panel-bottom p {
+    margin: 0;
+}
+/* вывод погоды в аккордеоне */
+div.news-panel-bottom.weatherAccordion p.first {
+    margin: 0;
+    float: left;
+}
+div.news-panel-bottom.weatherAccordion p.last {
+    margin-left: 5px;
+    float: right;
+}
+div.news-panel-bottom.weatherAccordion div.last {
+    margin-left: 5px;
+    float: right;
+}
+ul.list-articles {
+	list-style: none;
+	margin: 0;
+}
+ul.list-articles li {
+	/* border-bottom: 1px solid #ccc; */
+    padding-bottom: 20px;
+}
+.table-page {
+	width: 100%;
+	height: 100%;
+	vertical-align: top;
+}
+.table-page tr {height: 100%;}
+.clear {clear: both;}
+/*Описываем пагинацию*/
+#nav ul {
+    text-align: center;
+}
+.list-pages {
+	text-align: center;
+	margin: 0 0 10px 0;
+}
+.list-pages ul {
+	margin: 10px 0 0 0;
+	padding: 0;
+	list-style: none;
+}
+.list-pages ul li {
+	display: inline-block;
+	margin: 0 10px 0 0;
+}
+.list-pages a {
+	color: #000;
+	font-size: 22px;
+	text-decoration: none;
+}
+.list-pages .page-num, .page-num-selected {
+	display: inline-block;
+	width: 30px;
+	height: 30px;
+	padding: 4px 0 0 0;/*положение цифр в кружках*/
+	/* border: 2px solid #d0d0d0;
+    border-color: red;
+	border-radius: 30px; */
+}
+.list-pages .page-num:hover {
+	/* box-shadow: 3px 3px 1px #d0d0d0;  */
+}
+.list-pages .page-num-selected {
+	border: none;
+	color: #000;
+	font-size: 22px;
+    color: #333671;;
+    font-weight: 700;
+}
+.list-pages .page-num-selected:hover {
+	box-shadow: none; 
+}
+.footer__container {
+    padding-top: 25px;
+}
+/*Блок fotter*/
+#footer {
+    background: #3F4137;
+    top: 30px;
+	box-sizing: border-box;
+	padding: 5px;
+	color: #aaa;
+	font-size: 14px;
+	font-family: Verdana, Geneva, Arial, Helvetica;
+	text-align: center;
+	overflow: hidden;
+    border-radius: 8px 8px 0 0;
+}
+#footer a {
+	text-decoration: underline;
+	color: #aaa;
+}
+.header__menu.active {
+    top: 225px;
+}
+
+/* Стили для кнопки аккордеона */
+.news-panel-bottom.weatherAccordion {
+    /* background-color: #eee; */
+    color: #aaa;
+    cursor: pointer;
+    /* padding: 10px; */
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+/* стилизация блока погоды */
+.rightSidebar {
+    /* height: 400px;
+    width: 160px;
+    background-color: #06283d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Lato" sans-serif; */
+    
+}
+.weather__container {
+    /* background-color: white; */
+    background-color: rgb(224, 224, 224);
+    width: auto;
+    height: auto;
+    padding: 28px 32px;
+    overflow: hidden;
+    border-radius: 8px;
+    /* transition: 0.6s ease-out; */
+}
+.search-box {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #06283d;
+    position: relative;
+}
+
+.search-box input {
+    color: #06283d;
+    width: 80%;
+    font-size: 22px;
+    font-weight: 200;
+    text-transform: uppercase;
+    padding-left: 26px;
+    background-color: rgb(224, 224, 224);
+}
+
+.search-box input::placeholder {
+    color: #06283d;
+    font-weight: 200;
+    font-size: 22px;
+    text-transform:  capitalize;
+}
+
+.search-box button {
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    background-color: #dff6ff;
+    border-radius: 50%;
+    font-size: 22px;
+}
+
+.search-box button:hover {
+    color: #fff;
+    background-color: #06283d;
+}
+
+.fa-location-dot {
+    position: absolute;
+    color: #06283d;
+    font-size: 24px;
+}
+
+.weather {
+    margin-top: 15px;
+    text-align: center;
+    /* скрытие погоды до ввода города */
+    /* display: none; */
+}
+
+.weather h1 {
+    font-size: 40px;
+    font-weight: 500;
+}
+
+.weather h2 {
+    font-size: 32px;
+    /* font-weight: 400; */
+    margin-top: 10px;
+}
+
+.details {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+}
+
+.details i {
+    font-size: 40px;
+    margin-top: 10px;
+}
+
+.details p {
+    font-size: 20px;
+    font-weight: 300;
+}
+
+.weather-image i {
+    font-size: 60px;
+}
+
+.errorCity {
+    color: red;
+    text-align: left;
+    margin-top: 20px;
+    display: none;
+    font-size: 30px;
+}
+
+/*делаем адаптивность*/
+@media (min-width: 415px) {
+    .logo-area {
+        /* max-width: 400px; */
+        width: 100%;
+    }
+    .logo-area img {
+        /* max-width: 405px; */
+        width: 95%;
+    }
+    .header__menu.active {
+        /*нужно подбирать разрешение и сдвиг*/
+        top: 225px;
+    }
+    p {
+        font-size: 16px;
+    }
+    h5 {
+        font-size: 16px;
+    }
+    .image-slider__image {
+            height: 300px;
+    }
+}
+@media (min-width: 550px) {
+    .image-slider__image {
+        height: 400px;
+    }
+}
+@media (min-width: 705px) {
+    .slider-header {
+        /* height: 289.23px; */
+    }
+    .main-content {
+        padding-top: 10px;
+    }
+    .logo-area {
+        /* max-width: 700px; */
+        width: 100%;
+    }
+    .logo-area img {
+        /* max-width: 705px; */
+        width: 95%;
+    }
+    .header__menu {
+        height: 320px;
+    }
+    .image-slider__image {
+        height: 500px;
+    }
+    h1 {
+        font-size: 26px;
+        }
+    h2 {
+        font-size: 22px;
+        }
+    p {
+        /* font-size: 18px; */
+    }
+    h5 {
+        font-size: 18px;
+    }
+}
+@media (min-width: 768px) {
+    .container {
+        /* width: 100%; */
+        min-width:320px;
+        /* max-width: 900px; */
+    }
+    body {
+        overflow-x: hidden;
+        /* цывет фона сайта */
+        background-color: rgb(201, 201, 201);
+        /* background-color: rgb(224, 224, 224); */
+        /* margin-left: 10px; */
+    }
+
+    .top-header__container {
+        padding: 0px 10px;
+    }
+
+    .main {
+        display: flex;
+        width: 100%;
+        /* box-sizing: border-box;
+        justify-content: space-between; */
+        gap: 10px;
+        justify-content: center; /* Центрирование по горизонтали */
+        /* align-items: center; */
+    }
+    /* добавляем левую панель */
+    .leftSidebar {
+        padding-top: 50px;
+        width: 155px;
+        height: calc(100vh - 45px);
+        top: 0;
+        left: 0;
+        position: sticky;
+        /* position: fixed; */
+        flex-shrink: 0;
+        border-radius: 8px;
+        /* flex-grow: 1; */
+        background-color: rgb(201, 201, 201);
+        /* z-index: 900; */
+    }
+
+    .navigation__list {
+        display: flex;
+        flex-direction: column;
+        padding: 5px;
+        column-gap: 8px;
+    }
+    .navigation__item {
+        /* background-color: #ffffff; */
+        border-radius: 8px;
+        padding: 7px 8px;
+        margin-block: 10px;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 16px;
+        white-space: nowrap; /*запрет переноса слов*/
+    }
+
+    /* переделать панель навигации как leftSidebar */
+    .navigation__list {
+        /* height: 90px; */
+        scrollbar-color: red white; /* Для Firefox где red - это цвет полосы прокрутки, а green - это цвет трека (фона полосы прокрутки) */
+    }
+    /*для Chrome, Safari*/
+    .navigation__list::-webkit-scrollbar {
+        width: 12px; /* Ширина полосы прокрутки */
+    }
+    .navigation__list::-webkit-scrollbar-thumb {
+        background-color: red; /* Цвет полосы прокрутки */
+    }
+    .navigation__list::-webkit-scrollbar-track {
+        background-color: white; /* Цвет трека (фона полосы прокрутки) */
+    }
+    ul.navigation__list {
+        width: 100%;
+    }
+    .navigation-header .navigation-header__container .header__body .header__menu{
+        height: 34px;
+        position: relative; /* Позволяет позиционировать меню относительно этого элемента */
+        /* margin-bottom: 20px; */
+    }
+    .navigation__list {
+        column-gap: 12px;
+        justify-content: space-between;
+        /* padding: 10px; */
+    }
+    .content {
+        padding-top: 60px;
+        flex-grow: 1;
+        /* flex: 1; */
+        position: sticky;
+        top: 0;
+
+        /* width: 55%; */
+        min-width: 412px;
+        /* width: 100%; */
+    }
+
+    .breaking-news-area {
+        background: #3F4137;
+        color: #aaa;
+        padding: 5px 10px 5px 10px;
+        /* padding: 5px 10px; */
+        box-sizing: border-box;
+        border-radius: 0 0 8px 8px;
+        /* Закрепляет элемент относительно окна просмотра */
+        /* position: fixed;  */
+        top: 0; /* Располагает элемент вверху страницы */
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+
+    .main-content {
+        /* padding-top: 35px; */
+    }    
+    .breaking-news-title {
+        flex: 1;
+        text-align: left;
+    }
+    .slider-title {
+        font-size: 22px;
+        font-weight: 700;
+    }
+    .image-slider__image {
+        height: 300px;
+        width: 100%;
+    }
+    .logo-area {
+        /* max-width: 100%; */
+        width: 100%;
+    }
+    .logo-area img {
+        /* max-width: 100%; */
+        width: 95%;
+    }
+    
+    .header__list li {
+        margin: 0px 0px 0px 0px;
+    }
+    h1 {
+        font-size: 30px;
+        }
+    h2 {
+        font-size: 26px;
+        }
+    p {
+        /* font-size: 22px; */
+    }
+    h5 {
+        font-size: 22px;
+    }
+
+    /* добавляем правую панель */
+    .rightSidebar {
+        padding-top: 60px;
+        /* padding-right: 10px; */
+        top: 0;
+        right: 0;
+        flex-grow: 1;
+        flex-shrink: 0;
+        /* position: fixed; */
+        position: sticky;
+        flex-shrink: 0;
+        height: calc(100vh - 65px);
+        width: 20%;
+        /* background-color: rgb(224, 224, 224); */
+        background-color: rgb(201, 201, 201);
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        /* отобразим блок для больших экранов */
+        display: block;
+        /* z-index: 900; */
+    }
+    .weather__container {
+        background-color: rgb(224, 224, 224);
+        width: auto;
+        /* height: 50%; */
+        padding: 5px 5px;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+    /* .search-box {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #06283d;
+        position: relative;
+    } */
+    .search-box input {
+        color: #06283d;
+        width: 80%;
+        font-size: 12px;
+        font-weight: 200;
+        text-transform: uppercase;
+        padding-left: 16px;
+        background-color: rgb(224, 224, 224);
+    }
+    .search-box input::placeholder {
+        color: #06283d;
+        font-weight: 200;
+        font-size: 16px;
+        text-transform:  capitalize;
+    }
+    .search-box button {
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        background-color: #dff6ff;
+        border-radius: 50%;
+        font-size: 11px;
+    }
+    /* .search-box button:hover {
+        color: #fff;
+        background-color: #06283d;
+    } */
+    .fa-location-dot {
+        position: absolute;
+        color: #06283d;
+        font-size: 14px;
+    }
+    /* .weather {
+        margin-top: 15px;
+        text-align: center;
+        display: none;
+    } */
+    .weather h1 {
+        font-size: 40px;
+        margin: 0;
+    }
+    .weather h2 {
+        font-size: 32px;
+        margin-top: 10px;
+    }
+    /* .details {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    } */
+    .details i {
+        font-size: 20px;
+        margin-top: 10px;
+    }
+    .details p {
+        font-size: 15px;
+        font-weight: 300;
+    }
+    .weather-image i {
+        font-size: 60px;
+    }
+    .errorCity {
+        color: red;
+        text-align: left;
+        margin-top: 20px;
+        display: none;
+        font-size: 30px;
+    }
+
+
+}
+/* @media (min-width: 959px) {
+} */
+@media (min-width: 920px) {
+    .main {
+        /* gap: 15px; */
+    }
+    .container {
+        /* width: 1024px; */
+        /* width: 22%; */
+    }
+    .leftSidebar {
+        /* width: 200px; */
+        width: 210px;
+    }
+    .content {
+        /* width: 50%; */
+        width: 460px;
+    }
+    .main-content {
+        padding-top: 10px;
+    }
+    .rightSidebar {
+        width: 12%;
+        /* width: 22%; */
+    }
+    .slider-title {
+        padding-bottom: 10px;
+        font-size: 26px;
+        font-weight: 700;
+    }
+    .image-slider__image {
+        /* height: 400px; */
+    }
+    .navigation-header .navigation-header__container .header__body .header__menu{
+        /* height: 44px; */
+        /* margin-bottom: 100px; */
+    }
+    .navigation {
+        /* margin-bottom: 10px; */
+    }
+    .navigation__list {
+        /* column-gap: 14px; */
+    }
+    .navigation__item {
+        padding: 9px 14px;
+        font-size: 16px;
+        line-height: 22px;
+        background-position: 14px center;
+    }
+    .main-content {
+        padding-top: 20px;
+    }
+}
+@media (min-width: 1070px) {
+    .content {
+        /* width: 25%; */
+        width: 55%;
+        /* width: 680px; */
+        /* width: 100%; */
+        /* width: 620px; */
+        margin: 0 auto;
+    }
+    .image-slider__image {
+        height: 400px;
+    }
+    /* .list-articles li {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        height: 500px;
+    } */
+    .list-articles {
+        column-count: 2; /* Количество колонок */
+        column-gap: 1rem; /* Расстояние между колонками */
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .list-articles li {
+        margin: 0 0 1rem; /* Отступ между элементами, чтобы не было наложений */
+        padding: 0;
+        border: none;
+        break-inside: avoid; /* Убирает пробелы внутри колонок */
+    }
+    ul.list-articles li {
+        padding-bottom: 0;
+    }
+}
+@media (min-width: 1230px) {
+    .content {
+        /* width: 40%; */
+        /* width: 220px; */
+    }
+    .rightSidebar {
+        width: 15%;
+    }
+
+    /*Переделываем карусель*/
+    /* область показа всех слайдов */
+    .image-slider__slide {
+        box-sizing: border-box;
+        flex: 1 0 calc(33% - 10px); /* Три слайда в одном ряду с отступами */
+        /* margin-right: 10px; */
+        position: relative;
+    }
+
+    /* блок погоды */
+    .search-box input {
+        font-size: 22px;
+    }
+    .search-box input::placeholder {
+        font-size: 26px;
+        padding-left: 20px;
+    }
+    .search-box button {
+        width: 50px;
+        height: 50px;
+        font-size: 21px;
+    }
+    .fa-location-dot {
+        padding-left: 10px;
+        font-size: 24px;
+    }
+    .weather h1 {
+        font-size: 50px;
+        margin: 0;
+    }
+    .weather h2 {
+        font-size: 42px;
+        margin-top: 10px;
+    }
+    .details i {
+        font-size: 35px;
+        margin-top: 10px;
+    }
+    .details p {
+        font-size: 25px;
+    }
+    h1 {
+        font-size: 30px;
+        }
+    h2 {
+        font-size: 28px;
+        }
+    p {
+        /* font-size: 22px; */
+        font-size: 15px;
+    }
+    h5 {
+        font-size: 22px;
+    }
+}
+@media (min-width: 1400px) {
+    .content {
+        /* width: 30%; */
+        /* width: 60%; */
+    }
+    .rightSidebar {
+        width: 12%;
+    }
+    .image-slider__image {
+        height: 500px;
+    }
+    p {
+        font-size: 18px;
+        /* font-size: 15px; */
+    }
+}
+@media (min-width: 1680px) {
+    .content {
+        /* width: 62%; */
+        /* width: 33%; */
+        width: 70%;
+    }
+    /* настройка слайдера */
+    .image-slider__slide {
+        /* width: 90%; */
+        /* position: relative;
+        overflow: hidden; */
+        box-sizing: border-box;
+        /* margin-right: 10px; */
+    
+        width: calc(33.3% - 10px);
+    }
+    .slider-title {
+        padding-top: 20px;
+        font-size: 35px;
+        font-weight: 700;
+    }
+    .image-slider__image {
+        height: 600px;
+    }
+    /* блок контента */
+    .list-articles {
+        column-count: 3; /* Количество колонок */
+        /* column-gap: 1rem;
+        list-style: none;
+        margin: 0;
+        padding: 0; */
+    }
+    /* блок погоды */
+    .search-box input {
+        font-size: 22px;
+    }
+    .search-box input::placeholder {
+        font-size: 26px;
+        padding-left: 20px;
+    }
+    .search-box button {
+        width: 50px;
+        height: 50px;
+        font-size: 21px;
+    }
+    .fa-location-dot {
+        padding-left: 10px;
+        font-size: 24px;
+    }
+    .weather h1 {
+        font-size: 50px;
+        margin: 0;
+    }
+    .weather h2 {
+        font-size: 42px;
+        margin-top: 10px;
+    }
+    .details i {
+        font-size: 35px;
+        margin-top: 10px;
+    }
+    .details p {
+        font-size: 25px;
+    }
+    h1 {
+        font-size: 36px;
+        }
+    h2 {
+        font-size: 32px;
+        }
+    p {
+        font-size: 22px;
+    }
+    h5 {
+        font-size: 28px;
+    }
+}
+/*стили для страницы регистрации*/
+.sub {
+    padding-bottom: 10px;
+    text-align: center;
+    margin-top: 10px; /* Вы можете настроить отступ сверху, чтобы кнопка не прижималась слишком близко к форме */
+}
+table {
+    min-width: 320px;
+    max-width: calc(100vw / 2 - var(--container) / 2);
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+tbody {
+    display: table-row-group;
+    vertical-align: middle;
+    border-color: inherit;
+    
+}
+tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: inherit;
+}
+/* Анкета обратной связи */
+.tbl {
+    padding: 8px;
+    /* border: 1px solid #F3FFEB; */
+    /* border: 1px solid #F3FFEB; */
+    border-radius: 5px;
+}
+.tbl2 {
+    color: #091609;
+    /* background-color: #FBFEFF; */
+    /* padding: 8px; */
+    /* border: 1px solid #E4F5FF; */
+    border-radius: 5px;
+    
+}
+
+/* .tbl2.navigation__item p{
+    font-size: 22px;
+} */
+
+.form-error {
+    color: red;
+}
+.horizont {
+    display: table-row;
+}

@@ -19,7 +19,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <!-- Подключим основной файл index.css который содержит ссылки на остальные css файлы -->
-	<link type="text/css" href="{% static 'news/css/index4.css' %}" rel="stylesheet" />
+	<link type="text/css" href="{% static 'news/css/index5.css' %}" rel="stylesheet" />
     <!--Подключаем Swiper карусели с ресурса https://swiperjs.com/get-started-->
     <link href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" rel="stylesheet"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -258,27 +258,27 @@
                     <!--Пагинация-->
                     {% if page_obj.has_other_pages %}
                     <nav class="list-pages">
-                    <ul>
-                    {% if page_obj.has_previous %}
-                        <li class="page-num">
-                            <a href="?page={{ page_obj.previous_page_number }}">&lt;</a>
-                        </li>
-                    {% endif %}
-                    {% for p in paginator.page_range %}
-                        {% if page_obj.number == p %}
-                            <li class="page-num page-num-selected">{{ p }}</li>
-                        {% elif p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
-                            <li class="page-num">
-                                <a href="?page={{ p }}">{{ p }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                    {% if page_obj.has_next %}
-                        <li class="page-num">
-                            <a href="?page={{ page_obj.next_page_number }}">&gt;</a>
-                        </li>
-                    {% endif %}
-                    </ul>
+                        <ul>
+                            {% if page_obj.has_previous %}
+                                <li class="page-num">
+                                    <a href="?page={{ page_obj.previous_page_number }}">&lt;</a>
+                                </li>
+                            {% endif %}
+                            {% for p in paginator.page_range %}
+                                {% if page_obj.number == p %}
+                                    <li class="page-num page-num-selected">{{ p }}</li>
+                                {% elif p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
+                                    <li class="page-num">
+                                        <a href="?page={{ p }}">{{ p }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            {% if page_obj.has_next %}
+                                <li class="page-num">
+                                    <a href="?page={{ page_obj.next_page_number }}">&gt;</a>
+                                </li>
+                            {% endif %}
+                        </ul>
                     </nav>
                     {% endif %}
                     <!--Конец блока пагинации-->

@@ -27,6 +27,8 @@
                                     </div>
                                     {% comment %} <p class="last">Дата: {{p.time_update|date:"d-m-Y H:i:s"}}</p> {% endcomment %}
                                     {% comment %} <p class="last">Дата: {{p.date}}</p> {% endcomment %}
+
+
                                     <div class="news-content">
                                         {% autoescape on %}
                                             <a href="{{ p.get_absolute_url }}">
@@ -34,6 +36,8 @@
                                             </a>
                                         {% endautoescape %}
                                     </div>
+
+
                                     {% comment %} <div class="news-content">
                                         {{ p.content|linebreaksbr|truncatewords:50}}
                                     </div> {% endcomment %}
@@ -56,7 +60,6 @@
                                     </div>
                                 </div>
                             </li>
-                            <br>
                         {% endfor %}
                     
                 </ul>
