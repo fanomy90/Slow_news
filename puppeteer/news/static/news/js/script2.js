@@ -33,5 +33,10 @@ new Swiper('.image-slider', {
         el: '.swiper-scrollbar',
         draggable: true
     },
+    on: {
+        init: function () {
+            this.slideToLoop(1, 1); // Начать с первого слайда
+        }
+    }
 
 });

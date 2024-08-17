@@ -1,5 +1,6 @@
 const apiKey = "c3d9500417df01e0513292a8b7357c43";
 const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=`;
+
 const weatherIcon = document.querySelector(".weather-image i");
 const searchInput = document.querySelector(".search-box input");
 const searchButton = document.querySelector(".search-box button");

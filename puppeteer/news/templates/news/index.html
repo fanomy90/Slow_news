@@ -1,6 +1,13 @@
 {% extends 'news/base.html' %}
 {% load news_tags %}
 {% block content %}
+                <div class="postWrapper">
+                    {% if cat_selected == 0 %}
+                    <h2 class="slider-title">Все новости </h2>
+                    {% else %}
+                    <h2 class="slider-title">Новости в категории: {{cat_selected}} </h2>
+                    {% endif %}
+                </div>
                 <ul class="list-articles">
                     {% for p in posts %}
                             <li>

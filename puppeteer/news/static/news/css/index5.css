@@ -69,11 +69,13 @@ a {
 /*нужно сделать space between*/
 .breaking-news-area p.last {
     float: right;
+    align-items: center;
 }
 .breaking-news-title p a {
     color: #aaa; /* Задаем белый цвет текста */
     text-decoration: none; /* Убираем подчеркивание */
     /* position: fixed; */
+    align-items: center;
 }
 .logo-area {
     width: 100%;
@@ -105,7 +107,8 @@ a {
     background-color: rgb(224, 224, 224);
     /* background: #fff; */
     /* padding: 0 20px 0 20px; */
-    border-radius: 8px;
+    /* border-radius: 8px; */
+    border-radius: 8px 8px 0 0 ;
 }
 
 .navigation-header__container {
@@ -181,8 +184,16 @@ a {
     /* скрываем аккордеон погоды для других разрешений */
     .accordion {
         display: block;
+        padding-bottom: 10px;
     }
-    /* Стили для контента аккордеона */
+    /* Стили для контента аккордеона курса валюты */
+    .accordionExchange-content {
+        padding: 0 10px;
+        display: none; /* Скрыть по умолчанию */
+        overflow: hidden;
+        /* background-color: #f1f1f1; */
+    }
+    /* Стили для контента аккордеона погоды*/
     .accordionWeather-content {
         padding: 0 10px;
         display: none; /* Скрыть по умолчанию */
@@ -190,14 +201,23 @@ a {
         /* background-color: #f1f1f1; */
     }
     /* Изменение фона кнопки при наведении */
+    .news-panel-upper.exchangeAccordion:hover {
+        background-color: green;
+    }
     .news-panel-bottom.weatherAccordion:hover {
         background-color: blue;
     }
-    /* Плавное раскрытие */
+    /* Плавное раскрытие аккордеонов*/
+    .accordionExchange-content.show {
+        display: block;
+    }
     .accordionWeather-content.show {
         display: block;
     }
-    /* скрываем блок погоды для маленьких экранов */
+    /* скрываем дополнительные области для маленьких экранов */
+    .leftSidebar {
+        display: none;
+    }
     .rightSidebar {
         display: none;
     }
@@ -297,12 +317,16 @@ a {
     /* height: 316px; */
 }
 .slider-title {
-    padding-top: 10px;
-    font-size: 15px;
+    padding: 10px;
+    font-size: 18px;
     font-weight: 700;
     text-align: center;
+    align-items: center;
     color: black;
     margin: 0px 0px 10px 0px;
+    font-family: "Raleway", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
 }
 .image-slider {
     box-sizing: border-box;
@@ -329,7 +353,8 @@ a {
     background-position: center;
     background-size: cover; /* Изображение будет масштабироваться, чтобы покрыть весь контейнер */
     width: 100%;
-    height: 200px;
+    /* height: 200px; */
+    height: 280px;
     position: relative;
     overflow: hidden; /* Скрывает избыточные части изображения */
     border-radius: 0 0 8px 8px;
@@ -407,6 +432,7 @@ img.img-article-left.thumb {
     background-color: rgb(224, 224, 224);
     /* padding: 0 20px 0 20px; */
     border-radius: 8px;
+    
 }
 .postWrapper > *:first-child  {
     margin-top: 0; /* Убираем отступ сверху у первого дочернего элемента */
@@ -427,6 +453,22 @@ img.img-article-left.thumb {
     text-indent: 20px; /* Отступ первой строки */
     margin-bottom: 0.5em; /* Отступ между абзацами */
 }
+.news-panel-upper {
+    /* background: #3F4137; */
+    background: rgb(5, 80, 5);
+    color: #aaa;
+    /* color: white; */
+    /* padding: 0px 10px 5px 0px; */
+    box-sizing: border-box;
+    overflow: hidden;
+    /* color: white; */
+    /* border-top-left-radius: 15px;
+    border-top-right-radius: 15px; */
+    padding: 10px 20px 10px 10px;
+	text-align: left;
+    border-radius: 8px 8px 0 0;
+}
+
 .news-panel-bottom {
     /* background: #3F4137; */
     background: #333671;
@@ -504,7 +546,16 @@ div.article-panel p.last {
 .news-panel-bottom p {
     margin: 0;
 }
-/* вывод погоды в аккордеоне */
+/* вывод курса в аккордеоне валюты*/
+div.news-panel-upper.exchangeAccordion p.first {
+    margin: 0;
+    float: left;
+}
+div.news-panel-upper.exchangeAccordion div.last {
+    margin-left: 5px;
+    float: right;
+}
+/* вывод показаний в аккордеоне погоды*/
 div.news-panel-bottom.weatherAccordion p.first {
     margin: 0;
     float: left;
@@ -601,6 +652,18 @@ ul.list-articles li {
 }
 
 /* Стили для кнопки аккордеона */
+.news-panel-bottom.exchangeAccordion {
+    /* background-color: #eee; */
+    color: #aaa;
+    cursor: pointer;
+    /* padding: 10px; */
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
 .news-panel-bottom.weatherAccordion {
     /* background-color: #eee; */
     color: #aaa;
@@ -624,6 +687,34 @@ ul.list-articles li {
     font-family: "Lato" sans-serif; */
     
 }
+/* вывод валют - переделать */
+.currency-item {
+    margin-bottom: 10px;
+}
+
+.marquee-container {
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    box-sizing: border-box;
+    user-select: none; /* Убираем выделение текста */
+}
+
+.marquee {
+    display: inline-block;
+    white-space: nowrap;
+
+    animation: marquee 20s linear infinite;
+}
+/* .marquee:hover {
+    animation-play-state: paused;
+} */
+@keyframes marquee {
+    100% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
+/* виджет погоды */
 .weather__container {
     /* background-color: white; */
     background-color: rgb(224, 224, 224);
@@ -633,7 +724,22 @@ ul.list-articles li {
     overflow: hidden;
     border-radius: 8px;
     /* transition: 0.6s ease-out; */
+    margin-bottom: 10px;
 }
+.exchange__container {
+    /* background-color: white; */
+    background-color: rgb(224, 224, 224);
+    width: auto;
+    /* height: 480px; */
+    padding: 28px 32px;
+    overflow: hidden;
+    border-radius: 8px;
+    /* transition: 0.6s ease-out; */
+    margin-bottom: 10px;
+    /* height: calc(100% - 100px);
+    box-sizing: border-box; */
+}
+
 .search-box {
     width: 100%;
     display: flex;
@@ -681,7 +787,7 @@ ul.list-articles li {
 }
 
 .weather {
-    margin-top: 15px;
+    margin-top: 5px;
     text-align: center;
     /* скрытие погоды до ввода города */
     /* display: none; */
@@ -748,12 +854,14 @@ ul.list-articles li {
         font-size: 16px;
     }
     .image-slider__image {
-            height: 300px;
+        /* height: 300px; */
+        height: 220px;
     }
 }
 @media (min-width: 550px) {
     .image-slider__image {
-        height: 400px;
+        /* height: 400px; */
+        height: 300px;
     }
 }
 @media (min-width: 705px) {
@@ -761,7 +869,7 @@ ul.list-articles li {
         /* height: 289.23px; */
     }
     .main-content {
-        padding-top: 10px;
+        /* padding-top: 10px; */
     }
     .logo-area {
         /* max-width: 700px; */
@@ -775,7 +883,8 @@ ul.list-articles li {
         height: 320px;
     }
     .image-slider__image {
-        height: 500px;
+        /* height: 500px; */
+        height: 400px;
     }
     h1 {
         font-size: 26px;
@@ -791,6 +900,9 @@ ul.list-articles li {
     }
 }
 @media (min-width: 768px) {
+    .breaking-news-title {
+        font-size: 20px;
+    }
     .container {
         /* width: 100%; */
         min-width:320px;
@@ -803,12 +915,12 @@ ul.list-articles li {
         /* background-color: rgb(224, 224, 224); */
         /* margin-left: 10px; */
     }
-
     .top-header__container {
         padding: 0px 10px;
     }
-
     .main {
+        /* padding-top: 60px; */
+        /* padding-left: 10px; */
         display: flex;
         width: 100%;
         /* box-sizing: border-box;
@@ -819,8 +931,9 @@ ul.list-articles li {
     }
     /* добавляем левую панель */
     .leftSidebar {
-        padding-top: 50px;
-        width: 155px;
+        padding-top: 60px;
+        /* width: 20%; */
+        width: 160px;
         height: calc(100vh - 45px);
         top: 0;
         left: 0;
@@ -831,6 +944,9 @@ ul.list-articles li {
         /* flex-grow: 1; */
         background-color: rgb(201, 201, 201);
         /* z-index: 900; */
+    }
+    .navigation-header {
+        min-width: 170px;
     }
 
     .navigation__list {
@@ -849,7 +965,6 @@ ul.list-articles li {
         line-height: 16px;
         white-space: nowrap; /*запрет переноса слов*/
     }
-
     /* переделать панель навигации как leftSidebar */
     .navigation__list {
         /* height: 90px; */
@@ -879,17 +994,18 @@ ul.list-articles li {
         /* padding: 10px; */
     }
     .content {
+        /* padding-top: 50px; */
         padding-top: 60px;
+        /* padding-top: 30px; */
         flex-grow: 1;
         /* flex: 1; */
         position: sticky;
         top: 0;
-
         /* width: 55%; */
-        min-width: 412px;
+        /* min-width: 412px; */
+        min-width: 50%;
         /* width: 100%; */
     }
-
     .breaking-news-area {
         background: #3F4137;
         color: #aaa;
@@ -904,7 +1020,6 @@ ul.list-articles li {
         right: 0;
         z-index: 1000;
     }
-
     .main-content {
         /* padding-top: 35px; */
     }    
@@ -917,18 +1032,20 @@ ul.list-articles li {
         font-weight: 700;
     }
     .image-slider__image {
-        height: 300px;
+        height: 240px;
+        /* height: 300px; */
         width: 100%;
     }
     .logo-area {
         /* max-width: 100%; */
         width: 100%;
+        /* display: block; */
+        display: none;
     }
     .logo-area img {
         /* max-width: 100%; */
         width: 95%;
     }
-    
     .header__list li {
         margin: 0px 0px 0px 0px;
     }
@@ -936,10 +1053,10 @@ ul.list-articles li {
         font-size: 30px;
         }
     h2 {
-        font-size: 26px;
+        font-size: 22px;
         }
     p {
-        /* font-size: 22px; */
+        font-size: 13px;
     }
     h5 {
         font-size: 22px;
@@ -951,13 +1068,15 @@ ul.list-articles li {
         /* padding-right: 10px; */
         top: 0;
         right: 0;
-        flex-grow: 1;
+        /* flex-grow: 1; */
         flex-shrink: 0;
         /* position: fixed; */
         position: sticky;
         flex-shrink: 0;
         height: calc(100vh - 65px);
-        width: 20%;
+        /* width: 25%; */
+        width: 190px;
+        /* width: 20%; */
         /* background-color: rgb(224, 224, 224); */
         background-color: rgb(201, 201, 201);
         border-radius: 8px;
@@ -968,12 +1087,16 @@ ul.list-articles li {
         /* z-index: 900; */
     }
     .weather__container {
+        overflow: block
+    }
+    .weather__container {
         background-color: rgb(224, 224, 224);
         width: auto;
         /* height: 50%; */
+        height: 265px;
         padding: 5px 5px;
-        overflow: hidden;
-        border-radius: 8px;
+        /* overflow: hidden; */
+        overflow: block
     }
     /* .search-box {
         width: 100%;
@@ -986,10 +1109,10 @@ ul.list-articles li {
     .search-box input {
         color: #06283d;
         width: 80%;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 200;
         text-transform: uppercase;
-        padding-left: 16px;
+        padding-left: 20px;
         background-color: rgb(224, 224, 224);
     }
     .search-box input::placeholder {
@@ -1051,12 +1174,13 @@ ul.list-articles li {
         display: none;
         font-size: 30px;
     }
-
-
 }
 /* @media (min-width: 959px) {
 } */
 @media (min-width: 920px) {
+    .breaking-news-title {
+        font-size: 22px;
+    }
     .main {
         /* gap: 15px; */
     }
@@ -1065,28 +1189,11 @@ ul.list-articles li {
         /* width: 22%; */
     }
     .leftSidebar {
-        /* width: 200px; */
-        width: 210px;
+        margin-right: -10px;
+        width: 200px;
+        /* width: 210px; */
     }
-    .content {
-        /* width: 50%; */
-        width: 460px;
-    }
-    .main-content {
-        padding-top: 10px;
-    }
-    .rightSidebar {
-        width: 12%;
-        /* width: 22%; */
-    }
-    .slider-title {
-        padding-bottom: 10px;
-        font-size: 26px;
-        font-weight: 700;
-    }
-    .image-slider__image {
-        /* height: 400px; */
-    }
+
     .navigation-header .navigation-header__container .header__body .header__menu{
         /* height: 44px; */
         /* margin-bottom: 100px; */
@@ -1099,31 +1206,78 @@ ul.list-articles li {
     }
     .navigation__item {
         padding: 9px 14px;
-        font-size: 16px;
+        font-size: 14px;
+        /* font-size: 16px; */
         line-height: 22px;
         background-position: 14px center;
     }
+    .content {
+        width: 50%;
+        /* width: 460px; */
+    }
     .main-content {
-        padding-top: 20px;
+        padding-top: 10px;
+    }
+    .slider-title {
+        padding-bottom: 10px;
+        font-size: 26px;
+        font-weight: 700;
+    }
+    .image-slider__image {
+        /* height: 400px; */
+    }
+    .rightSidebar {
+        /* width: 20%; */
+        /* width: 12%; */
+        /* width: 22%; */
+    }
+    .weather__container {
+        height: 275px;
+    }
+    .weather {
+        margin-top: 15px;
+    }
+    .exchange__container {
+        /* height: 460px; */
     }
 }
 @media (min-width: 1070px) {
     .content {
         /* width: 25%; */
-        width: 55%;
+        /* width: 55%; */
         /* width: 680px; */
         /* width: 100%; */
         /* width: 620px; */
         margin: 0 auto;
     }
     .image-slider__image {
-        height: 400px;
+        /* height: 320px; */
+        height: 260px;
+        /* height: 400px; */
     }
     /* .list-articles li {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
         height: 500px;
+    } */
+    /* div.slider-panel-bottom {
+
+        background: #333671;
+        color: #aaa;
+
+        box-sizing: border-box;
+        overflow: hidden;
+
+        text-align: center;
+
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 5px 10px 5px 10px;
+        box-sizing: border-box;
+        border-radius: 0 0 8px 8px;
     } */
     .list-articles {
         column-count: 2; /* Количество колонок */
@@ -1142,27 +1296,46 @@ ul.list-articles li {
     ul.list-articles li {
         padding-bottom: 0;
     }
+    .rightSidebar {
+        /* width: 20%; */
+        /* width: 12%; */
+        /* width: 22%; */
+    }
+    .weather__container {
+        height: 295px;
+    }
+    .weather {
+        margin-top: 35px;
+    }
 }
 @media (min-width: 1230px) {
     .content {
         /* width: 40%; */
         /* width: 220px; */
     }
+    .image-slider__image {
+        /* height: 320px; */
+        /* height: 400px; */
+        /* height: 170px; */
+        height: 260px;
+    }
     .rightSidebar {
-        width: 15%;
+        /* width: 20%; */
+        /* width: 12%; */
     }
 
     /*Переделываем карусель*/
     /* область показа всех слайдов */
     .image-slider__slide {
         box-sizing: border-box;
-        flex: 1 0 calc(33% - 10px); /* Три слайда в одном ряду с отступами */
-        /* margin-right: 10px; */
+        /* flex: 1 0 calc(50% - 10px); */
+        flex: 1 0 calc(70% - 10px);
+        /* margin-right: 65px; */
         position: relative;
     }
 
     /* блок погоды */
-    .search-box input {
+    /* .search-box input {
         font-size: 22px;
     }
     .search-box input::placeholder {
@@ -1192,16 +1365,17 @@ ul.list-articles li {
     }
     .details p {
         font-size: 25px;
-    }
+    } */
     h1 {
         font-size: 30px;
         }
     h2 {
-        font-size: 28px;
+        font-size: 24px;
         }
     p {
         /* font-size: 22px; */
-        font-size: 15px;
+        /* font-size: 15px; */
+        /* font-size: 13px; */
     }
     h5 {
         font-size: 22px;
@@ -1213,17 +1387,27 @@ ul.list-articles li {
         /* width: 60%; */
     }
     .rightSidebar {
-        width: 12%;
+        /* width: 20%; */
     }
     .image-slider__image {
-        height: 500px;
+        /* height: 500px; */
+        /* height: 180px; */
+        /* height: 190px; */
+        height: 258px;
+    }
+    .image-slider__slide {
+        flex: 1 0 calc(33% - 10px);
+        /* width: calc(33.3% - 10px); */
     }
     p {
-        font-size: 18px;
-        /* font-size: 15px; */
+        /* font-size: 18px; */
+        font-size: 15px;
     }
 }
 @media (min-width: 1680px) {
+    .breaking-news-title {
+        font-size: 28px;
+    }
     .content {
         /* width: 62%; */
         /* width: 33%; */
@@ -1234,18 +1418,24 @@ ul.list-articles li {
         /* width: 90%; */
         /* position: relative;
         overflow: hidden; */
-        box-sizing: border-box;
+        /* box-sizing: border-box; */
         /* margin-right: 10px; */
-    
-        width: calc(33.3% - 10px);
+        /* flex: 1 0 calc(33% - 10px); */
+        /* flex: 1 0 calc(45% - 10px); */
+        flex: 1 0 calc(25% - 10px);
+        /* width: calc(33.3% - 10px); */
     }
     .slider-title {
-        padding-top: 20px;
-        font-size: 35px;
+        /* padding-top: 20px; */
+        font-size: 30px;
         font-weight: 700;
     }
     .image-slider__image {
-        height: 600px;
+        /* height: 600px; */
+        /* height: 300px; */
+        /* height: 220px; */
+        height: 254px;
+        /* width: 100%; */
     }
     /* блок контента */
     .list-articles {
@@ -1256,7 +1446,7 @@ ul.list-articles li {
         padding: 0; */
     }
     /* блок погоды */
-    .search-box input {
+    /* .search-box input {
         font-size: 22px;
     }
     .search-box input::placeholder {
@@ -1286,15 +1476,21 @@ ul.list-articles li {
     }
     .details p {
         font-size: 25px;
+    } */
+    .exchange__container {
+        /* height: 446px; */
     }
     h1 {
-        font-size: 36px;
+        font-size: 22px;
+        /* font-size: 36px; */
         }
     h2 {
-        font-size: 32px;
+        font-size: 22px;
+        /* font-size: 32px; */
         }
     p {
-        font-size: 22px;
+        /* font-size: 22px; */
+        font-size: 17px;
     }
     h5 {
         font-size: 28px;

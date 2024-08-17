@@ -13,6 +13,9 @@
 	<title>{{title}}</title>
 	<!-- предзагрузим шрифт -->
 	<link rel="preload" href="{% static 'news/fonts/roboto-v30-latin-regular.woff2' %}" as="font" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100..900&display=swap" rel="stylesheet">
     <!--дополнения для работы погоды-->
     <link
     rel="stylesheet"
@@ -37,13 +40,13 @@
                     <div class="header__burger">
                         <span></span>
                     </div>
-                    <h5 class="breaking-news-title">Slowpoke news
+                    <p class="breaking-news-title">Slowpoke news
                         {% if request.user.is_authenticated %}
                             <p class="last"> {{user.username}} | <a href="{% url 'logout' %}">Выйти</a></p>
                         {% else %}
                             <p class="last"><a href="{% url 'register' %}">Регистрация</a> | <a href="{% url 'login' %}">Войти</a></p>
                         {% endif %}
-                    </h5>
+                    </p>
                     <!--Убрал пока вывод о сайте и обратная связь, думаю добавить виджетов с курсом валюты и погоду
                     <div class="ticker">
                         <ul class="title__element" id="top-mainmenu">
@@ -65,9 +68,19 @@
     <div class='main'>
         <!--левый блок для отображения меню-->
         <div class='leftSidebar'>
+
             <div class="navigationWrapper">
-                <div class="navigation-header">
-                    <div class="container navigation-header__container">
+                
+                <div class="container navigation-header">
+
+                    <div class="postWrapper">
+                        <h2 class="slider-title">MENU</h2>
+                    </div>
+
+                    {% comment %} <div class="container navigation-header__container"> {% endcomment %}
+                    <div class="navigation-header__container">
+                    {% comment %} <div> {% endcomment %}
+
                         {% comment %} <div class="navigationWrapper"> {% endcomment %}
                             <div class="header__body">
                                 {% comment %} <div class="navigationWrapper"> {% endcomment %}
@@ -144,6 +157,16 @@
                 <div class="container middle-header__container">
                     <div class="headerWrapper">
                         <!--Logo Area-->
+                        <div class="accordion">
+                            <div class="news-panel-upper exchangeAccordion">
+                                {% comment %} <p class="first">Курсы валют</p> {% endcomment %}
+                                <div class="marquee"></div>
+                            </div>
+                            <div class="accordionExchange-content">
+                                <!--контент валюты-->
+                                {% include "news/includes/include_exchange.html" %}
+                            </div>
+                        </div>
                         <div class="logo-area">
                             <a href="{% url 'home' %}">
                                 <img src="{% static 'news/images/top-header.jpg' %}" alt="logo">
@@ -167,7 +190,6 @@
                         <div class="accordionWeather-content">
                             {% comment %} <p>Контент погоды</p> {% endcomment %}
                             {% include "news/includes/include_weather.html" %}
-                            <!--контент валюты-->
                         </div>
                     </div>
                 </div>
@@ -212,7 +234,9 @@
             {% if show_slider_header %} <!--условие чтобы скрывать карусель в шаблонах где она не нужна-->
                 <div class="slider-header">
                     <div class="container slider__container wrapper"><!--wrapper не используется-->
-                        <h2 class="slider-title">Breaking NEWS</h2>
+                        <div class="postWrapper">
+                            <h2 class="slider-title">Breaking NEWS</h2>
+                        </div>
                         <div class="image-slider swiper-container">
                             <div class="image-slider__wrapper swiper-wrapper">
                                 {% for p in posts %}
@@ -288,8 +312,15 @@
         </div>
         <!--правый блок с дополнительной информацией, возможно уберу в будущем-->
         <div class='rightSidebar'>
+            <div class="postWrapper">
+                <h2 class="slider-title">WEATHER</h2>
+            </div>
             {% include "news/includes/include_weather.html" %}
             {% comment %} место для ваоюты {% endcomment %}
+            <div class="postWrapper">
+                <h2 class="slider-title">RATES</h2>
+            </div>
+            {% include "news/includes/include_exchange.html" %}
         </div>
         <br>
 
@@ -308,7 +339,8 @@
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
     <!--Подключаем файл скрипта для работы меню-->
     <script src="{% static 'news/js/script.js' %}"></script>
-    <script src="{% static 'news/js/weather.js' %}"></script>
+    <script src="{% static 'news/js/weather2.js' %}"></script>
+    <script src="{% static 'news/js/exchange-rate2.js' %}"></script>
     <!--Подключаем Swiper карусели с ресурса https://swiperjs.com/get-started-->
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
     <script src="{% static 'news/js/script2.js' %}"></script>
