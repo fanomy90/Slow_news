@@ -2,8 +2,10 @@
     <div class="search-box">
         <i class="fa-solid fa-location-dot"></i>
         <input type="text" placeholder="Введите город" />
-        <button class="fa-solid fa-magnifying-glass"></button>
+        <button class="refresh fa-solid fa-arrows-rotate"></button>
+        <button class="search fa-solid fa-magnifying-glass"></button>
     </div>
+
     <div class="errorCity">
         <p>Ошибка в имени города</p>
     </div>
@@ -28,6 +30,13 @@
                 <p>Ветер</p>
                 </div>
             </div>
+            
         </div>
+        
+    </div>
+    <div class="refresh-box">
+        <p class="last-refresh"></p>
+        {% comment %} <p class="title-refresh">Обновить</p> {% endcomment %}
+        {% comment %} <button class="fa-solid fa-arrows-rotate"></button> {% endcomment %}
     </div>
 </div>
