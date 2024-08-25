@@ -1,8 +1,16 @@
 <div class="exchange__container">
-    <h3>Курсы валют</h3>
-    <br>
+    <div class="exchangeWrapper">
+        <h3>Курсы валют</h3>
+        <p class="rates-refresh"></p>
+    </div>
+    <div class="divider"></div>
     <div class="exchange">
         {% comment %} <ul id="exchangeRate"></ul> {% endcomment %}
         <ul class="exchangeRate"></ul>
+    </div>
+    <div class="divider"></div>
+    <div class="exchange-box">
+        <p>Обновить данные</p>
+        <button class="refresh fa-solid fa-arrows-rotate"></button>
     </div>
 </div>

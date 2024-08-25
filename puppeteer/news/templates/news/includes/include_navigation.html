@@ -1,0 +1,25 @@
+<ul class="header__list navigation__list">
+    {% comment %} велосипед чтобы убрать активный пункт меню для страниц регистрации и входа на сайт котрые не включены в меню сайта {% endcomment %}
+    {% if cat_selected == 0 and request.path != '/login/' and request.path != '/register/' %}
+        <li><button class="header__link selected navigation__item">Все новости</button></li>
+    {% else %}
+        <li><button class="header__link navigation__item" onclick="window.location.href='{% url 'home' %}'">Все новости</button></li>
+    {% endif %}
+    {% for c in cats %}
+        {% if c.news__count > 0 %}
+            {% if c == cat_selected %}
+                <li><button class="header__link selected navigation__item">{{c.name}}</button></li>
+            {% else %}
+                <li><button class="header__link navigation__item" onclick="window.location.href='{{ c.get_absolute_url }}'">{{c.name}}</button></li>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    {% for m in menu %}
+        {% comment %} <li><button class="header__link navigation__item" onclick="window.location.href='{% url m.url_name %}'">{{m.title}}</button></li> {% endcomment %}
+        {% if m == cat_selected %}
+            <li><button class="header__link selected navigation__item">{{m.title}}</button></li>
+        {% else %}
+            <li><button class="header__link navigation__item" onclick="window.location.href='{% url m.url_name %}'">{{m.title}}</button></li>
+        {% endif %}
+    {% endfor %}
+</ul>

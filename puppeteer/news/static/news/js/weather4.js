@@ -41,10 +41,8 @@ function updateWeatherUI(data) {
     document.querySelectorAll(".accordionWind").forEach(accordionWindElement => {
         accordionWindElement.innerHTML = Math.round(data.wind.speed) + " км/ч";
     });
-
     const weatherMain = data.weather[0].main;
     let iconClass = '';
-
     if (weatherMain == "Clear") {
         iconClass = "fa-solid fa-sun";
     } else if (weatherMain == "Rain") {
@@ -56,14 +54,12 @@ function updateWeatherUI(data) {
     } else if (weatherMain == "Clouds") {
         iconClass = "fa-solid fa-cloud";
     }
-
     document.querySelectorAll(".weather-image i").forEach(iconElement => {
         iconElement.className = iconClass;
     });
     document.querySelectorAll(".accordion-weather-image i").forEach(accordionIconElement => {
         accordionIconElement.className = iconClass;
     });
-
     document.querySelectorAll(".weather").forEach(weather => {
         weather.style.display = "block";
     });
@@ -71,14 +67,12 @@ function updateWeatherUI(data) {
         errorCity.style.display = "none";
     });
 }
-
 // Функция для проверки погоды
 async function checkWeather(city) {
     const response = await fetch(apiUrl + city + `&units=metric&appid=${apiKey}`);
     const data = await response.json();
     // console.log(data, "data");
     // console.log(data.name, "city");
-
     if (response.status == 404) {
         document.querySelectorAll(".errorCity").forEach(errorCity => {
             errorCity.style.display = "block";
@@ -88,26 +82,20 @@ async function checkWeather(city) {
         });
         return;
     }
-
     // Сохраняем данные в localStorage
     const currentTime = new Date().toISOString();
     localStorage.setItem('weatherData', JSON.stringify(data));
     // localStorage.setItem('lastCity', city);
     localStorage.setItem('lastCity', data.name);
     localStorage.setItem('lastRefresh', currentTime);
-
     // Обновляем интерфейс с новыми данными
     updateWeatherUI(data);
 }
-
 // Функция для форматирования времени (необязательно, для отображения)
 function formatTime(isoString) {
     const date = new Date(isoString);
     return date.toLocaleString();
 }
-
-
-
 // Обработка кнопки поиска погоды по городам
 searchButton.forEach((button, index) => {
     button.addEventListener("click", () => {
@@ -115,7 +103,6 @@ searchButton.forEach((button, index) => {
         searchInput[index].value = "";
     });
 });
-
 // Обработка нажатия Enter
 searchInput.forEach((input, index) => {
     input.addEventListener("keydown", (e) => {
@@ -125,7 +112,6 @@ searchInput.forEach((input, index) => {
         }
     });
 });
-
 // Обработка кнопки обновления погоды по последнему городу
 refreshWeatherButton.forEach((button, index) => {
     button.addEventListener("click", () => {
@@ -141,13 +127,39 @@ refreshWeatherButton.forEach((button, index) => {
     });
 });
 
-// Аккордеон погоды
+// Обновление прогноза погоды и инициадизация аккордеона погоды
 document.addEventListener('DOMContentLoaded', function () {
     // Проверяем наличие данных в localStorage
+    // const savedWeatherData = localStorage.getItem('weatherData');
+    // if (savedWeatherData) {
+    //     const data = JSON.parse(savedWeatherData);
+    //     updateWeatherUI(data);
+    // }
+    const lastCity = localStorage.getItem('lastCity');
     const savedWeatherData = localStorage.getItem('weatherData');
-    if (savedWeatherData) {
-        const data = JSON.parse(savedWeatherData);
-        updateWeatherUI(data);
+    const lastRefresh = localStorage.getItem('lastRefresh'); // Получаем строку с датой
+    if (lastRefresh) {
+        const lastRefreshTime = new Date(lastRefresh).getTime(); // Преобразуем сохраненное время в миллисекунды
+        const currentTime = new Date().getTime(); // Текущее время в миллисекундах
+        const deltaTime = currentTime - lastRefreshTime; // Разница во времени в миллисекундах
+        // Проверяем, прошло ли больше часа
+        if (deltaTime > 3600000) { // 1 час = 3600000 миллисекунд
+            console.log("Данные погоды устарели - запустим checkWeather");
+            checkWeather(lastCity);
+        } else if (savedWeatherData) {
+            // Если данные еще актуальны и есть в localStorage
+            console.log("Данные уже есть в localStorage - обновим updateWeatherUI");
+            const data = JSON.parse(savedWeatherData);
+            updateWeatherUI(data);
+        } else {
+            console.log("Нет данных для обновления");
+        }
+    } else if (lastCity) {
+        // Если данные обновлялись впервые или отсутствуют данные обновления
+        console.log("Первый запуск или данные отсутствуют - запустим checkWeather");
+        checkWeather(lastCity);
+    } else {
+        console.log("В локальном хранилище отсутствуют данные - введите город");
     }
 
     const accordionButtons = document.querySelectorAll('.news-panel-bottom.weatherAccordion');
