@@ -1,6 +1,10 @@
 const baseURL = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/";
 const historyURL = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@";
 const refreshExchangeButton = document.querySelectorAll(".exchange-box .refresh");
+// данные для формирования курса валют
+let rates = "rub"
+let exc = ["eur", "usd", "cny", "kzt", "gbp", "btc"];
+
 // Функция для обновления интерфейса с данными о курсах валют
 function updateExchangeUI() {
     // получим элемент шаблона
@@ -117,50 +121,51 @@ async function checkExchange(rates, exc) {
         console.error('Ошибка:', error);
     }
 }
-// данные для формирования курса валют
-let rates = "rub"
-let exc = ["eur", "usd", "cny", "kzt", "gbp", "btc"];
 // Запуск функции проверки при загрузке страницы
-window.onload = function() {
-    // checkLocalStorage();
-    exchangeRates = localStorage.getItem('exchangeRates');
-    marqueeContent = localStorage.getItem('marqueeContent');
-    lastRefresh = localStorage.getItem('lastRefresh');
-    // Если данных нет в localStorage или они устарели
-    if (!exchangeRates || !marqueeContent || !lastRefresh || normalizeDate(new Date(lastRefresh)) < normalizeDate(new Date())) {
-        console.log("Данных нет или они устарели - запустим checkExchange");
-        checkExchange(rates, exc);
-    } else {
-        console.log("Данные уже есть в localStorage - обновим updateExchangeUI");
-        updateExchangeUI();
-    }
-
-};
-// Обработка кнопки обновления курса валют
-document.addEventListener('DOMContentLoaded', function() {
-    const refreshExchangeButton = document.querySelectorAll(".exchange-box .refresh");
-    refreshExchangeButton.forEach((button, index) => {
-        button.addEventListener("click", () => {
+// window.onload = function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        // Проверка данных в localStorage
+        let exchangeRates = localStorage.getItem('exchangeRates');
+        let marqueeContent = localStorage.getItem('marqueeContent');
+        let lastRefresh = localStorage.getItem('lastRefresh');
+        
+        if (!exchangeRates || !marqueeContent || !lastRefresh ) {
+            console.log("Данных курса валют нет в локальном хранилище - запустим checkExchange");
             checkExchange(rates, exc);
+        } else {
+            const lastRefreshTime = new Date(lastRefresh).getTime();
+            const currentTime = new Date().getTime();
+            const deltaTime = currentTime - lastRefreshTime;
+    
+            if (deltaTime > 3600000) { // 1 час
+                console.log("Данные курса валют устарели - запустим checkExchange");
+                checkExchange(rates, exc);
+            } else {
+                console.log("Данные курса валют актуальны - обновляем интерфейс");
+                updateExchangeUI();
+            }
+        }
+    
+        // Обработка кнопки обновления курса валют
+        const refreshExchangeButton = document.querySelectorAll(".exchange-box .refresh");
+        refreshExchangeButton.forEach(button => {
+            button.addEventListener("click", () => {
+                console.log("Данные курса валют принудительно обновлены");
+                checkExchange(rates, exc);
+            });
         });
-    });
-});
-// аккордеон курса валют
-document.addEventListener('DOMContentLoaded', function () {
-    // Находим все элементы с классом weatherAccordion
-    const accordionButtons = document.querySelectorAll('.news-panel-upper.exchangeAccordion');
-    accordionButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            // Находим следующий элемент (контент аккордеона)
-            const content = this.nextElementSibling;
-            // Переключаем класс show
-            content.classList.toggle('show');
-            // Закрываем другие аккордеоны
-            document.querySelectorAll('.accordionExchange-content').forEach(c => {
-                if (c !== content) {
-                    c.classList.remove('show');
-                }
+    
+        // Аккордеон курса валют
+        const accordionButtons = document.querySelectorAll('.news-panel-upper.exchangeAccordion');
+        accordionButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const content = this.nextElementSibling;
+                content.classList.toggle('show');
+                document.querySelectorAll('.accordionExchange-content').forEach(c => {
+                    if (c !== content) {
+                        c.classList.remove('show');
+                    }
+                });
             });
         });
     });
-});
