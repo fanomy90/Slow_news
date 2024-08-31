@@ -13,12 +13,24 @@ import requests
 from bs4 import BeautifulSoup
 from django.core.management import call_command
 
+from asgiref.sync import async_to_sync
+from celery import shared_task
+from django.conf import settings
+# from news.tasks import send_task_status
+import asyncio
+from channels.layers import get_channel_layer
+
 url = 'https://cisoclub.ru/category/news/'
 base_url = 'https://cisoclub.ru'
 now = datetime.now()
 output_dir = '/app/puppeteer/SAVE'
 output_path = os.path.join(output_dir, 'news.json')
 output_path_history = os.path.join(output_dir, 'news_history.json')
+
+# обработка для передачи сообщений от задачи
+async def send_task_status(task_id, status, message):
+    channel_layer = get_channel_layer()
+    await channel_layer.group_send(f"task_{task_id}", {"type": "task_status", "status": status, "message": message,})
 
 def load_existing_data(file_path):
     print(str(now) + ' получим исторические данные')
@@ -110,7 +122,16 @@ def parse_date(date_str):
     print(f'Не удалось распознать дату: {date_str}')
     return None
 
-def cisoclub_news():
+# @shared_task(bind=True)
+# def cisoclub_news(task_id):
+def cisoclub_news(task_id):
+    print(str(now) + ' запущена задача с id: ' + task_id)
+    # asyncio.get_event_loop().run_until_complete(
+    #     send_task_status(task_id.request.id, "PROGRESS", f"{now} Запущена задача cisoclub_news")
+    # )
+    # Запуск асинхронного процесса для отправки статуса задачи
+    async_to_sync(send_task_status)(task_id, "PROGRESS", f"{now} Запущена задача cisoclub_news")
+    
     if not os.path.exists(output_dir):
         print(str(now) + ' не найдена директория для сохранения: ' + output_dir)
     try:
@@ -149,6 +170,11 @@ def cisoclub_news():
                         news_links.append(full_url)
 
             print('получены ссылки для анализа: ' + ', '.join(news_links))
+            async_to_sync(send_task_status)(task_id, "PROGRESS", f"{now} получены ссылки для анализа: {(news_links)}")
+            # инициализация счетчика новостей доступных для импорта
+            news_count = 0
+            # инициализация счетчика дубликатов новостей для лога
+            dublicate_count = 0
             for news_link in news_links:
                 post_response = requests.get(news_link, headers=headers)
                 if post_response.status_code == 200:
@@ -168,6 +194,7 @@ def cisoclub_news():
 
                     if date is None:
                         print(f'Пропуск новости с некорректной датой: {date_str}')
+                        async_to_sync(send_task_status)(task_id, "PROGRESS", f'Пропуск новости с некорректной датой: {date_str}')
                         continue  # Пропускаем новость с некорректной датой
 
                     title = post_soup.find("h1", class_='postContentTitle')
@@ -175,6 +202,7 @@ def cisoclub_news():
                         title = title.text
                     else:
                         print(f'Пропуск новости без заголовка: {news_link}')
+                        async_to_sync(send_task_status)(task_id, "PROGRESS", f'Пропуск новости без заголовка: {news_link}')
                         continue  # Пропускаем новость без заголовка
 
                     content = post_soup.find("div", class_='articleContent')
@@ -182,6 +210,7 @@ def cisoclub_news():
                         content = content.text
                     else:
                         print(f'Пропуск новости без содержания: {news_link}')
+                        async_to_sync(send_task_status)(task_id, "PROGRESS", f'Пропуск новости без содержания: {news_link}')
                         continue  # Пропускаем новость без содержания
 
                     author = post_soup.find("div", class_='author_info_text')
@@ -189,6 +218,7 @@ def cisoclub_news():
                         author = author.text
                     else:
                         print(f'Пропуск новости без автора: {news_link}')
+                        async_to_sync(send_task_status)(task_id, "PROGRESS", f'Пропуск новости без автора: {news_link}')
                         continue  # Пропускаем новость без автора
 
                     image = post_soup.find("div", class_='imageWrapper')
@@ -221,18 +251,33 @@ def cisoclub_news():
                         }
                         data.append(news_post)
                         news_pk += 1
+                        news_count += 1
                     else:
+                        dublicate_count += 1
                         print(f'Дубликат найден и пропущен: {title}')
+                        # async_to_sync(send_task_status)(task_id, "PROGRESS", f'{now} Дубликат найден и пропущен: {title}')
                 else:
                     print('полученная ссылка: ' + str(news_link) + ' не доступна для анализа')
+                    async_to_sync(send_task_status)(task_id, "PROGRESS", f'{now} полученная ссылка: {str(news_link)} не доступна для анализа')
                     return False
         else:
             print('ссылка сайта: ' + str(base_url) + ' не доступна для анализа')
+            async_to_sync(send_task_status)(task_id, "PROGRESS", f'ссылка сайта: ' + str(base_url) + ' не доступна для анализа')
             return False
 
+        async_to_sync(send_task_status)(task_id, "PROGRESS", f'{now} Было обнаружено {dublicate_count} дубликатов новостей которые не будут сохранены в файл для импорта')
+        
         with open(output_path, 'w', encoding='utf-8') as json_file:
             json.dump(data, json_file, ensure_ascii=False, indent=2)
-            print(str(now) + ' посты новостей cisoclub сохранены в файл: ' + str(output_path))
+            # print(str(now) + ' посты новостей cisoclub сохранены в файл: ' + str(output_path))
+            # message = f"{now} посты новостей cisoclub сохранены в файл: {output_path}"
+            # async_to_sync(send_task_status)(task_id, "PROGRESS", message)
+
+            # asyncio.get_event_loop().run_until_complete(
+            #     send_task_status(task_id.request.id, "PROGRESS", f"{now} посты новостей cisoclub сохранены в файл: {output_path}")
+            # )
+            # Отправляем сообщение о завершении задачи
+            async_to_sync(send_task_status)(task_id, "PROGRESS", f"{now} в файл: {output_path} сохранено {news_count} постов новостей cisoclub которые можно импортировать")
 
         return True
     except Exception as e:

@@ -5,28 +5,39 @@
     <h2 class="slider-title">{{title}}</h2>
 </div>
 <div class="postWrapper">
-    <!-- Вывод состояния выполнения -->
-    {% comment %} <button class="header__link navigation__item" onclick="startTaskOnClick('task3')">download a cat</button>
-    <br> {% endcomment %}
-    <button class="header__link navigation__item" onclick="startTask('task1')">Start Parsing News</button>
-    <br>
-    <br>
-    <button class="header__link navigation__item" onclick="startTask('task4')">Start Parsing Public</button>
-    <br>
-    <br>
-    <button class="header__link navigation__item" onclick="startTask('task5')">Start Parsing Review</button>
-    <br>
-    <br>
-    <button class="header__link navigation__item" onclick="startTask('task6')">Start Parsing Interviews</button>
-    <br>
-    <br>
-    <button class="header__link navigation__item" onclick="startTask('task2')">Start Import</button>
-    <br>
-    <br>
-    <div>
-        <ul id="tasks"></ul>
+    <div class="tasksManage">
+        <div class="tasksButtons">
+            <div class="scroll-wrapper">
+                <!-- Кнопки вызова задач celery -->
+                {% comment %} <button class="header__link navigation__item" onclick="startTaskOnClick('task3')">download a cat</button>
+                <br> {% endcomment %}
+                <button class="header__link navigation__item" onclick="startTask('task1')">Start Parsing News</button>
+                <br>
+                <br>
+                <button class="header__link navigation__item" onclick="startTask('task4')">Start Parsing Public</button>
+                <br>
+                <br>
+                <button class="header__link navigation__item" onclick="startTask('task5')">Start Parsing Review</button>
+                <br>
+                <br>
+                <button class="header__link navigation__item" onclick="startTask('task6')">Start Parsing Interviews</button>
+                <br>
+                <br>
+                <button class="header__link navigation__item" onclick="startTask('task2')">Start Import</button>
+                <br>
+                <br>
+                <button class="header__link navigation__item" onclick="startTask('task3')">cpu_task2</button>
+            </div>
+        </div>
+        <div class="verticalDivider"></div>
+        <!-- Вывод состояния выполнения -->
+        <div class="tasksConsole">
+            <div class="scroll-wrapper">
+                <ul id="tasks"></ul>
+            </div>
+        </div>
+        <br>
     </div>
-    <br>
 </div>
     {% comment %} тестовая обработка для работы с вебсокетами, нужно после тестов вынести в отдельный js скрипт {% endcomment %}
     <script>
@@ -35,9 +46,16 @@
         // Получаем имя хоста
         const host = window.location.hostname; 
         console.log(host);
+
+        //очистка старого списка
+        function clearTasksList() {
+            tasksList.innerHTML = ''; // Очищаем содержимое списка
+        }
         //запуск задачи через вебсокеты
         async function startTask(taskID) {
             console.log(`Starting task ${taskID}...`);
+            // Очищаем старый список задач перед запуском новой задачи
+            clearTasksList();
             //открываем соединение по вебсокетам, нужно заменить адрес на имя сервиса
             const socket = new WebSocket(`ws://${host}:9000/ws/start_task/`);
             socket.onopen = () => {
@@ -79,33 +97,144 @@
             //делаем проверку на существование элемента списка и при необходимости создаем его
             let taskitem = document.getElementById(data.task_id);
             if (!taskitem) {
+                // Создаем дополнительный элемент <div> с нужным классом
+                let titleTaskDiv = document.createElement("div");
+                titleTaskDiv.classList.add("divider");
+                titleTaskDiv.textContent = "Статус задачи:"; // Добавляем текст или другой контент
+                // Добавляем <div> в <li>
+                tasksList.appendChild(titleTaskDiv);
+                //создаем элемент списка для статуса задачи
                 taskitem = document.createElement("li");
                 taskitem.id = data.task_id;
                 tasksList.appendChild(taskitem);
-                //return;
+                // Создаем дополнительный элемент <div> с нужным классом
+                let bottomTaskDiv = document.createElement("div");
+                bottomTaskDiv.classList.add("divider");
+                //bottomTaskDiv.textContent = "Лог задачи"; // Добавляем текст или другой контент
+                // Добавляем <div> в <li>
+                tasksList.appendChild(bottomTaskDiv);
+                // Создаем дополнительный элемент <div> с нужным классом
+                let textTaskDiv = document.createElement("div");
+                textTaskDiv.textContent = "Лог задачи:"; // Добавляем текст или другой контент
+                // Добавляем <div> в <li>
+                tasksList.appendChild(textTaskDiv);
             }
             //taskitem.id = data.task_id
             if (data.status === 'STARTED') {
+                //console.log("Получен статус задачи:", data.status);
+                //taskitem = document.createElement("li");
+                //taskitem.id = data.task_id;
+                //tasksList.appendChild(taskitem);
+                
                 taskitem.style.color = "red";
                 message = "Запуск";
+                const taskWebSocket = comTask(data.task_id);
+
+                
             }
             if (data.status === 'PROGRESS') {
-                const taskWebSocket = comTask(data.task_id);
-                taskitem.style.color = "purple";
-                message = data.message;
+                console.log("Получен статус задачи:", data.status);
+                // Создаем элемент <li>
+                let taskItem = document.createElement("li");
+                taskItem.id = data.task_id;
+                taskItem.style.color = "purple"; // Пример установки цвета текста
+                taskItem.textContent = data.message; // Устанавливаем текст
+                // Добавляем <li> в список задач
+                tasksList.appendChild(taskItem);
+                // Создаем дополнительный элемент <div> с нужным классом
+                let additionalDiv = document.createElement("div");
+                additionalDiv.classList.add("divider");
+                // Вставляем <div> в родительский элемент
+                // Например, если вы хотите добавить <div> в tasksList
+                tasksList.appendChild(additionalDiv);
+                // Устанавливаем WebSocket для задачи
+                //const taskWebSocket = comTask(data.task_id);
             }
             if (data.status === 'SUCCESS') {
+                console.log("Получен статус задачи:", data.status);
                 taskitem.style.color = "green"
                 message = "Успех";
-                setTimeout(() => deleter(taskitem), 3000);
+                //setTimeout(() => deleter(taskitem), 3000);
             }
             if (data.status === 'FAILURE') {
+                console.log("Получен статус задачи:", data.status);
                 taskitem.style.color = "orange"
                 message = "Ошибка";
-                setTimeout(() => deleter(taskitem), 5000);
+                //setTimeout(() => deleter(taskitem), 5000);
             }
             taskitem.innerHTML = `ID: ${data.task_id} STATUS: ${data.status} MESSAGE: ${message}`;
         }
+
+
+	        // Функция для получения сообщений от задачи для кнопки Start a cpu_task 2
+        async function comTask(task_id) {
+            console.log(`Открываем соединение с задачей ${task_id}...`);
+            const taskSocket = new WebSocket(`ws://${host}:9000/ws/task_status/${task_id}/`);
+            taskSocket.onopen = () => {
+                console.log(`Вебсокет для ${task_id} открыт успешно`);
+            };
+            taskSocket.onmessage = (event) => {
+                //обработка входящих сообщений
+                console.log(`Принято сообщение по вебсокету от ${task_id}:`, event.data);
+                taskitem = document.createElement("li");
+                taskitem.id = task_id;
+                tasksList.appendChild(taskitem);
+
+
+                
+                //передаем данные функции для обновления информации на странице
+                const taskWebSocket = updateStatus(event.data);
+            };
+            taskSocket.onclose = (event) => {
+                console.log(`Вебсокет для ${task_id} закрыт`, event);
+            };
+            taskSocket.onerror = (error) => {
+                console.error("Ошибка WebSocket:", error);
+            };
+            return task_id;
+        }
+        //function updateStatus(statusData) {
+        //    console.log("Обновления статуса задачи:", statusData);
+        //    //парсим полученные сообщения содержащие id и состояние задачи и записываем в переменную data
+        //    const data = JSON.parse(statusData);
+        //    //объявим переменную для хранения сообщения при статусе PROGRESS
+        //    let message;
+        //    //делаем проверку на существование элемента списка и при необходимости создаем его
+        //    let taskitem = document.getElementById(data.task_id);
+        //    if (!taskitem) {
+        //        taskitem = document.createElement("li");
+        //        taskitem.id = data.task_id;
+        //        tasksList.appendChild(taskitem);
+        //        //return;
+        //    }
+        //    //taskitem.id = data.task_id
+        //    if (data.status === 'STARTED') {
+        //        taskitem.style.color = "red";
+        //        message = "Запуск";
+        //    }
+        //    if (data.status === 'PROGRESS') {
+        //        const taskWebSocket = comTask(data.task_id);
+        //        taskitem.style.color = "purple";
+        //        message = data.message;
+        //    }
+        //    if (data.status === 'SUCCESS') {
+        //        taskitem.style.color = "green"
+        //        message = "Успех";
+        //        setTimeout(() => deleter(taskitem), 3000);
+        //    }
+        //    if (data.status === 'FAILURE') {
+        //        taskitem.style.color = "orange"
+        //        message = "Ошибка";
+        //        setTimeout(() => deleter(taskitem), 5000);
+        //    }
+        //    taskitem.innerHTML = `ID: ${data.task_id} STATUS: ${data.status} MESSAGE: ${message}`;
+        //}
+
+
+
+
+
+        
     </script>
 {% endblock %}
 
