@@ -1,3 +1,44 @@
+//инициализируем Swiper
+new Swiper('.image-slider', {
+    slidesPerView: 'auto',
+    centeredSlides: true,
+    spaceBetween: 10,
+    loop: true,
+    autoplay: {
+        delay: 3000,
+        disableOnInteraction: false,
+    },
+    speed: 800,
+    effect: 'slide',
+    fadeEffect: {
+    crossFade: true
+    },
+    //стрелки
+    navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev'
+    },
+    //навигация
+    pagination: {
+        el: '.swiper-pagination',
+        //буллеты
+        clickable: true,
+        //динамические буллеты
+        dynamicBullets: true,
+        //прогрессбар
+        //type: 'progressbar',
+    },
+    //Скролл
+    scrolbar: {
+        el: '.swiper-scrollbar',
+        draggable: true
+    },
+    on: {
+        init: function () {
+            this.slideToLoop(1, 1); // Начать с первого слайда
+        }
+    }
+});
 // работа кнопки бургер меню
 $(document).ready(function() {
     $('.header__burger').click(function(event) {
@@ -29,3 +70,4 @@ document.addEventListener('DOMContentLoaded', function() {
         contentDiv.innerHTML = newHtml;
     });
 });
+

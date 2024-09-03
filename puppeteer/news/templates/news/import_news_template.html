@@ -26,7 +26,7 @@
                 <button class="header__link navigation__item" onclick="startTask('task2')">Start Import</button>
                 <br>
                 <br>
-                <button class="header__link navigation__item" onclick="startTask('task3')">cpu_task2</button>
+                {% comment %} <button class="header__link navigation__item" onclick="startTask('task3')">cpu_task2</button> {% endcomment %}
             </div>
         </div>
         <div class="verticalDivider"></div>
@@ -46,7 +46,6 @@
         // Получаем имя хоста
         const host = window.location.hostname; 
         console.log(host);
-
         //очистка старого списка
         function clearTasksList() {
             tasksList.innerHTML = ''; // Очищаем содержимое списка
@@ -57,7 +56,8 @@
             // Очищаем старый список задач перед запуском новой задачи
             clearTasksList();
             //открываем соединение по вебсокетам, нужно заменить адрес на имя сервиса
-            const socket = new WebSocket(`ws://${host}:9000/ws/start_task/`);
+            //const socket = new WebSocket(`ws://${host}:9000/ws/start_task/`);
+            const socket = new WebSocket(`ws://${host}:80/ws/start_task/`);
             socket.onopen = () => {
                 console.log("WebSocket opened successfully.");
                 //отправляем консумеру сообщение с названием запускаемой задачи, рассмотреть исключение отправки start_task
@@ -125,12 +125,9 @@
                 //taskitem = document.createElement("li");
                 //taskitem.id = data.task_id;
                 //tasksList.appendChild(taskitem);
-                
                 taskitem.style.color = "red";
                 message = "Запуск";
                 const taskWebSocket = comTask(data.task_id);
-
-                
             }
             if (data.status === 'PROGRESS') {
                 console.log("Получен статус задачи:", data.status);
@@ -169,7 +166,8 @@
 	        // Функция для получения сообщений от задачи для кнопки Start a cpu_task 2
         async function comTask(task_id) {
             console.log(`Открываем соединение с задачей ${task_id}...`);
-            const taskSocket = new WebSocket(`ws://${host}:9000/ws/task_status/${task_id}/`);
+            {% comment %} const taskSocket = new WebSocket(`ws://${host}:9000/ws/task_status/${task_id}/`); {% endcomment %}
+            const taskSocket = new WebSocket(`ws://${host}:80/ws/task_status/${task_id}/`);
             taskSocket.onopen = () => {
                 console.log(`Вебсокет для ${task_id} открыт успешно`);
             };

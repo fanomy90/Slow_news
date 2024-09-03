@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views.generic import ListView
-from . import tasks
+# from . import tasks
 from celery.result import AsyncResult
 from rest_framework.views import APIView
 # from news.tasks import cpu_task1, cpu_task2
