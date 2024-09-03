@@ -19,8 +19,6 @@ from django.conf import settings
 # from news.tasks import send_task_status
 import asyncio
 from channels.layers import get_channel_layer
-
-url = 'https://cisoclub.ru/category/news/'
 base_url = 'https://cisoclub.ru'
 now = datetime.now()
 output_dir = '/app/puppeteer/SAVE'
@@ -122,15 +120,12 @@ def parse_date(date_str):
     print(f'Не удалось распознать дату: {date_str}')
     return None
 
-# @shared_task(bind=True)
+@shared_task(bind=True)
 # def cisoclub_news(task_id):
-def cisoclub_news(task_id):
-    print(str(now) + ' запущена задача с id: ' + task_id)
-    # asyncio.get_event_loop().run_until_complete(
-    #     send_task_status(task_id.request.id, "PROGRESS", f"{now} Запущена задача cisoclub_news")
-    # )
+# def cisoclub_news(task_id, mode = "security"):
+def cisoclub_news(self, mode=None):
+    task_id = self.request.id
     # Запуск асинхронного процесса для отправки статуса задачи
-    async_to_sync(send_task_status)(task_id, "PROGRESS", f"{now} Запущена задача cisoclub_news")
     
     if not os.path.exists(output_dir):
         print(str(now) + ' не найдена директория для сохранения: ' + output_dir)
@@ -143,6 +138,33 @@ def cisoclub_news(task_id):
         max_existing_pk = get_max_pk(existing_data)
         existing_titles = get_existing_titles(existing_data)
 
+        # # сделать привязку к разным разделам
+        if mode == "security":
+            url = 'https://cisoclub.ru/category/news/'
+            categoriesPk = 1
+            categoriesName = "Безопасность"
+            categoriesSlug = "security"
+        if mode == "public":
+            url = 'https://cisoclub.ru/category/public/'
+            categoriesPk = 3
+            categoriesName = "Статьи"
+            categoriesSlug = "public"
+        if mode == "review":
+            url = 'https://cisoclub.ru/category/obzory/'
+            categoriesPk = 4
+            categoriesName = "Обзоры"
+            categoriesSlug = "obzory"
+        if mode == "interviews":
+            url = 'https://cisoclub.ru/category/interviews/'
+            categoriesPk = 5
+            categoriesName = "Интервью"
+            categoriesSlug = "interviews"
+        print(str(now) + ' запущена задача ипорта новостей категории ' + categoriesName + ' с id: ' + task_id)
+        # Пауза для обеспечения отправки сообщения
+        # time.sleep(2)
+        async_to_sync(send_task_status)(task_id, "PROGRESS", f"{now} Запущена задача парсинга новостей с сайта {base_url} в разделе {categoriesName} c id {task_id}")
+        # await send_task_status(task_id, "PROGRESS", f"{now} Запущена задача парсинга новостей с сайта {base_url} в разделе {categoriesName} c id {task_id}")
+        # time.sleep(2)
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             src = response.text
@@ -154,10 +176,12 @@ def cisoclub_news(task_id):
             news_pk = max_existing_pk + 1
             categories = {
                 "model": "news.category",
-                "pk": 1,
+                # сделать привязку к разным разделам
+                "pk": categoriesPk,
                 "fields": {
-                    "name": "Безопасность",
-                    "slug": "security"
+                    # сделать привязку к разным разделам
+                    "name": categoriesName,
+                    "slug": categoriesSlug
                 }
             }
             data = [categories] if not existing_data else []
@@ -171,6 +195,7 @@ def cisoclub_news(task_id):
 
             print('получены ссылки для анализа: ' + ', '.join(news_links))
             async_to_sync(send_task_status)(task_id, "PROGRESS", f"{now} получены ссылки для анализа: {(news_links)}")
+            # time.sleep(2)
             # инициализация счетчика новостей доступных для импорта
             news_count = 0
             # инициализация счетчика дубликатов новостей для лога
@@ -243,7 +268,8 @@ def cisoclub_news(task_id):
                                 "time_create": datetime.now().isoformat(),
                                 "time_update": datetime.now().isoformat(),
                                 "is_published": True,
-                                "cat": 1,
+                                # сделать привязку к разным разделам
+                                "cat": categoriesPk,
                                 "date": date.isoformat(),
                                 "author": author,
                                 "image": image_url
@@ -264,9 +290,10 @@ def cisoclub_news(task_id):
             print('ссылка сайта: ' + str(base_url) + ' не доступна для анализа')
             async_to_sync(send_task_status)(task_id, "PROGRESS", f'ссылка сайта: ' + str(base_url) + ' не доступна для анализа')
             return False
+        async_to_sync(send_task_status)(task_id, "PROGRESS", f"{now} Запущена задача парсинга новостей с сайта {base_url} в разделе {categoriesName} c id {task_id}")
 
         async_to_sync(send_task_status)(task_id, "PROGRESS", f'{now} Было обнаружено {dublicate_count} дубликатов новостей которые не будут сохранены в файл для импорта')
-        
+        # time.sleep(2)
         with open(output_path, 'w', encoding='utf-8') as json_file:
             json.dump(data, json_file, ensure_ascii=False, indent=2)
             # print(str(now) + ' посты новостей cisoclub сохранены в файл: ' + str(output_path))
@@ -278,7 +305,7 @@ def cisoclub_news(task_id):
             # )
             # Отправляем сообщение о завершении задачи
             async_to_sync(send_task_status)(task_id, "PROGRESS", f"{now} в файл: {output_path} сохранено {news_count} постов новостей cisoclub которые можно импортировать")
-
+            # time.sleep(2)
         return True
     except Exception as e:
         print(str(now) + ' получение новостей с сайта cisoclub завершилось с ошибкой: ' + str(e))

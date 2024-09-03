@@ -43,39 +43,8 @@ def download_a_news(self):
     asyncio.get_event_loop().run_until_complete(
         send_task_status(self.request.id, "PROGRESS", "запущена задача download_a_news из tasks.py")
     )
-    cisoclub_news(self.request.id)
+    cisoclub_news(self.request.id, "security")
     return True
-
-# @shared_task(bind=True)
-# def download_a_news(self):
-#     asyncio.get_event_loop().run_until_complete(
-#         send_task_status(self.request.id, "PROGRESS", "Задача запущена")
-#     )
-#     cisoclub_news()
-#     return True
-
-# @shared_task(bind=True)
-# def download_a_news(self):
-#     async def send_task_status():
-#         channel_layer = get_channel_layer()
-#         await channel_layer.group_send(
-#             f"task_{self.request.id}",
-#             {"type": "task_status", "status": "PROGRESS", "message": "Задача запущена"},
-#         )
-#     asyncio.get_event_loop().run_until_complete(send_task_status())
-    
-#     cisoclub_news()
-    
-#     async def send_task_status_complete():
-#         channel_layer = get_channel_layer()
-#         await channel_layer.group_send(
-#             f"task_{self.request.id}",
-#             {"type": "task_status", "status": "SUCCESS", "message": "Задача завершена"},
-#         )
-    
-#     asyncio.get_event_loop().run_until_complete(send_task_status_complete())
-    
-#     return True
 
 @shared_task()
 def download_a_post():
