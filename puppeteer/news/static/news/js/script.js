@@ -5,7 +5,7 @@ new Swiper('.image-slider', {
     spaceBetween: 10,
     loop: true,
     autoplay: {
-        delay: 3000,
+        delay: 300000,
         disableOnInteraction: false,
     },
     speed: 800,

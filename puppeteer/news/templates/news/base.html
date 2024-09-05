@@ -214,7 +214,8 @@
                                         {% else %}
                                             <div class="slider-news-title">
                                                 <a href="{{ p.get_absolute_url }}">
-                                                    <h2>{{p.title}}</h2>
+                                                    {% comment %} <h2>{{p.title}}</h2> {% endcomment %}
+                                                    <p>{{p.content|linebreaks|truncatewords:35}}</p>
                                                 </a>
                                             </div>
                                             <div class="slider-panel-bottom">
