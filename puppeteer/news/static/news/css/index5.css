@@ -550,6 +550,23 @@ img.img-article-left.thumb {
 .news-title {
     padding: 10px 20px 0 20px;
 }
+.slider-news-title {
+    padding: 10px 20px 0 20px;
+    /* background-color: rgb(224, 224, 224); */
+    background-color: white;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    height: 302px;
+    border-radius: 0 0 8px 8px;
+}
+
+.slider-news-title h2 {
+    
+    margin-top: -40px;
+}
+
 .news-author {
     padding: 20px;
 }

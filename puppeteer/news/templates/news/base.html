@@ -210,6 +210,16 @@
                                             <div class="slider-panel-bottom">
                                                 <p>{{ p.title|truncatewords:10 }}</p>
                                             </div>
+                                        {% comment %} если нет картинки выведем часть текста {% endcomment %}
+                                        {% else %}
+                                            <div class="slider-news-title">
+                                                <a href="{{ p.get_absolute_url }}">
+                                                    <h2>{{p.title}}</h2>
+                                                </a>
+                                            </div>
+                                            <div class="slider-panel-bottom">
+                                                <p>{{ p.title|truncatewords:10 }}</p>
+                                            </div>
                                         {% endif %}
                                     </div>
                                 {% endfor %}
