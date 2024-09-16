@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 while [ ! -f /etc/letsencrypt/live/slow-news.sytes.net/fullchain.pem ]; do
     echo "Waiting for certbot to generate certificates..."
