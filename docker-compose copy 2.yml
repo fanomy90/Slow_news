@@ -1,0 +1,77 @@
+version: "3.9"
+services:
+  redis:
+    image: redis
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+  cell:
+    restart: always
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    volumes:
+      - /home/projects/SAVE:/yt/news/SAVE
+      # - /home/projects/Slow_news/puppeteer:/yt/puppeteer
+      # - /home/projects/Slow_news/puppeteer/db.sqlite3:/app/puppeteer/db.sqlite3
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      # каталоги статики для nginx
+      - static_volume:/yt/static
+      - media_volume:/yt/media
+      - static_volume:/yt/staticfiles
+    env_file:
+        - .env
+    ports:
+      - "9000:9000"
+    command:
+      #выполняем миграции и запускаем веб сервер
+      # bash -c "./manage.py collectstatic --noinput && ./manage.py makemigrations && ./manage.py migrate && gunicorn -b 0.0.0.0:9000 puppeteer.wsgi:application"
+      bash -c "./manage.py makemigrations && ./manage.py migrate && ./manage.py collectstatic --noinput --ignore admin && gunicorn --timeout 120 -b 0.0.0.0:9000 puppeteer.wsgi:application --log-level debug --access-logfile /yt/access.log --error-logfile /yt/error.log"
+
+  nginx:
+      build:
+        dockerfile: ./Dockerfile
+        context: ./docker/nginx/
+      container_name: yt_nginx
+      image: yt_nginx
+      volumes:
+        - static_volume:/yt/static
+        - media_volume:/yt/media
+        - static_volume:/yt/staticfiles
+      depends_on:
+        - cell
+      ports:
+        - "${NGINX_EXTERNAL_PORT}:80"
+        # - "${NGINX_EXTERNAL_HTTPS_PORT}:443"
+  worker:
+    restart: always
+    build:
+      context: ./
+    volumes:
+      - /home/projects/SAVE:/yt/puppeteer/SAVE
+      - /home/projects/Slow_news/puppeteer/db.sqlite3:/yt/puppeteer/db.sqlite3  # Монтируем SQLite файл
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    # command: ['celery', '--workdir=./puppeteer', '-A', 'puppeteer', 'worker']
+    # command: ['celery', './yt/puppeteer/puppeteer', '-A', 'puppeteer', 'worker']
+    # command: ['celery', '--workdir=/yt/puppeteer', '-A', 'puppeteer', 'worker']
+    command: ['celery', '--workdir=.', '-A', 'puppeteer', 'worker']
+
+    depends_on:
+      - redis
+      - cell
+  # контейнер для мониторинга и управления задачами
+  # flower:
+  #   image: mher/flower
+  #   command: ['flower', '--broker=redis://redis:6379/0', '--port=5555']
+  #   restart: always
+  #   ports:
+  #     - "5555:5555"
+  #   depends_on:
+  #     - redis
+volumes:
+    static_volume:
+    media_volume:

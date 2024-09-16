@@ -166,8 +166,9 @@
 	        // Функция для получения сообщений от задачи для кнопки Start a cpu_task 2
         async function comTask(task_id) {
             console.log(`Открываем соединение с задачей ${task_id}...`);
-            {% comment %} const taskSocket = new WebSocket(`ws://${host}:9000/ws/task_status/${task_id}/`); {% endcomment %}
-            const taskSocket = new WebSocket(`ws://${host}:80/ws/task_status/${task_id}/`);
+            //const taskSocket = new WebSocket(`ws://${host}:9000/ws/task_status/${task_id}/`);
+            //const taskSocket = new WebSocket(`ws://${host}:80/ws/task_status/${task_id}/`);
+            const taskSocket = new WebSocket(`ws://${host}/ws/task_status/${task_id}/`);
             taskSocket.onopen = () => {
                 console.log(`Вебсокет для ${task_id} открыт успешно`);
             };

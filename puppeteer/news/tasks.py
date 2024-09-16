@@ -24,6 +24,8 @@ from django.core.management import call_command #возможный косяк �
 from django.conf import settings #для генерации имен файлов
 import logging
 
+from puppeteer.celery import app
+
 logger = logging.getLogger(__name__)
 # обработка для передачи сообщений от задачи
 async def send_task_status(task_id, status, message):
@@ -38,6 +40,11 @@ def download_a_news(self):
     asyncio.get_event_loop().run_until_complete(
         send_task_status(self.request.id, "PROGRESS", "запущена задача download_a_news из tasks.py")
     )
+    cisoclub_news(self.request.id, "security")
+    return True
+
+@app.task()
+def download_a_news_beat(self):
     cisoclub_news(self.request.id, "security")
     return True
 

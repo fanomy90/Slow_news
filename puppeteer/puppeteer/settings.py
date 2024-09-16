@@ -1,13 +1,20 @@
 import os
 from pathlib import Path
+# from dotenv import load_dotenv
+
+# load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
+APPS_DIR = ROOT_DIR / "puppeteer"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-bg8yodc#l^002n4!oy-gpikrp!c&78pxm#86anqh8wr_f$o#31'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = True
+# DEBUG = False
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
@@ -42,7 +49,13 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "http://95.29.204.228:80",
+    "https://95.29.204.228:443",
     ]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://slow-news.sytes.net',
+]
 
 ROOT_URLCONF = 'puppeteer.urls'
 
@@ -103,12 +116,43 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
+STATIC_ROOT = os.path.join(BASE_DIR, '/yt/static/')
+# STATIC_URL = '/static/'
+# STATIC_ROOT = '/yt/staticfiles'
+# STATICFILES_DIRS = [
+#     '/yt/static',
+# ]
 STATICFILES_DIRS = []
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+
+# STATIC_URL = '/static/'
+# STATIC_ROOT = str(ROOT_DIR / 'static')
+# STATICFILES_DIRS = [
+#     '/yt/static',  # Updated path
+# ]
+# STATICFILES_DIRS = [BASE_DIR / 'puppeteer' / 'static']  # Папка, где Django ищет файлы
+
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_URL = '/static/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_URL = '/media/'
+# STATICFILES_DIRS = []
+
+# STATIC_ROOT = str(ROOT_DIR / "staticfiles")
+# STATIC_URL = "/static/"
+# STATICFILES_DIRS = [
+#     str(APPS_DIR / "static"),
+# ]
+
+# STATICFILES_FINDERS = [
+#     "django.contrib.staticfiles.finders.FileSystemFinder",
+#     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+# ]
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
 
 # настройки celery
 CELERY_BROKER_URL = 'redis://redis:6379'
@@ -116,3 +160,17 @@ CORS_ALLOW_ALL_ORIGINS = True
 CELERY_RESULT_BACKEND = 'redis://redis:6379'
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
+
+# Новая опция для предотвращения предупреждения в Celery 6.0 и выше
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+# периодическая задача
+CELERY_BEAT_SHEDULE = {
+    'download_a_news_beat' : {
+        'task': 'news.tasks.download_a_news_beat',
+        'shedule': 50
+    },
+}

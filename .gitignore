@@ -125,6 +125,8 @@ celerybeat.pid
 .env
 .venv
 env/
+# папка появилась после collectstativ - разобраться нужно ли ее синхронизировать
+puppeteer/static
 venv/
 ENV/
 env.bak/
