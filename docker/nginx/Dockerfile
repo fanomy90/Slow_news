@@ -3,14 +3,15 @@ FROM nginx:latest
 # COPY nginx.conf /etc/nginx/conf.d
 # COPY proxy_params /etc/nginx
 
-# Dockerfile для Nginx
-FROM nginx:latest
+COPY ./tmp/nginx-http.conf /etc/nginx/conf.d/nginx-http.conf
+COPY ./tmp/nginx-https.conf /etc/nginx/conf.d/nginx-https.conf
+COPY ./tmp/nginx-ssl.conf /etc/nginx/conf.d/nginx-ssl.conf
 
 # Копируем конфигурацию Nginx в контейнер
-COPY ./nginx.conf /etc/nginx/nginx.conf
+# COPY ./nginx.conf /etc/nginx/nginx.conf
 
 # Копируем параметры прокси (если нужно)
-COPY ./proxy_params /etc/nginx/proxy_params
+# COPY ./proxy_params /etc/nginx/proxy_params
 
 # Убедитесь, что директивы для Certbot будут корректно работать
 RUN mkdir -p /var/www/html

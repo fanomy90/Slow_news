@@ -76,16 +76,18 @@ services:
   #       - "${NGINX_EXTERNAL_PORT}:80"
         # - "${NGINX_EXTERNAL_HTTPS_PORT}:443"
   nginx:
-    # build:
-      # dockerfile: ./Dockerfile
-      # context: ./docker/nginx/
+    build:
+      dockerfile: ./Dockerfile
+      context: ./docker/nginx/
     container_name: nginx
-    image: nginx:latest
+    # image: nginx:latest
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      # - ./docker/nginx/nginx-ssl.conf:/etc/nginx/conf.d/nginx-ssl.conf
       - ./docker/nginx/certificates:/etc/letsencrypt
       - ./docker/nginx/challenges:/var/www/html
       - static_volume:/yt/static
+      - nginx_volume:/etc/nginx/conf.d
     ports:
       - "80:80"
       - "443:443"
@@ -93,7 +95,7 @@ services:
       - puppeteer
       # - certbot
     # command: ["/bin/bash", "./docker/nginx/wait-cert.sh"]
-    command: ["/bin/bash", "-c", "nginx -g 'daemon off;'"]
+    # command: ["/bin/bash", "-c", "nginx -g 'daemon off;'"]
 
   certbot:
     build:
@@ -102,8 +104,11 @@ services:
     # image: certbot/certbot
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      # - ./docker/nginx/nginx-ssl.conf:/etc/nginx/nginx-ssl.conf
       - ./docker/nginx/certificates:/etc/letsencrypt
       - ./docker/nginx/challenges:/var/www/html
+      - static_volume:/yt/static
+      - nginx_volume:/etc/nginx/conf.d
       - /var/run/docker.sock:/var/run/docker.sock # для перезапуска nginx после обновления сертификатов
       # - ./docker/certbot/restart-nginx.sh:/usr/local/bin/restart-nginx.sh
     # entrypoint: [
@@ -115,8 +120,11 @@ services:
     # entrypoint: ["/bin/sh"]
     depends_on:
       - nginx
-    # environment:
-    #   - DOCKER_HOST=unix:///var/run/docker.sock
+      - puppeteer
+      - celery
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    
 
   celery:
     restart: always
@@ -170,3 +178,4 @@ services:
 volumes:
     static_volume:
     # media_volume:
+    nginx_volume:
