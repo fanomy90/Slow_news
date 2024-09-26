@@ -20,4 +20,4 @@ CMD python manage.py migrate \
     # && python manage.py runserver 0.0.0.0:9000
     # && gunicorn puppeteer.wsgi:application --bind 0.0.0.0:9002
     # && gunicorn --bind 0.0.0.0:9000 --workers 3 --access-logfile - --error-logfile - puppeteer.wsgi:application
-    && gunicorn --bind 0.0.0.0:9000 --workers 3 --access-logfile - --error-logfile - puppeteer.wsgi:application
+    && daphne -b 0.0.0.0 -p 9000 puppeteer.asgi:application

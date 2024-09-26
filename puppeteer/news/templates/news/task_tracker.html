@@ -35,7 +35,8 @@
         async function startTask(taskID) {
             console.log(`Starting task ${taskID}...`);
             //открываем соединение по вебсокетам, нужно заменить адрес на имя сервиса
-            const socket = new WebSocket(`ws://${host}:80/ws/start_task/`);
+            //const socket = new WebSocket(`ws://${host}:80/ws/start_task/`);
+            const socket = new WebSocket(`wss://${host}:443/ws/start_task/`);
             socket.onopen = () => {
                 console.log("WebSocket opened successfully.");
                 //отправляем консумеру сообщение с названием запускаемой задачи, рассмотреть исключение отправки start_task
@@ -69,7 +70,8 @@
         async function comTask(task_id) {
             console.log(`Открываем соединение с задачей ${task_id}...`);
             //const taskSocket = new WebSocket(`ws://${host}:80/ws/task_status/${task_id}/`);
-            const taskSocket = new WebSocket(`ws://${host}/ws/task_status/${task_id}/`);
+            //const taskSocket = new WebSocket(`ws://${host}/ws/task_status/${task_id}/`);
+            const taskSocket = new WebSocket(`wss://${host}:443/ws/task_status/${task_id}/`);
             taskSocket.onopen = () => {
                 console.log(`Вебсокет для ${task_id} открыт успешно`);
             };

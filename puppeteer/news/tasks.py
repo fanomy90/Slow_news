@@ -50,8 +50,13 @@ def download_a_news_beat(self):
 
 @shared_task(bind=True)
 def import_news_task(self):
-    input_dir = settings.BASE_DIR / 'SAVE'
-    input_path = input_dir / 'news.json'
+    # input_dir = settings.BASE_DIR / 'SAVE'
+    # input_path = input_dir / 'news.json'
+
+    input_dir = '/yt/puppeteer/SAVE'
+    input_path = os.path.join(input_dir, 'news.json')
+
+
     # Логирование пути к файлу
     # logger.info(f'Checking if file exists: {input_path}')
     print(f'Checking if file exists: {input_path}')

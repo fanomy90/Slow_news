@@ -11,9 +11,11 @@ class SaveConsumer(AsyncWebsocketConsumer):
     task_status = {}
     # обработка подключения к вебсокетам
     async def connect(self):
+        print("Client connected")
         await self.accept()
     # обработка сообщений полученных по вебсокетам
     async def receive(self, text_data):
+        print(f"Received data: {text_data}")
         text_data_json = json.loads(text_data)
         message_type = text_data_json.get("type")
         task = text_data_json.get("task")

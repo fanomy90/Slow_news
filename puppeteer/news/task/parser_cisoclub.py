@@ -21,7 +21,8 @@ import asyncio
 from channels.layers import get_channel_layer
 base_url = 'https://cisoclub.ru'
 now = datetime.now()
-output_dir = '/app/puppeteer/SAVE'
+# output_dir = '/app/puppeteer/SAVE'
+output_dir = '/yt/puppeteer/SAVE'
 output_path = os.path.join(output_dir, 'news.json')
 output_path_history = os.path.join(output_dir, 'news_history.json')
 
