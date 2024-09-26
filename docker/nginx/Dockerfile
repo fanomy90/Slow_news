@@ -3,9 +3,9 @@ FROM nginx:latest
 # COPY nginx.conf /etc/nginx/conf.d
 # COPY proxy_params /etc/nginx
 
-COPY ./tmp/nginx-http.conf /etc/nginx/conf.d/nginx-http.conf
-COPY ./tmp/nginx-https.conf /etc/nginx/conf.d/nginx-https.conf
-COPY ./tmp/nginx-ssl.conf /etc/nginx/conf.d/nginx-ssl.conf
+# COPY ./tmp/nginx-http.conf /etc/nginx/conf.d/nginx-http.conf
+# COPY ./tmp/nginx-https.conf /etc/nginx/conf.d/nginx-https.conf
+# COPY ./tmp/nginx-ssl.conf /etc/nginx/conf.d/nginx-ssl.conf
 
 # Копируем конфигурацию Nginx в контейнер
 # COPY ./nginx.conf /etc/nginx/nginx.conf

@@ -51,6 +51,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://95.29.204.228:80",
     "https://95.29.204.228:443",
+    "https://slow-news.sytes.net"
+    # "https://slow-news.sytes.net:443"
+    # "https://slow-news.sytes.net:80"
     ]
 
 CSRF_TRUSTED_ORIGINS = [

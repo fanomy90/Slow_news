@@ -87,7 +87,7 @@ services:
       - ./docker/nginx/certificates:/etc/letsencrypt
       - ./docker/nginx/challenges:/var/www/html
       - static_volume:/yt/static
-      - nginx_volume:/etc/nginx/conf.d
+      # - nginx_volume:/etc/nginx/conf.d
     ports:
       - "80:80"
       - "443:443"
@@ -108,18 +108,19 @@ services:
       - ./docker/nginx/certificates:/etc/letsencrypt
       - ./docker/nginx/challenges:/var/www/html
       - static_volume:/yt/static
-      - nginx_volume:/etc/nginx/conf.d
+      # - nginx_volume:/etc/nginx/conf.d
       - /var/run/docker.sock:/var/run/docker.sock # для перезапуска nginx после обновления сертификатов
       # - ./docker/certbot/restart-nginx.sh:/usr/local/bin/restart-nginx.sh
     # entrypoint: [
     #   "certbot", "certonly", "--webroot", "-w", "/var/www/html", "-d", "slow-news.sytes.net",
     #   "--email", "fanomy90@gmail.com", "--agree-tos", "--no-eff-email", "--keep-until-expiring",
     #   "--deploy-hook", "/usr/local/bin/restart-nginx.sh"
-    # ]
-    entrypoint: ["/usr/local/bin/cert_check.sh"]
+    # # ]
+    # entrypoint: ["/usr/local/bin/cert_check.sh"]
+    entrypoint: ["/usr/local/bin/cert_init.sh"]
     # entrypoint: ["/bin/sh"]
     depends_on:
-      - nginx
+      # - nginx
       - puppeteer
       - celery
     environment:
