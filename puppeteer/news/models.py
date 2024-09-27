@@ -3,9 +3,9 @@ from django.urls import reverse
 
 class News(models.Model):
     #через verbose_name задали наименование поля для отображения в админ панеле
-    title = models.CharField(max_length=255, verbose_name='Заголовок')
+    title = models.CharField(max_length=355, verbose_name='Заголовок')
     #добавления использования slug в записях БД
-    slug = models.SlugField(max_length=255, unique=True, db_index=True, verbose_name="URL")
+    slug = models.SlugField(max_length=355, unique=True, db_index=True, verbose_name="URL")
     content = models.TextField(blank=True, verbose_name='Статья')
     time_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     time_update = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
@@ -14,9 +14,9 @@ class News(models.Model):
     cat = models.ForeignKey('Category', on_delete=models.PROTECT, verbose_name='Категория')
     #новые поля
     date = models.DateField(verbose_name='Дата статьи')
-    author = models.CharField(max_length=255, blank=True, null=True, verbose_name='Автор')
+    author = models.CharField(blank=True, null=True, verbose_name='Автор')
     #image = models.ImageField(upload_to='news_image', blank=True, null=True, verbose_name='Изображение')
-    image = models.CharField(max_length=255, blank=True, null=True, verbose_name='Изображение')
+    image = models.CharField(blank=True, null=True, verbose_name='Изображение')
     def __str__(self):
         return self.title
     def get_absolute_url(self):

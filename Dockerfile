@@ -5,12 +5,14 @@ SHELL ["/bin/bash", "-c"]
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 # Обновим pip
-RUN pip install --upgrade pip
+# RUN pip install --upgrade pip
+RUN apt-get update && apt-get install -y curl && apt-get clean
 WORKDIR /yt
-COPY ./puppeteer /yt/
 COPY ./requirements.txt /yt/
 # Установим зависимости проекта
 RUN pip install -r requirements.txt
+
+COPY ./puppeteer /yt/
 
 CMD python manage.py migrate \ 
     # создание суперпользователя

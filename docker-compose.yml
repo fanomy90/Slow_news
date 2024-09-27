@@ -2,11 +2,11 @@ version: "3.9"
 # глобальные настройки окружения
 x-environment-defaults: &environment-defaults
   DEBUG: "True"
-  DB_NAME: "Slow_news"
+  DB_NAME: "slow_news"
   DB_USER: "puppeteer"
   DB_PASSWORD: "puppeteer"
   DB_HOST: "postgres"
-  DB_PORT: 5432
+  DB_PORT: 5433
   CELERY_BROKER_URL: "redis://redis:6379/0"
   CELERY_RESULT_BACKEND: "redis://redis:6379/0"
   SECRET_KEY: "secret"
@@ -20,15 +20,16 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-  # postgres:
-  #   image: postgres:latest
-  #   container_name: postgres
-  #   environment:
-  #     POSTGRES_USER: puppeteer
-  #     POSTGRES_PASSWORD: puppeteer
-  #     POSTGRES_DB: Slow_news
-  #   ports:
-  #     - "5432:5432"
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: puppeteer
+      POSTGRES_PASSWORD: puppeteer
+      POSTGRES_DB: slow_news
+    ports:
+      - "5433:5432"
 
   puppeteer:
     restart: always
@@ -37,8 +38,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "9000:9000"
-    # depends_on:
-    #   - postgres
+    depends_on:
+      - postgres
     environment:
       <<: *environment-defaults
     volumes:
@@ -144,7 +145,7 @@ services:
     depends_on:
       - redis
       - puppeteer
-      #   - postgres
+      - postgres
     environment:
       <<: *environment-defaults
   # периодические фоновые задачи
@@ -164,7 +165,7 @@ services:
     depends_on:
       - redis
       - puppeteer
-      #   - postgres
+      - postgres
     environment:
       <<: *environment-defaults
 
