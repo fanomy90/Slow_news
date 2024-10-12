@@ -6,7 +6,7 @@ x-environment-defaults: &environment-defaults
   DB_USER: "puppeteer"
   DB_PASSWORD: "puppeteer"
   DB_HOST: "postgres"
-  DB_PORT: 5433
+  DB_PORT: 5432
   CELERY_BROKER_URL: "redis://redis:6379/0"
   CELERY_RESULT_BACKEND: "redis://redis:6379/0"
   SECRET_KEY: "secret"
@@ -30,6 +30,8 @@ services:
       POSTGRES_DB: slow_news
     ports:
       - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   puppeteer:
     restart: always
@@ -45,7 +47,9 @@ services:
     volumes:
       - /home/projects/SAVE:/yt/news/SAVE
       # - /home/projects/Slow_news/puppeteer:/yt/puppeteer
+
       # - /home/projects/Slow_news/puppeteer/db.sqlite3:/app/puppeteer/db.sqlite3
+      
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
       # каталоги статики для nginx
@@ -61,21 +65,7 @@ services:
       # bash -c "./manage.py collectstatic --noinput && ./manage.py makemigrations && ./manage.py migrate && gunicorn -b 0.0.0.0:9000 puppeteer.wsgi:application"
       # bash -c "./manage.py makemigrations && ./manage.py migrate && ./manage.py collectstatic --noinput --ignore admin && gunicorn --timeout 120 -b 0.0.0.0:9000 puppeteer.wsgi:application --log-level debug --access-logfile /yt/access.log --error-logfile /yt/error.log"
 
-  # nginx:
-  #     build:
-  #       dockerfile: ./Dockerfile
-  #       context: ./docker/nginx/
-  #     container_name: yt_nginx
-  #     image: yt_nginx
-  #     volumes:
-  #       - static_volume:/yt/static
-  #       - media_volume:/yt/media
-  #       - static_volume:/yt/staticfiles
-  #     depends_on:
-  #       - cell
-  #     ports:
-  #       - "${NGINX_EXTERNAL_PORT}:80"
-        # - "${NGINX_EXTERNAL_HTTPS_PORT}:443"
+
   nginx:
     build:
       dockerfile: ./Dockerfile
@@ -128,6 +118,22 @@ services:
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
     
+  # telbot:
+  #   build:
+  #     dockerfile: ./Dockerfile
+  #     context: ./docker/telbot/
+  #   container_name: telegram_bot
+  #   environment:
+  #     <<: *environment-defaults
+  #   depends_on:
+  #     - puppeteer
+  #     - redis
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - /etc/timezone:/etc/timezone:ro
+  #     - static_volume:/yt/static
+  #   command: ["python", "bot.py"]  # замените на команду для запуска вашего бота
+
 
   celery:
     restart: always
@@ -135,7 +141,7 @@ services:
       context: ./
     volumes:
       - /home/projects/SAVE:/yt/puppeteer/SAVE
-      - /home/projects/Slow_news/puppeteer/db.sqlite3:/yt/puppeteer/db.sqlite3  # Монтируем SQLite файл
+      # - /home/projects/Slow_news/puppeteer/db.sqlite3:/yt/puppeteer/db.sqlite3  # Монтируем SQLite файл
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     # command: ['celery', '--workdir=./puppeteer', '-A', 'puppeteer', 'worker']
@@ -147,7 +153,12 @@ services:
       - puppeteer
       - postgres
     environment:
-      <<: *environment-defaults
+      #<<: *environment-defaults
+      DB_NAME: "slow_news"
+      DB_USER: "puppeteer"
+      DB_PASSWORD: "puppeteer"
+      DB_HOST: "postgres"
+      DB_PORT: 5432  # Убедитесь, что это правильно настроено
   # периодические фоновые задачи
   celery-beat:
     restart: always
@@ -155,7 +166,7 @@ services:
       context: ./
     volumes:
       - /home/projects/SAVE:/yt/puppeteer/SAVE
-      - /home/projects/Slow_news/puppeteer/db.sqlite3:/yt/puppeteer/db.sqlite3  # Монтируем SQLite файл
+      # - /home/projects/Slow_news/puppeteer/db.sqlite3:/yt/puppeteer/db.sqlite3  # Монтируем SQLite файл
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     # command: ['celery', '--workdir=./puppeteer', '-A', 'puppeteer', 'worker']
@@ -167,7 +178,22 @@ services:
       - puppeteer
       - postgres
     environment:
-      <<: *environment-defaults
+      # <<: *environment-defaults
+      DB_NAME: "slow_news"
+      DB_USER: "puppeteer"
+      DB_PASSWORD: "puppeteer"
+      DB_HOST: "postgres"
+      DB_PORT: 5432  # Убедитесь, что это правильно настроено
+
+  # celery-bot:
+  #   build:
+  #     context: ./
+  #   command: ['celery', '--workdir=.', '-A', 'puppeteer', 'worker']
+  #   volumes:
+  #     - /home/projects/SAVE:/yt/puppeteer/SAVE
+  #     - /home/projects/Slow_news/puppeteer/db.sqlite3:/yt/puppeteer/db.sqlite3  # Монтируем SQLite файл
+  #   environment:
+  #     <<: *environment-defaults
 
   # контейнер для мониторинга и управления задачами
   # flower:
@@ -179,6 +205,7 @@ services:
   #   depends_on:
   #     - redis
 volumes:
+    postgres_data:
     static_volume:
     # media_volume:
     nginx_volume:

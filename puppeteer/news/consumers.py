@@ -6,6 +6,7 @@ import asyncio
 from .tasks import cpu_task2, import_news_task
 # from . import tasks
 from news.task.parser_cisoclub import cisoclub_news
+from news.task.parser_cisoclub_beat import cisoclub_news_beat
 # тестовая обработка работы с задачами
 class SaveConsumer(AsyncWebsocketConsumer):
     task_status = {}
@@ -37,6 +38,8 @@ class SaveConsumer(AsyncWebsocketConsumer):
                 cisoclub_news.apply_async(kwargs={'mode': 'review'}, task_id=task_id)
             elif task == "task6":
                 cisoclub_news.apply_async(kwargs={'mode': 'interviews'}, task_id=task_id)
+            elif task == "task7":
+                cisoclub_news_beat.apply_async(kwargs={'mode': 'security'}, task_id=task_id)
             self.task_status[task_id] = "PENDING"
             while True:
                 status = AsyncResult(task_id).state

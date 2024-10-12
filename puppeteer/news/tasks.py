@@ -16,6 +16,7 @@ from django.core.files import File
 from django.utils.text import slugify
 # from news.management.commands import load_test3
 from news.task.parser_cisoclub import cisoclub_news
+from news.task.parser_cisoclub_beat import cisoclub_news_beat
 from django.utils.timezone import now
 
 import os
@@ -26,6 +27,13 @@ import logging
 
 from puppeteer.celery import app
 
+#для бота
+# from news.models import News
+from .slow_bot import run_bot, send_news
+import subprocess
+from celery.exceptions import MaxRetriesExceededError
+from requests.exceptions import Timeout  # Импорт тайм-аута
+
 logger = logging.getLogger(__name__)
 # обработка для передачи сообщений от задачи
 async def send_task_status(task_id, status, message):
@@ -33,20 +41,46 @@ async def send_task_status(task_id, status, message):
     await channel_layer.group_send(f"task_{task_id}", {"type": "task_status", "status": status, "message": message,})
 
 @shared_task(bind=True)
-def download_a_news(self):
-    # task_id = download_a_news.request.id
-    # cisoclub_news(task_id)
+def download_a_news_beat(self):
     # Отправляем статус через универсальную функцию
     asyncio.get_event_loop().run_until_complete(
-        send_task_status(self.request.id, "PROGRESS", "запущена задача download_a_news из tasks.py")
+        send_task_status(self.request.id, "PROGRESS", "запущена SQL задача cisoclub_news_beat из tasks.py")
     )
-    cisoclub_news(self.request.id, "security")
+    print("Запущена фоновая SQL задача парсинга и иморта новостей категории security")
+    # cisoclub_news.apply_async(kwargs={'mode': 'security'}, task_id=self.request.id)
+    cisoclub_news_beat.apply_async(kwargs={'mode': 'security'}, task_id=self.request.id)
+    print("Выполнена фоновая SQL задача парсинга и импорт новостей категории security.")
+    # Задержка на 20 секунд
+    # time.sleep(20)
+    #print("Выполнена фоновая задача парсинга новостей категории security. Запускаем импорт полученных новостей...")
+    # import_news_task.delay()  # Запуск import_news_task как асинхронной задачи
+    # print("Выполнен импорт полученных новостей.")
     return True
 
-@app.task()
-def download_a_news_beat(self):
-    cisoclub_news(self.request.id, "security")
-    return True
+# @app.task()
+# def download_a_news_beat(self):
+#     cisoclub_news(self.request.id, "security")
+#     return True
+
+# @shared_task(bind=True)
+# def download_a_news_beat(self):
+#     print("Запуск фоновой задачи парсинга новостей категории security")
+#     task_id = self.request.id
+#     async_to_sync(send_task_status)(task_id, "START", "Запуск парсинга новостей.")
+#     result = cisoclub_news(self.request.id, "security")
+
+#     cisoclub_news.apply_async(kwargs={'mode': 'security'}, task_id=task_id)
+
+#     async_to_sync(send_task_status)(task_id, "END", "Парсинг завершен.")
+#     print("Выполнена фоновая задача парсинга новостей категории security")
+#     # Запускаем другую задачу после завершения парсинга
+#     # print("Запуск фоновой задачи импорта новостей категории security")
+#     # async_to_sync(send_task_status)(task_id, "START", "Запуск импорта новостей.")
+#     # import_news_task.delay()  # Запуск import_news_task как асинхронной задачи
+#     # async_to_sync(send_task_status)(task_id, "END", "Иморт завершен.")
+#     # print("Выполнена фоновая задача импорта новостей категории security")
+#     return result
+    
 
 @shared_task(bind=True)
 def import_news_task(self):
@@ -79,7 +113,7 @@ def import_news_task(self):
     except Exception as e:
         # logger.error(f'An error occurred: {e}')
         print(f'An error occurred: {e}')
-        async_to_sync(send_task_status)(self.request.id, "PROGRESS", f"{now} в файл: {output_path} сохранено {news_count} постов новостей cisoclub которые можно импортировать")
+        async_to_sync(send_task_status)(self.request.id, "ERROR", f'An error occurred: {e}')
         return f'An error occurred: {e}'
 
 @shared_task
@@ -112,3 +146,62 @@ def cpu_task2(self):
             send_task_status(self.request.id, "FAILURE", f"An error occurred: {str(e)}")
         )
         return {"status": "FAILURE", "message": str(e)}
+
+
+# Задачи для телеграм бота
+# @shared_task
+# def tel_daily_news():
+#     today = datetime.date.today()
+#     news = News.objects.filter(date=today, is_published=True)
+
+#     for article in news:
+#         message = f"Заголовок: {article.title}\nСсылка: {article.get_absolute_url()}\nАвтор: {article.author}"
+#         send_news_to_tel(message)
+@shared_task
+def send_daily_news():
+    #today = datetime.date.today()
+    #news = News.objects.filter(date=today, is_published=True, is_sent=False)  # Фильтруем только те новости, которые не были отправлены
+    
+    # if news.exists():
+    #     send_news(news)
+    # Отправляем новости или сообщение об их отсутствии
+    send_news()
+
+# @shared_task
+# def start_telegram_bot():
+#     run_bot()
+
+# @shared_task
+# def run_bot():
+#     print("Запуск Telegram-бота...")
+#     bot.polling(none_stop=True)
+
+# @shared_task
+# def run_bot():
+    # subprocess.Popen(['python', 'news/slow_bot.py'])
+
+# @shared_task(bind=True, autoretry_for=(subprocess.SubprocessError,), retry_kwargs={'max_retries': 5, 'countdown': 10})
+# def run_bot(self):
+#     try:
+#         # Запуск бота через Popen
+#         subprocess.Popen(['python', 'news/slow_bot.py'])
+#     except subprocess.SubprocessError as exc:
+#         # Если возникает ошибка при запуске процесса, задача повторяется
+#         raise self.retry(exc=exc)
+#     except MaxRetriesExceededError:
+#         # Обработка случая, если превышено количество попыток
+#         print("Превышено максимальное количество попыток запуска бота")
+#         return "Max retries exceeded"
+
+# убрал чтобы запуск шел через Supervisor.
+# @shared_task(bind=True, autoretry_for=(Timeout,), retry_kwargs={'max_retries': 5, 'countdown': 10})
+# def run_bot(self):
+#     try:
+#         # subprocess.Popen(['python', 'news/slow_bot.py'])
+#         # Запуск бота как отдельного процесса
+#         subprocess.Popen(['python', 'news/slow_bot.py'], start_new_session=True)
+#     except Timeout as exc:
+#         raise self.retry(exc=exc)
+#     except MaxRetriesExceededError:
+#         print("Превышено максимальное количество попыток запуска бота")
+#         return "Max retries exceeded"

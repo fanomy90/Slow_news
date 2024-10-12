@@ -3,13 +3,14 @@ from django.urls import reverse
 
 class News(models.Model):
     #через verbose_name задали наименование поля для отображения в админ панеле
-    title = models.CharField(max_length=355, verbose_name='Заголовок')
+    title = models.CharField(max_length=455, verbose_name='Заголовок')
     #добавления использования slug в записях БД
-    slug = models.SlugField(max_length=355, unique=True, db_index=True, verbose_name="URL")
+    slug = models.SlugField(max_length=455, unique=True, db_index=True, verbose_name="URL")
     content = models.TextField(blank=True, verbose_name='Статья')
     time_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     time_update = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
     is_published = models.BooleanField(default=True, verbose_name='Опубликовано')
+    is_sent = models.BooleanField(default=False, verbose_name='В соцсети')  # Новое поле для отслеживания отправки новостей
     #внешний ключ для связи с первичной моделью Category как cat_id (id добавляется атоматом)
     cat = models.ForeignKey('Category', on_delete=models.PROTECT, verbose_name='Категория')
     #новые поля
@@ -43,3 +44,50 @@ class Category(models.Model):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категория'
         ordering = ['id']
+
+#пользователи телеграм
+class TelegramSubscriber(models.Model):
+    #данные пользователя
+    chat_id = models.CharField(max_length=255, unique=True)
+    username = models.CharField(max_length=255, blank=True, null=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+    #настройки подписки
+    subscribed_to_categories = models.ManyToManyField('Category', blank=True, verbose_name='Подписка на категориии новостей')
+
+
+    #подписка на прогноз погоды
+    #subscribed_to_weather = models.BooleanField(default=False, verbose_name='Подписка на прогноз погоды')
+    # Город для получения прогноза погоды
+    subscribed_weather_city = models.CharField(max_length=255, verbose_name='Город', blank=True, null=True)
+    #подписка на курсы валют
+    #subscribed_to_currency = models.BooleanField(default=False, verbose_name='Подписка на курс валют')
+    # Город для получения прогноза погоды
+    subscribed_currency = models.CharField(max_length=255, verbose_name='Валюта', blank=True, null=True)
+
+    # Настройки формата сообщений (полные или сокращенные)
+    MESSAGE_FORMAT_CHOICES = [
+        ('full', 'Полные сообщения'),
+        ('short', 'Сокращенные сообщения'),
+    ]
+    message_format = models.CharField(
+        choices=MESSAGE_FORMAT_CHOICES,
+        default='short',
+        verbose_name='Формат сообщений'
+    )
+    # Периодичность рассылки
+    FREQUENCY_CHOICES = [
+        ('every_hour', 'Каждый час'),
+        ('every_3hour', 'Каждые 3 часа'),
+        ('every_6hour', 'Каждые 6 часов'),
+        ('every_9hour', 'Каждые 9 часов'),
+        ('every_12hour', 'Каждые 12 часов'),
+        ('daily', 'Ежедневно'),
+    ]
+    frequency_sending = models.CharField(
+        choices=FREQUENCY_CHOICES,
+        default='every_hour',
+        verbose_name='Частота рассылки'
+    )
+
+    def __str__(self):
+        return f'{self.username} ({self.chat_id})'

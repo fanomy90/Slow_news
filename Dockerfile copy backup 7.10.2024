@@ -11,13 +11,8 @@ WORKDIR /yt
 COPY ./requirements.txt /yt/
 # Установим зависимости проекта
 RUN pip install -r requirements.txt
-# Установка supervisord
-RUN apt-get install -y supervisor
-# Копируем конфигурацию supervisord
-COPY ./supervisord.conf /etc/supervisor/supervisord.conf
 
 COPY ./puppeteer /yt/
-RUN chmod +x /yt/news/slow_bot.py
 
 CMD python manage.py migrate \ 
     # создание суперпользователя
@@ -25,9 +20,9 @@ CMD python manage.py migrate \
     # && python manage.py initialize_db \
     && python manage.py collectstatic --noinput \
     # && python manage.py runserver 0.0.0.0:9000
+    # && gunicorn puppeteer.wsgi:application --bind 0.0.0.0:9002
     # && gunicorn --bind 0.0.0.0:9000 --workers 3 --access-logfile - --error-logfile - puppeteer.wsgi:application
     && python manage.py makemigrations \
     && python manage.py migrate \
     # && python news/slow_bot.py & \
-    # && daphne -b 0.0.0.0 -p 9000 puppeteer.asgi:application
-    && supervisord -c /etc/supervisor/supervisord.conf
+    && daphne -b 0.0.0.0 -p 9000 puppeteer.asgi:application

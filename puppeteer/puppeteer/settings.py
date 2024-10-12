@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from celery.schedules import crontab
 # from dotenv import load_dotenv
 
 # load_dotenv()
@@ -33,6 +34,7 @@ INSTALLED_APPS = [
     'rest_framework',
 	'news',
     'channels',
+    # 'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -88,13 +90,14 @@ CHANNEL_LAYERS = {
         },
     },
 }
-
+#sqlite3
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+#postgre
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -123,11 +126,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
 USE_TZ = True
+TIME_ZONE = 'Europe/Moscow'
 
 STATIC_URL = '/static/'
 # STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
@@ -181,9 +185,24 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 # периодическая задача
-CELERY_BEAT_SHEDULE = {
-    'download_a_news_beat' : {
+# CELERY_BEAT_SHEDULE = {
+#     'download_a_news_beat' : {
+#         'task': 'news.tasks.download_a_news_beat',
+#         'shedule': 50
+#     },
+# }
+
+CELERY_BEAT_SCHEDULE = {
+    'import-daily-news-every-hour': {
         'task': 'news.tasks.download_a_news_beat',
-        'shedule': 50
+        # 'schedule': crontab(hour=9, minute=0),  # Каждое утро в 9:00
+        'schedule': crontab(minute=0, hour='*/3'),  # Каждый час
+        #'schedule': crontab(minute='*/5'),  #Каждые 15 минут
+    },
+    'send-daily-news-every-hour': {
+        'task': 'news.tasks.send_daily_news',
+        # 'schedule': crontab(hour=9, minute=0),  # Каждое утро в 9:00
+        'schedule': crontab(minute=5, hour='*/1'),  # Каждый час
+        #'schedule': crontab(minute='*/2'),  # Каждые 2 минут
     },
 }
