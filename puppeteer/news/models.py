@@ -45,6 +45,45 @@ class Category(models.Model):
         verbose_name_plural = 'Категория'
         ordering = ['id']
 
+class Currency(models.Model):
+    currency_name = models.CharField(max_length=255, unique=True, verbose_name='Название валюты')
+    symbol = models.CharField(max_length=10, verbose_name='Символ валюты', blank=True, null=True)  # Например, $, €, ₽
+
+    def __str__(self):
+        return self.currency_name
+
+    class Meta:
+        verbose_name = 'Валюта'
+        verbose_name_plural = 'Валюты'
+        ordering = ['currency_name']
+
+class CurrencyRate(models.Model):
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, related_name='rates', verbose_name='Валюта')
+    date = models.DateField(verbose_name='Дата курса')  # Дата, за которую указан курс
+    rate = models.DecimalField(max_digits=10, decimal_places=4, verbose_name='Курс валюты')
+
+    def __str__(self):
+        return f'{self.currency} - {self.rate} (на {self.date})'
+
+    class Meta:
+        verbose_name = 'Курс валюты'
+        verbose_name_plural = 'Курсы валют'
+        ordering = ['-date']  # Сортировка по дате (от новых к старым)
+        unique_together = ['currency', 'date']  # Уникальность записи на определенную дату для конкретной валюты
+class City(models.Model):
+    city_name = models.CharField(max_length=100, verbose_name="Название города")
+    city_latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True, verbose_name="Широта")
+    city_longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True, verbose_name="Долгота")
+    city_created_at = models.DateTimeField(auto_now_add=True)
+    city_updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.city_name
+    class Meta:
+        verbose_name = "Город"
+        verbose_name_plural = "Города"
+        ordering = ['city_name']
+
 #пользователи телеграм
 class TelegramSubscriber(models.Model):
     #данные пользователя
@@ -52,18 +91,12 @@ class TelegramSubscriber(models.Model):
     username = models.CharField(max_length=255, blank=True, null=True)
     subscribed_at = models.DateTimeField(auto_now_add=True)
     #настройки подписки
-    subscribed_to_categories = models.ManyToManyField('Category', blank=True, verbose_name='Подписка на категориии новостей')
-
-
-    #подписка на прогноз погоды
-    #subscribed_to_weather = models.BooleanField(default=False, verbose_name='Подписка на прогноз погоды')
-    # Город для получения прогноза погоды
-    subscribed_weather_city = models.CharField(max_length=255, verbose_name='Город', blank=True, null=True)
-    #подписка на курсы валют
-    #subscribed_to_currency = models.BooleanField(default=False, verbose_name='Подписка на курс валют')
-    # Город для получения прогноза погоды
-    subscribed_currency = models.CharField(max_length=255, verbose_name='Валюта', blank=True, null=True)
-
+    news_sent = models.BooleanField(default=False, verbose_name='Подписка на новости')
+    subscribed_to_categories = models.ManyToManyField('Category', blank=True, verbose_name='Категориии новостей')
+    currency_sent = models.BooleanField(default=False, verbose_name='Подписка на валюты')
+    subscribed_to_currency = models.ManyToManyField('Currency', blank=True, verbose_name='Валюты для курсов')
+    weather_sent = models.BooleanField(default=False, verbose_name='Подписка на прогноз погоды')
+    subscribed_weather_city = models.ForeignKey ('City', on_delete=models.SET_NULL, blank=True, null=True, verbose_name='Города для прогноза')
     # Настройки формата сообщений (полные или сокращенные)
     MESSAGE_FORMAT_CHOICES = [
         ('full', 'Полные сообщения'),
@@ -91,3 +124,8 @@ class TelegramSubscriber(models.Model):
 
     def __str__(self):
         return f'{self.username} ({self.chat_id})'
+
+    class Meta:
+        verbose_name = 'Подписчик Telegram'
+        verbose_name_plural = 'Подписчики Telegram'
+        ordering = ['subscribed_at']

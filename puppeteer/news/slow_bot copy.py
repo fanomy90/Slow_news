@@ -2,18 +2,14 @@ import os
 from pathlib import Path
 import telebot
 from telebot import types, TeleBot
-
-
+import requests
+import datetime
 import sys
-import time
-import logging
 
-#проверить и убрать
+import logging
 # from news.templatetags.news_tags import trim_author
 from django.utils.html import linebreaks
 from django.template.defaultfilters import truncatewords
-import datetime
-import requests
 
 # Получаем путь к корневой директории проекта
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -49,29 +45,6 @@ def trim_content(content, word_limit=35):
     # Разбиваем текст на слова и обрезаем до word_limit
     words = content.split()[:word_limit]
     return ' '.join(words)  # Объединяем слова обратно в строку
-
-#функция отправки сообщений с повторной отправкой в случае ошибок
-def send_message_with_retry(subscriber, message, image=None, retries=3, delay=3):
-    for attempt in range(retries):
-        try:
-            if image:
-                print(f"Отправка сообщения c картинкой пользователю {subscriber.chat_id}, попытка {attempt + 1}")
-                logging.info(f"Отправка сообщения c картинкой пользователю {subscriber.chat_id}, попытка {attempt + 1}")
-                bot.send_photo(chat_id=subscriber.chat_id, photo=image, caption=message, parse_mode="HTML")
-            else:
-                print(f"Отправка простого сообщения без картинки пользователю {subscriber.chat_id}, попытка {attempt + 1}")
-                logging.info(f"Отправка простого сообщения без картинки пользователю {subscriber.chat_id}, попытка {attempt + 1}")
-                bot.send_message(subscriber.chat_id, message, parse_mode="HTML")
-            return True  # Сообщение успешно отправлено, выход из цикла
-        except Exception as e:
-            print(f"Ошибка при отправке сообщения пользователю {subscriber.chat_id}: {e}, попытка {attempt + 1}")
-            logging.info(f"Ошибка при отправке сообщения пользователю {subscriber.chat_id}: {e}, попытка {attempt + 1}")
-            if attempt + 1 < retries:  # Если не последняя попытка, делаем паузу перед следующей
-                print(f"Задержка {delay} секунд перед повторной попыткой...")
-                time.sleep(delay)  # Задержка в несколько секунд
-            else:
-                return False  # Если достигли лимита попыток
-# если есть новости которые можно отправить то формируем сообщение
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
@@ -131,30 +104,28 @@ def send_news():
     news = News.objects.filter(is_published=True, is_sent=False)
     print(f"Найдено новостей для отправки: {news.count()}")
     logging.info(f"Найдено новостей для отправки: {news.count()}")
-
-    # #функция отправки сообщений с повторной отправкой в случае ошибок
-    # def send_message_with_retry(subscriber, message, image=None, retries=3, delay=3):
-    #     for attempt in range(retries):
-    #         try:
-    #             if image:
-    #                 print(f"Отправка сообщения c картинкой пользователю {subscriber.chat_id}, попытка {attempt + 1}")
-    #                 logging.info(f"Отправка сообщения c картинкой пользователю {subscriber.chat_id}, попытка {attempt + 1}")
-    #                 bot.send_photo(chat_id=subscriber.chat_id, photo=image, caption=message, parse_mode="HTML")
-    #             else:
-    #                 print(f"Отправка простого сообщения без картинки пользователю {subscriber.chat_id}, попытка {attempt + 1}")
-    #                 logging.info(f"Отправка простого сообщения без картинки пользователю {subscriber.chat_id}, попытка {attempt + 1}")
-    #                 bot.send_message(subscriber.chat_id, message, parse_mode="HTML")
-    #             return True  # Сообщение успешно отправлено, выход из цикла
-    #         except Exception as e:
-    #             print(f"Ошибка при отправке сообщения пользователю {subscriber.chat_id}: {e}, попытка {attempt + 1}")
-    #             logging.info(f"Ошибка при отправке сообщения пользователю {subscriber.chat_id}: {e}, попытка {attempt + 1}")
-    #             if attempt + 1 < retries:  # Если не последняя попытка, делаем паузу перед следующей
-    #                 print(f"Задержка {delay} секунд перед повторной попыткой...")
-    #                 time.sleep(delay)  # Задержка в несколько секунд
-    #             else:
-    #                 return False  # Если достигли лимита попыток
-    # # если есть новости которые можно отправить то формируем сообщение
-
+    #функция отправки сообщений с повторной отправкой в случае ошибок
+    def send_message_with_retry(subscriber, message, image=None, retries=3, delay=3):
+        for attempt in range(retries):
+            try:
+                if image:
+                    print(f"Отправка сообщения c картинкой пользователю {subscriber.chat_id}, попытка {attempt + 1}")
+                    logging.info(f"Отправка сообщения c картинкой пользователю {subscriber.chat_id}, попытка {attempt + 1}")
+                    bot.send_photo(chat_id=subscriber.chat_id, photo=image, caption=message, parse_mode="HTML")
+                else:
+                    print(f"Отправка простого сообщения без картинки пользователю {subscriber.chat_id}, попытка {attempt + 1}")
+                    logging.info(f"Отправка простого сообщения без картинки пользователю {subscriber.chat_id}, попытка {attempt + 1}")
+                    bot.send_message(subscriber.chat_id, message, parse_mode="HTML")
+                return True  # Сообщение успешно отправлено, выход из цикла
+            except Exception as e:
+                print(f"Ошибка при отправке сообщения пользователю {subscriber.chat_id}: {e}, попытка {attempt + 1}")
+                logging.info(f"Ошибка при отправке сообщения пользователю {subscriber.chat_id}: {e}, попытка {attempt + 1}")
+                if attempt + 1 < retries:  # Если не последняя попытка, делаем паузу перед следующей
+                    print(f"Задержка {delay} секунд перед повторной попыткой...")
+                    time.sleep(delay)  # Задержка в несколько секунд
+                else:
+                    return False  # Если достигли лимита попыток
+    # если есть новости которые можно отправить то формируем сообщение
     if news.exists():
         for article in news:
             if not article.is_sent:
@@ -178,21 +149,6 @@ def send_news():
                         f'{content}\n' \
                         f'{author}'
                         # f'{article.author}'
-                # for subscriber in subscribers:
-                #     try:
-                #         #проверка что в сообщении есть ссылка на картинку
-                #         if article.image:
-                #             print(f"Отправка сообщения c картинкой пользователю {subscriber.chat_id}")
-                #             logging.info(f"Отправка сообщения c картинкой пользователю {subscriber.chat_id}")
-                #             bot.send_photo(chat_id=subscriber.chat_id, photo=article.image, caption=message, parse_mode="HTML")
-                #         else:
-                #             print(f"Отправка простого сообщения без картинки пользователю {subscriber.chat_id}")
-                #             logging.info(f"Отправка простого сообщения без картинки пользователю {subscriber.chat_id}")
-                #             bot.send_message(subscriber.chat_id, message, parse_mode="HTML")
-                #     except Exception as e:
-                #         print(f"Ошибка при отправке сообщения пользователю {subscriber.chat_id}: {e}")
-                #         logging.info(f"Ошибка при отправке сообщения пользователю {subscriber.chat_id}: {e}")
-
                 #цикл отправки сообщений по пользователям с переотправлением в случае ошибок
                 for subscriber in subscribers:
                     image = article.image if article.image else None

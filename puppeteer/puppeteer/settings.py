@@ -205,4 +205,31 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute=5, hour='*/1'),  # Каждый час
         #'schedule': crontab(minute='*/2'),  # Каждые 2 минут
     },
+
+    'send-news-every-hour': {
+        'task': 'news.tasks.send_news_every_hour',
+        # 'schedule': crontab(hour=9, minute=0),  # Каждое утро в 9:00
+        'schedule': crontab(minute=10, hour='*/1'),  # Каждый час
+        #'schedule': crontab(minute='*/2'),  # Каждые 2 минут
+    },
+    # 'send_news_every_3hour': {
+    #     'task': 'news.tasks.send_news_every_3hour',
+    #     'schedule': crontab(minute=5, hour='*/3'),  # Каждые 3 часа
+    # },
+    # 'send_news_every_6hour': {
+    #     'task': 'news.tasks.send_news_every_6hour',
+    #     'schedule': crontab(minute=5, hour='*/6'),  # Каждые 6 часа
+    # },
+    # 'send_news_every_9hour': {
+    #     'task': 'news.tasks.send_news_every_9hour',
+    #     'schedule': crontab(minute=5, hour='*/9'),  # Каждые 9 часов
+    # },
+    # 'send_news_every_12hour': {
+    #     'task': 'news.tasks.send_news_every_12hour',
+    #     'schedule': crontab(minute=5, hour='*/12'),  # Каждые 12 часов
+    # },
+    # 'send_news_daily': {
+    #     'task': 'news.tasks.send_news_daily',
+    #     'schedule': crontab(minute=5, hour='*/24'),  # Каждые 24 часов
+    # },
 }

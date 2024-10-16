@@ -17,6 +17,9 @@ from django.utils.text import slugify
 # from news.management.commands import load_test3
 from news.task.parser_cisoclub import cisoclub_news
 from news.task.parser_cisoclub_beat import cisoclub_news_beat
+
+from news.task.slow_bot_news import send_news_frequency
+
 from django.utils.timezone import now
 
 import os
@@ -166,6 +169,25 @@ def send_daily_news():
     #     send_news(news)
     # Отправляем новости или сообщение об их отсутствии
     send_news()
+
+@shared_task
+def send_news_every_hour():
+    send_news_frequency("every_hour")
+@shared_task
+def send_news_every_3hour():
+    send_news_frequency("every_3hour")
+@shared_task
+def send_news_every_6hour():
+    send_news_frequency("every_6hour")
+@shared_task
+def send_news_every_9hour():
+    send_news_frequency("every_9hour")
+@shared_task
+def send_news_every_12hour():
+    send_news_frequency("every_12hour")
+@shared_task
+def send_news_daily():
+    send_news_frequency("daily")
 
 # @shared_task
 # def start_telegram_bot():
