@@ -22,8 +22,8 @@ from channels.layers import get_channel_layer
 
 from django.db.models import Max
 # from news.models import News
-
-
+from django.db import transaction
+import time
 
 base_url = 'https://cisoclub.ru'
 now = datetime.now()
@@ -35,26 +35,8 @@ output_path_history = os.path.join(output_dir, 'news_history.json')
 # обработка для передачи сообщений от задачи
 async def send_task_status(task_id, status, message):
     channel_layer = get_channel_layer()
+    #await channel_layer.group_send(f"{now} task_{task_id}", {"type": "task_status", "status": status, "message": message,})
     await channel_layer.group_send(f"task_{task_id}", {"type": "task_status", "status": status, "message": message,})
-
-# переделать на запрос к бд
-# def load_existing_data(file_path):
-#     print(str(now) + ' получим исторические данные')
-#     try:
-#         call_command('dumpdata', 'news', indent=2, output=file_path)
-#         print(str(now) + ' получены исторически данные: ' + file_path)
-#         with open(file_path, 'r', encoding='utf-8') as json_file:
-#             return json.load(json_file)
-#     except Exception as e:
-#         print(str(now) + ' получение исторических данных завершилось с ошибкой: ' + str(e))
-#         return []
-
-# def get_max_pk(data):
-#     max_pk = 0
-#     for item in data:
-#         if 'pk' in item and isinstance(item['pk'], int) and item['pk'] > max_pk:
-#             max_pk = item['pk']
-#     return max_pk
 
 # получение максимального pk новостных записей напрямую из бд
 def get_max_pk():
@@ -63,23 +45,13 @@ def get_max_pk():
     print(str(now) + ' получение max_pk из БД ' + str(max_pk))
     return max_pk if max_pk is not None else 0
 
-
-# def get_existing_titles(data):
-#     titles = set()
-#     for item in data:
-#         if item['model'] == 'news.news' and 'fields' in item and 'title' in item['fields']:
-#             titles.add(item['fields']['title'])
-#     return titles
-
 # получение заголовков новостей напрямую из бд
 def get_existing_titles():
     from news.models import News
     existing_titles = News.objects.values_list('title', flat=True)
     return list(existing_titles)
 
-
 # обработка даты
-
 def aware_date(naive_datetime):
     # Преобразование наивной даты в "сознательную"
     aware_datetime = make_aware(naive_datetime)
@@ -87,12 +59,10 @@ def aware_date(naive_datetime):
 
 def parse_date(date_str):
     date_str = date_str.strip()
-    print(f'Парсинг даты: {date_str}')
-
+    print(f'{now} Парсинг даты: {date_str}')
     if not date_str:
-        print('Дата не найдена, возвращаем None')
+        print(f'{now} Дата не найдена, возвращаем None')
         return None
-
     if 'timeago' in date_str:
         datetime_match = re.search(r'datetime="([^"]+)"', date_str)
         if datetime_match:
@@ -102,7 +72,7 @@ def parse_date(date_str):
                 parsed_date = datetime.strptime(datetime_str, '%a %b %d %Y %H:%M:%S')
                 return parsed_date.date()
             except ValueError as e:
-                print(f'Ошибка парсинга времени из timeago: {e}')
+                print(f'{now} Ошибка парсинга времени из timeago: {e}')
                 return None
     # проверка часов нгазад
     hours_ago_match = re.search(r'(\d+)\sчас(а|ов)\sназад', date_str)
@@ -112,15 +82,15 @@ def parse_date(date_str):
     # проверка на время
     time_match = re.search(r'\b\d{2}:\d{2}\b', date_str)
     if time_match:
-        print('проверка на Время')
+        print(f'{now} проверка на Время')
         return datetime.now().date()
     # проверка на сегодня
     if "Сегодня" in date_str:
-        print('проверка на Сегодня')
+        print(f'{now} проверка на Сегодня')
         return datetime.now().date()
     # проверка на вчера
     if "Вчера" in date_str:
-        print('проверка на Вчера')
+        print(f'{now} проверка на Вчера')
         return (datetime.now() - timedelta(days=1)).date()
     # проверка на формат типа "26 июля"
     month_mapping = {
@@ -130,7 +100,7 @@ def parse_date(date_str):
     }
     date_match = re.search(r'(\d{1,2})\s([а-яА-Я]+)', date_str)
     if date_match:
-        print('проверка на Дату формата "дд месяц"')
+        print(f'{now} проверка на Дату формата "дд месяц"')
         day = int(date_match.group(1))
         month_str = date_match.group(2)
         month = month_mapping.get(month_str)
@@ -141,16 +111,17 @@ def parse_date(date_str):
     # Проверка на формат "дд.мм.гггг" (например, 21.12.2023)
     dot_date_match = re.search(r'\b(\d{2})\.(\d{2})\.(\d{4})\b', date_str)
     if dot_date_match:
-        print('проверка на Формат ДД.ММ.ГГГГ')
+        print(f'{now} проверка на Формат ДД.ММ.ГГГГ')
         day = int(dot_date_match.group(1))
         month = int(dot_date_match.group(2))
         year = int(dot_date_match.group(3))
         return datetime(year, month, day).date()
 
-    print(f'Не удалось распознать дату: {date_str}')
+    print(f'{now} Не удалось распознать дату: {date_str}')
     return None
 
-@shared_task(bind=True)
+#@shared_task(bind=True)
+@shared_task(bind=True, time_limit=60, soft_time_limit=30)
 # def cisoclub_news(task_id):
 # def cisoclub_news(task_id, mode = "security"):
 def cisoclub_news_beat(self, mode=None):
@@ -164,12 +135,6 @@ def cisoclub_news_beat(self, mode=None):
         headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36 OPR/68.0.3618.125'
         }
-
-        # переделать на запрос к бд
-        # existing_data = load_existing_data(output_path_history)
-        # max_existing_pk = get_max_pk(existing_data)
-        # existing_titles = get_existing_titles(existing_data)
-
         # получение данных напрямую из БД
         max_existing_pk = get_max_pk()
         existing_titles = get_existing_titles()
@@ -201,7 +166,20 @@ def cisoclub_news_beat(self, mode=None):
         async_to_sync(send_task_status)(task_id, "PROGRESS", f"{now} Запущена SQL задача парсинга новостей с сайта {base_url} в разделе {categoriesName} c id {task_id}")
         # await send_task_status(task_id, "PROGRESS", f"{now} Запущена задача парсинга новостей с сайта {base_url} в разделе {categoriesName} c id {task_id}")
         # time.sleep(2)
-        response = requests.get(url, headers=headers)
+
+        #старый запроса к сайту с повторными попытками
+        #response = requests.get(url, headers=headers, timeout=10)
+        #вариант запроса к сайту с повторными попытками
+        for _ in range(3):
+            try:
+                response = requests.get(url, headers=headers, timeout=10)
+                break
+            except RequestException as e:
+                print(f"{now} Ошибка при обращении к сайту новостей: {e}")
+                time.sleep(5)
+        else:
+            print(f"{now} Запрос данных с сайта новостей не удался после 3 попыток, проверьте доступность сайта")
+
         if response.status_code == 200:
             src = response.text
             soup = BeautifulSoup(src, 'lxml')
@@ -229,7 +207,7 @@ def cisoclub_news_beat(self, mode=None):
                         full_url = base_url + href
                         news_links.append(full_url)
 
-            print('получены ссылки для анализа: ' + ', '.join(news_links))
+            print(f'{now} получены ссылки для анализа: ' + ', '.join(news_links))
             async_to_sync(send_task_status)(task_id, "PROGRESS", f"{now} получены ссылки для анализа: {(news_links)}")
             # time.sleep(2)
             # инициализация счетчика новостей доступных для импорта
@@ -237,7 +215,21 @@ def cisoclub_news_beat(self, mode=None):
             # инициализация счетчика дубликатов новостей для лога
             dublicate_count = 0
             for news_link in news_links:
-                post_response = requests.get(news_link, headers=headers)
+
+                #старый запроса к сайту с повторными попытками
+                #post_response = requests.get(news_link, headers=headers, timeout=10)
+
+                #вариант запроса к сайту с повторными попытками
+                for _ in range(3):
+                    try:
+                        post_response = requests.get(news_link, headers=headers, timeout=10)
+                        break
+                    except RequestException as e:
+                        print(f"{now} Ошибка при обращении к сайту новостей: {e}")
+                        time.sleep(5)
+                else:
+                    print(f"{now} Запрос данных с сайта новостей не удался после 3 попыток, проверьте доступность сайта")
+
                 if post_response.status_code == 200:
                     post_src = post_response.text
                     post_soup = BeautifulSoup(post_src, 'lxml')
@@ -254,7 +246,7 @@ def cisoclub_news_beat(self, mode=None):
                     date = parse_date(date_str)
 
                     if date is None:
-                        print(f'Пропуск новости с некорректной датой: {date_str}')
+                        print(f'{now} Пропуск новости с некорректной датой: {date_str}')
                         async_to_sync(send_task_status)(task_id, "PROGRESS", f'Пропуск новости с некорректной датой: {date_str}')
                         continue  # Пропускаем новость с некорректной датой
 
@@ -262,7 +254,7 @@ def cisoclub_news_beat(self, mode=None):
                     if title:
                         title = title.text
                     else:
-                        print(f'Пропуск новости без заголовка: {news_link}')
+                        print(f'{now} Пропуск новости без заголовка: {news_link}')
                         async_to_sync(send_task_status)(task_id, "PROGRESS", f'Пропуск новости без заголовка: {news_link}')
                         continue  # Пропускаем новость без заголовка
 
@@ -270,7 +262,7 @@ def cisoclub_news_beat(self, mode=None):
                     if content:
                         content = content.text
                     else:
-                        print(f'Пропуск новости без содержания: {news_link}')
+                        print(f'{now} Пропуск новости без содержания: {news_link}')
                         async_to_sync(send_task_status)(task_id, "PROGRESS", f'Пропуск новости без содержания: {news_link}')
                         continue  # Пропускаем новость без содержания
 
@@ -278,7 +270,7 @@ def cisoclub_news_beat(self, mode=None):
                     if author:
                         author = author.text
                     else:
-                        print(f'Пропуск новости без автора: {news_link}')
+                        print(f'{now} Пропуск новости без автора: {news_link}')
                         async_to_sync(send_task_status)(task_id, "PROGRESS", f'Пропуск новости без автора: {news_link}')
                         continue  # Пропускаем новость без автора
 
@@ -314,7 +306,7 @@ def cisoclub_news_beat(self, mode=None):
                             image=image_url
                         )
                         # Сохранение объекта в базу данных
-                        print(f'Сохранение в базу поста: {news_post}')
+                        print(f'{now} Сохранение в базу поста: {news_post}')
                         async_to_sync(send_task_status)(task_id, "PROGRESS", f'{now} Сохранение в базу поста: {news_post}')
                         
                         
@@ -323,31 +315,29 @@ def cisoclub_news_beat(self, mode=None):
                         # except Exception as e:
                         #     print(f"Ошибка сохранения: {e}")
                         from django.db import transaction
-                        with transaction.atomic():
+                        with transaction.atomic(using='default', savepoint=True):
                             news_post.save()
-
-
                         # data.append(news_post)
                         news_pk += 1
                         news_count += 1
                     else:
                         dublicate_count += 1
-                        print(f'Дубликат найден и пропущен: {title}')
+                        print(f'{now} Дубликат найден и пропущен: {title}')
                         # async_to_sync(send_task_status)(task_id, "PROGRESS", f'{now} Дубликат найден и пропущен: {title}')
                 else:
-                    print('полученная ссылка: ' + str(news_link) + ' не доступна для анализа')
+                    print(f'{now} полученная ссылка: {news_link} не доступна для анализа')
                     async_to_sync(send_task_status)(task_id, "PROGRESS", f'{now} полученная ссылка: {str(news_link)} не доступна для анализа')
                     return False
         else:
-            print('ссылка сайта: ' + str(base_url) + ' не доступна для анализа')
+            print(f'{now} ссылка сайта: {base_url} не доступна для анализа')
             async_to_sync(send_task_status)(task_id, "PROGRESS", f'ссылка сайта: ' + str(base_url) + ' не доступна для анализа')
             return False
         async_to_sync(send_task_status)(task_id, "PROGRESS", f"{now} Запущена SQL задача парсинга новостей с сайта {base_url} в разделе {categoriesName} c id {task_id}")
 
         async_to_sync(send_task_status)(task_id, "PROGRESS", f'{now} Добавлено {news_count} новостей, обнаружено {dublicate_count} дубликатов новостей которые не были загружены в базу данных')
 
-        print(f'Было добавлено {news_count} новостей')
-        print(f'Пропущено {dublicate_count} дубликатов')
+        print(f'{now} Было добавлено {news_count} новостей')
+        print(f'{now} Пропущено {dublicate_count} дубликатов')
         # time.sleep(2)
         # with open(output_path, 'w', encoding='utf-8') as json_file:
         #     json.dump(data, json_file, ensure_ascii=False, indent=2)
@@ -355,6 +345,10 @@ def cisoclub_news_beat(self, mode=None):
         #     async_to_sync(send_task_status)(task_id, "PROGRESS", f"{now} в файл: {output_path} сохранено {news_count} постов новостей cisoclub которые можно импортировать")
         #     # time.sleep(2)
         return True
+
     except Exception as e:
-        print(str(now) + ' получение новостей с сайта cisoclub завершилось с ошибкой: ' + str(e))
-        return f'An error occurred: {e}'
+        print(f'{now} получение новостей с сайта cisoclub завершилось с ошибкой: {e}')
+        return f'{now} An error occurred: {e}'
+            # Обработка мягкого лимита (например, частичное завершение)
+    except SoftTimeLimitExceeded:
+        print(f"{now} Задача превысила мягкий лимит времени и будет завершена.")

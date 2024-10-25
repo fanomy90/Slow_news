@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 import sys
 import logging
-
+import datetime
+from django.db import transaction
 # Получаем путь к корневой директории проекта
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Добавляем корневую директорию в PYTHONPATH
@@ -11,17 +12,9 @@ sys.path.append(project_root)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'puppeteer.settings')
 import django
 django.setup()
-
-# Настройка логирования
-logging.basicConfig(level=logging.INFO, 
-                    format='%(asctime)s - %(levelname)s - %(message)s',
-                    handlers=[
-                        logging.FileHandler("/var/log/bot.log"),
-                        # logging.StreamHandler()
-                        logging.StreamHandler(sys.stdout),  # вывод логов в stdout
-    ]
-)
-
+now = datetime.datetime.now()
+#ограничение на максимальную длинну сообщения
+MAX_MESSAGE_LENGTH = 4096
 #обрезка автора
 def trim_author(text):
     if text:
@@ -30,7 +23,6 @@ def trim_author(text):
         if index != -1:
             return text[:index]
     return text
-
 #обрезка текста новости
 def trim_content(content, word_limit=35):
     if not content:
@@ -39,102 +31,117 @@ def trim_content(content, word_limit=35):
     # Разбиваем текст на слова и обрезаем до word_limit
     words = content.split()[:word_limit]
     return ' '.join(words)  # Объединяем слова обратно в строку
+#функция для разбивки сообщения на несколько для обхода лимита телеграмм
+def split_message(full_content, max_length=MAX_MESSAGE_LENGTH):
+    while full_content:
+        split_at = full_content[:max_length].rfind(' ')
+        if split_at == -1:
+            split_at = max_length
+        yield full_content[:split_at]
+        full_content = full_content[split_at:].strip()
 
 #получить подписчиков на новости
 # def get_subscribers_to_news(subscribers, category, message_format):
 #     return subscribers.filter(subscribed_to_categories=category, message_format=message_format)
 
 #сборка сообщения перед отправкой
-def prepare_and_send_news(subscribers, article, category_style, content, image, message_format):
+def prepare_and_send_news(subscribers, article, category_style, content, image, message_format, is_first_message=True):
     from news.slow_bot import send_message_with_retry
     for subscriber in subscribers:
-        message = (
-            f'{category_style} <b>{article.cat.name} {article.date}</b>\n\n'
-            f'<a href="https://slow-news.sytes.net{article.get_absolute_url()}">{article.title}</a>\n'
-            f'{content}\n'
-            f'{trim_author(article.author)}'
-        )
-        print(f"Отправка {message_format} категории {article.cat.name} новостного сообщения пользователю {subscriber.chat_id}")
-        logging.info(f"Отправка {message_format} категории {article.cat.name} новостного сообщения пользователю {subscriber.chat_id}")
-        # Получаем функцию для рассылки через отложенный импорт
-        success = send_message_with_retry(subscriber, message, image, retries=3, delay=3)
-        if success:
-            print(f"Новостное сообщение {message_format} категории {article.cat.name} успешно отправлено пользователю {subscriber.chat_id}")
-            logging.info(f"Новостное сообщение {message_format} категории {article.cat.name} успешно отправлено пользователю {subscriber.chat_id}")
+        # Формируем сообщение в зависимости от типа сообщения
+        if message_format == "short":
+            message = (
+                f'{category_style} <b>{article.cat.name} {article.date}</b>\n\n'
+                f'<a href="https://slow-news.sytes.net{article.get_absolute_url()}">{article.title}</a>\n'
+                f'{content}\n'
+                f'{trim_author(article.author)}'
+            )
+            print(f"{now} Отправка короткого сообщения категории {article.cat.name} пользователю {subscriber.username}")
+
+        elif is_first_message:
+            message = (
+                f'{category_style} <b>{article.cat.name} {article.date}</b>\n\n'
+                f'<a href="https://slow-news.sytes.net{article.get_absolute_url()}">{article.title}</a>\n'
+                f'{trim_author(article.author)}'
+            )
+            print(f"{now} Отправка первой части полного сообщения категории {article.cat.name} пользователю {subscriber.username}")
+
         else:
-            print(f"Ошибка при отправке {message_format} категории {article.cat.name} новостного сообщения пользователю {subscriber.chat_id}")
-            logging.error(f"Ошибка при отправке {message_format} категории {article.cat.name} новостного сообщения пользователю {subscriber.chat_id}")
-        # if not success:
-        #     logging.error(f"Ошибка при отправке {message_format} сообщения пользователю {subscriber.chat_id}")
+            message = content
+            print(f"{now} Отправка текстовой части полного сообщения категории {article.cat.name} пользователю {subscriber.username}")
+
+        # Отправляем сообщение
+        success = send_message_with_retry(subscriber, message, image if is_first_message else None, retries=3, delay=3)
+        if success:
+            print(f"{now} Сообщение категории {article.cat.name} успешно отправлено пользователю {subscriber.username}")
+        else:
+            print(f"{now} Ошибка при отправке сообщения категории {article.cat.name} пользователю {subscriber.username}")
 
 
-# def send_news(type_message="news", frequency_sending="every_hour"):
+
 def send_news_frequency(frequency_sending="every_hour"):
-    #получаем подписчиков по частатое рассылки через отложенный импорт
     from news.models import TelegramSubscriber, News, Category
+
+    # Получаем всех подписчиков с указанной частотой рассылки
     subscribers = TelegramSubscriber.objects.filter(frequency_sending=frequency_sending)
 
-    if subscribers.exists():
-        #стилизация категории новости
-        categories = Category.objects.all()
-        category_styles = {
-            'Безопасность': '🔒',
-            'Статьи': '📄',
-            'Обзоры': '🔍',
-            'Интервью': '🗣️',
-        }
-        #прокоходим по категориям новостей
-        for category in categories:
-            cat_news_subscribers = subscribers.filter(subscribed_to_categories=category)
-            if cat_news_subscribers.exists():
-                #получаем новости категории
-                news = News.objects.filter(cat=category, is_published=True, is_sent=False)
-                if news.exists():
-                    for article in news:
-                        category_style = category_styles.get(category.name, 'i')
-                        image = article.image if article.image else None
-                        # Подписчики для коротких новостей по категории
-                        #short_news_subscribers = get_subscribers_to_news(subscribers, category, "short")
-                        short_cat_news_subscribers = cat_news_subscribers.filter(message_format="short")
-                        if short_cat_news_subscribers.exists():
-                            short_content = (trim_content(article.content, word_limit=35) + '...')
-                            #Подготовим и отправим сокращенные сообщения новостей по категориям
-                            prepare_and_send_news(short_cat_news_subscribers, article, category_style, short_content, image, "short")
-                            
-                        else:
-                            print(f"С периодичностью {frequency_sending} в категории {category.name} нет подписчиков на короткие сообщения")
-                            logging.info(f"С периодичностью {frequency_sending} в категории {category.name} нет подписчиков на короткие сообщения")
+    if not subscribers.exists():
+        print(f"{now} На рассылку новостей с периодичностью {frequency_sending} нет подписчиков")
+        return
 
-                        # Подписчики для полных новостей по категории
-                        #full_news_subscribers = get_subscribers_to_news(subscribers, category, "full")
-                        full_cat_news_subscribers = cat_news_subscribers.filter(message_format="full")
+    # Стилизация категории новостей
+    category_styles = {
+        'Безопасность': '🔒',
+        'Статьи': '📄',
+        'Обзоры': '🔍',
+        'Интервью': '🗣️',
+    }
 
-                        if full_cat_news_subscribers.exists():
-                            full_content = article.content
-                            #Подготовим и отправим сокращенные сообщения новостей по категориям
-                            prepare_and_send_news(full_cat_news_subscribers, article, category_style, full_content, image, "full")
-                        else:
-                            print(f"С периодичностью {frequency_sending} в категории {category.name} нет подписчиков на длинные сообщения")
-                            logging.info(f"С периодичностью {frequency_sending} в категории {category.name} нет подписчиков на длинные сообщения")
-                        # Отмечаем новость как отправленную
-                        try:
-                            article.is_sent = True
-                            article.save()
-                            print(f"Новость {article.title} помечена как отправленная.")
-                            logging.info(f"Новость {article.title} помечена как отправленная.")
-                        except Exception as e:
-                            print(f"Ошибка при сохранении новости {article.title}: {str(e)}")
-                            logging.error(f"Ошибка при сохранении новости {article.title}: {str(e)}")
+    # Разделяем подписчиков по формату сообщений (короткие или полные)
+    short_news_subscribers = subscribers.filter(message_format="short")
+    full_news_subscribers = subscribers.filter(message_format="full")
 
-                        # article.is_sent = True
-                        # article.save()
-                        # logging.info(f"Новость {article.title} помечена как отправленная.")
-                else:
-                    print(f"В категории {category.name} нет новостей для отправки.")
-                    logging.info(f"В категории {category.name} нет новостей для отправки.")
-            else:
-                print(f"На рассылку новостей с периодичностью {frequency_sending} в категории {category.name} нет подписчиков")
-                logging.info(f"На рассылку новостей с периодичностью {frequency_sending} в категории {category.name} нет подписчиков")
-    else:
-        print(f"На рассылку новостей с периодичностью {frequency_sending} нет подписчиков")
-        logging.info(f"На рассылку новостей с периодичностью {frequency_sending} нет подписчиков")
+    # Получаем все категории
+    categories = Category.objects.all()
+
+    # Прокручиваем категории и обрабатываем новости
+    for category in categories:
+        # Получаем новости, которые ещё не отправлены
+        news_articles = News.objects.filter(cat=category, is_published=True, is_sent=False)
+
+        if not news_articles.exists():
+            print(f"{now} В категории {category.name} нет новостей для отправки.")
+            continue
+
+        category_style = category_styles.get(category.name, 'i')
+        
+        # Отправляем короткие новости
+        if short_news_subscribers.exists():
+            for article in news_articles:
+                short_content = trim_content(article.content, word_limit=35) + '...'
+                image = article.image if article.image else None
+                prepare_and_send_news(short_news_subscribers, article, category_style, short_content, image, "short")
+        else:
+            print(f"{now} С периодичностью {frequency_sending} в категории {category.name} нет подписчиков на короткие сообщения")
+
+        # Отправляем полные новости
+        if full_news_subscribers.exists():
+            for article in news_articles:
+                full_content = article.content
+                image = article.image if article.image else None
+                # Отправляем первое сообщение с метаданными и картинкой
+                prepare_and_send_news(full_news_subscribers, article, category_style, '', image, "full", is_first_message=True)
+                # Разбиваем текст на части, если он превышает лимит
+                for part in split_message(full_content):
+                    prepare_and_send_news(full_news_subscribers, article, category_style, part, None, "full", is_first_message=False)
+        else:
+            print(f"{now} С периодичностью {frequency_sending} в категории {category.name} нет подписчиков на длинные сообщения")
+
+        # Отмечаем новости как отправленные
+        for article in news_articles:
+            try:
+                article.is_sent = True
+                article.save()
+                print(f"{now} Новость {article.title} помечена как отправленная.")
+            except Exception as e:
+                print(f"{now} Ошибка при сохранении новости {article.title}: {str(e)}")

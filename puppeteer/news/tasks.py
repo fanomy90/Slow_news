@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 async def send_task_status(task_id, status, message):
     channel_layer = get_channel_layer()
     await channel_layer.group_send(f"task_{task_id}", {"type": "task_status", "status": status, "message": message,})
-
+#Задача для запуска парсинга категории Безопасность
 @shared_task(bind=True)
 def download_a_news_beat(self):
     # Отправляем статус через универсальную функцию
@@ -59,6 +59,41 @@ def download_a_news_beat(self):
     # import_news_task.delay()  # Запуск import_news_task как асинхронной задачи
     # print("Выполнен импорт полученных новостей.")
     return True
+#Задача для запуска парсинга категории Обзоры
+@shared_task(bind=True)
+def download_a_obzory_beat(self):
+    # Отправляем статус через универсальную функцию
+    asyncio.get_event_loop().run_until_complete(
+        send_task_status(self.request.id, "PROGRESS", "запущена SQL задача cisoclub_news_beat из tasks.py")
+    )
+    print("Запущена фоновая SQL задача парсинга и иморта новостей категории security")
+    cisoclub_news_beat.apply_async(kwargs={'mode': 'review'}, task_id=self.request.id)
+    print("Выполнена фоновая SQL задача парсинга и импорт новостей категории security.")
+    return True
+#Задача для запуска парсинга категории Статьи
+@shared_task(bind=True)
+def download_a_public_beat(self):
+    # Отправляем статус через универсальную функцию
+    asyncio.get_event_loop().run_until_complete(
+        send_task_status(self.request.id, "PROGRESS", "запущена SQL задача cisoclub_news_beat из tasks.py")
+    )
+    print("Запущена фоновая SQL задача парсинга и иморта новостей категории security")
+    cisoclub_news_beat.apply_async(kwargs={'mode': 'public'}, task_id=self.request.id)
+    print("Выполнена фоновая SQL задача парсинга и импорт новостей категории security.")
+    return True
+#Задача для запуска парсинга категории Интервью
+@shared_task(bind=True)
+def download_a_interviews_beat(self):
+    # Отправляем статус через универсальную функцию
+    asyncio.get_event_loop().run_until_complete(
+        send_task_status(self.request.id, "PROGRESS", "запущена SQL задача cisoclub_news_beat из tasks.py")
+    )
+    print("Запущена фоновая SQL задача парсинга и иморта новостей категории security")
+    cisoclub_news_beat.apply_async(kwargs={'mode': 'interviews'}, task_id=self.request.id)
+    print("Выполнена фоновая SQL задача парсинга и импорт новостей категории security.")
+    return True
+
+
 
 # @app.task()
 # def download_a_news_beat(self):
@@ -189,41 +224,3 @@ def send_news_every_12hour():
 def send_news_daily():
     send_news_frequency("daily")
 
-# @shared_task
-# def start_telegram_bot():
-#     run_bot()
-
-# @shared_task
-# def run_bot():
-#     print("Запуск Telegram-бота...")
-#     bot.polling(none_stop=True)
-
-# @shared_task
-# def run_bot():
-    # subprocess.Popen(['python', 'news/slow_bot.py'])
-
-# @shared_task(bind=True, autoretry_for=(subprocess.SubprocessError,), retry_kwargs={'max_retries': 5, 'countdown': 10})
-# def run_bot(self):
-#     try:
-#         # Запуск бота через Popen
-#         subprocess.Popen(['python', 'news/slow_bot.py'])
-#     except subprocess.SubprocessError as exc:
-#         # Если возникает ошибка при запуске процесса, задача повторяется
-#         raise self.retry(exc=exc)
-#     except MaxRetriesExceededError:
-#         # Обработка случая, если превышено количество попыток
-#         print("Превышено максимальное количество попыток запуска бота")
-#         return "Max retries exceeded"
-
-# убрал чтобы запуск шел через Supervisor.
-# @shared_task(bind=True, autoretry_for=(Timeout,), retry_kwargs={'max_retries': 5, 'countdown': 10})
-# def run_bot(self):
-#     try:
-#         # subprocess.Popen(['python', 'news/slow_bot.py'])
-#         # Запуск бота как отдельного процесса
-#         subprocess.Popen(['python', 'news/slow_bot.py'], start_new_session=True)
-#     except Timeout as exc:
-#         raise self.retry(exc=exc)
-#     except MaxRetriesExceededError:
-#         print("Превышено максимальное количество попыток запуска бота")
-#         return "Max retries exceeded"

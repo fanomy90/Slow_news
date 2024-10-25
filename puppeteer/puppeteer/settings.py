@@ -193,23 +193,42 @@ CELERY_TIMEZONE = 'UTC'
 # }
 
 CELERY_BEAT_SCHEDULE = {
+    #задача импорта категории Безопасность
     'import-daily-news-every-hour': {
         'task': 'news.tasks.download_a_news_beat',
         # 'schedule': crontab(hour=9, minute=0),  # Каждое утро в 9:00
-        'schedule': crontab(minute=0, hour='*/3'),  # Каждый час
+        'schedule': crontab(minute=0, hour='*/3'),  # Каждый 3 часа
         #'schedule': crontab(minute='*/5'),  #Каждые 15 минут
     },
-    'send-daily-news-every-hour': {
-        'task': 'news.tasks.send_daily_news',
+    #задача импорта категории Обзоры
+    'import-daily-obzory-every-hour': {
+        'task': 'news.tasks.download_a_obzory_beat',
         # 'schedule': crontab(hour=9, minute=0),  # Каждое утро в 9:00
-        'schedule': crontab(minute=5, hour='*/1'),  # Каждый час
-        #'schedule': crontab(minute='*/2'),  # Каждые 2 минут
+        'schedule': crontab(minute=30, hour='*/24'),
     },
-
+    #задача импорта категории Статьи
+    'import-daily-public-every-hour': {
+        'task': 'news.tasks.download_a_public_beat',
+        # 'schedule': crontab(hour=9, minute=0),  # Каждое утро в 9:00
+        'schedule': crontab(minute=40, hour='*/24'),
+    },
+    #задача импорта категории Интервью
+    'import-daily-interviews': {
+        'task': 'news.tasks.download_a_interviews_beat',
+        # 'schedule': crontab(hour=9, minute=0),  # Каждое утро в 9:00
+        'schedule': crontab(minute=50, hour='*/24'),
+    },
+    # 'send-daily-news-every-hour': {
+    #     'task': 'news.tasks.send_daily_news',
+    #     # 'schedule': crontab(hour=9, minute=0),  # Каждое утро в 9:00
+    #     'schedule': crontab(minute=10, hour='*/1'),  # Каждый час
+    #     #'schedule': crontab(minute='*/2'),  # Каждые 2 минут
+    # },
+    #рассылка новостей каждый час
     'send-news-every-hour': {
         'task': 'news.tasks.send_news_every_hour',
         # 'schedule': crontab(hour=9, minute=0),  # Каждое утро в 9:00
-        'schedule': crontab(minute=10, hour='*/1'),  # Каждый час
+        'schedule': crontab(minute=5, hour='*/1'),  # Каждый час
         #'schedule': crontab(minute='*/2'),  # Каждые 2 минут
     },
     # 'send_news_every_3hour': {
