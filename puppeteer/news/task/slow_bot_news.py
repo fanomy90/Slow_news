@@ -57,7 +57,6 @@ def prepare_and_send_news(subscribers, article, category_style, content, image, 
                 f'{trim_author(article.author)}'
             )
             print(f"{now} Отправка короткого сообщения категории {article.cat.name} пользователю {subscriber.username}")
-
         elif is_first_message:
             message = (
                 f'{category_style} <b>{article.cat.name} {article.date}</b>\n\n'
@@ -65,11 +64,9 @@ def prepare_and_send_news(subscribers, article, category_style, content, image, 
                 f'{trim_author(article.author)}'
             )
             print(f"{now} Отправка первой части полного сообщения категории {article.cat.name} пользователю {subscriber.username}")
-
         else:
             message = content
             print(f"{now} Отправка текстовой части полного сообщения категории {article.cat.name} пользователю {subscriber.username}")
-
         # Отправляем сообщение
         success = send_message_with_retry(subscriber, message, image if is_first_message else None, retries=3, delay=3)
         if success:
@@ -77,44 +74,33 @@ def prepare_and_send_news(subscribers, article, category_style, content, image, 
         else:
             print(f"{now} Ошибка при отправке сообщения категории {article.cat.name} пользователю {subscriber.username}")
 
-
-
 def send_news_frequency(frequency_sending="every_hour"):
     from news.models import TelegramSubscriber, News, Category
-
     # Получаем всех подписчиков с указанной частотой рассылки
     subscribers = TelegramSubscriber.objects.filter(frequency_sending=frequency_sending)
-
     if not subscribers.exists():
         print(f"{now} На рассылку новостей с периодичностью {frequency_sending} нет подписчиков")
         return
-
-    # Стилизация категории новостей
+    # Стилизация категории новостей - убрать в prepare_and_send_news
     category_styles = {
         'Безопасность': '🔒',
         'Статьи': '📄',
         'Обзоры': '🔍',
         'Интервью': '🗣️',
     }
-
     # Разделяем подписчиков по формату сообщений (короткие или полные)
     short_news_subscribers = subscribers.filter(message_format="short")
     full_news_subscribers = subscribers.filter(message_format="full")
-
     # Получаем все категории
     categories = Category.objects.all()
-
     # Прокручиваем категории и обрабатываем новости
     for category in categories:
         # Получаем новости, которые ещё не отправлены
         news_articles = News.objects.filter(cat=category, is_published=True, is_sent=False)
-
         if not news_articles.exists():
             print(f"{now} В категории {category.name} нет новостей для отправки.")
             continue
-
         category_style = category_styles.get(category.name, 'i')
-        
         # Отправляем короткие новости
         if short_news_subscribers.exists():
             for article in news_articles:
@@ -123,7 +109,6 @@ def send_news_frequency(frequency_sending="every_hour"):
                 prepare_and_send_news(short_news_subscribers, article, category_style, short_content, image, "short")
         else:
             print(f"{now} С периодичностью {frequency_sending} в категории {category.name} нет подписчиков на короткие сообщения")
-
         # Отправляем полные новости
         if full_news_subscribers.exists():
             for article in news_articles:
@@ -136,7 +121,6 @@ def send_news_frequency(frequency_sending="every_hour"):
                     prepare_and_send_news(full_news_subscribers, article, category_style, part, None, "full", is_first_message=False)
         else:
             print(f"{now} С периодичностью {frequency_sending} в категории {category.name} нет подписчиков на длинные сообщения")
-
         # Отмечаем новости как отправленные
         for article in news_articles:
             try:

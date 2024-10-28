@@ -19,6 +19,7 @@ from news.task.parser_cisoclub import cisoclub_news
 from news.task.parser_cisoclub_beat import cisoclub_news_beat
 
 from news.task.slow_bot_news import send_news_frequency
+from news.task.slow_bot_weather import send_weather_frequency
 
 from django.utils.timezone import now
 
@@ -208,19 +209,25 @@ def send_daily_news():
 @shared_task
 def send_news_every_hour():
     send_news_frequency("every_hour")
+    send_weather_frequency("every_hour")
 @shared_task
 def send_news_every_3hour():
     send_news_frequency("every_3hour")
+    send_weather_frequency("every_3hour")
 @shared_task
 def send_news_every_6hour():
     send_news_frequency("every_6hour")
+    send_weather_frequency("every_6hour")
 @shared_task
 def send_news_every_9hour():
     send_news_frequency("every_9hour")
+    send_weather_frequency("every_9hour")
 @shared_task
 def send_news_every_12hour():
     send_news_frequency("every_12hour")
+    send_weather_frequency("every_12hour")
 @shared_task
 def send_news_daily():
     send_news_frequency("daily")
+    send_weather_frequency("daily")
 

@@ -20,8 +20,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-
   postgres:
+    restart: always
     image: postgres:latest
     container_name: postgres
     environment:
@@ -32,7 +32,6 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
   puppeteer:
     restart: always
     build:
@@ -47,9 +46,7 @@ services:
     volumes:
       - /home/projects/SAVE:/yt/news/SAVE
       # - /home/projects/Slow_news/puppeteer:/yt/puppeteer
-
       # - /home/projects/Slow_news/puppeteer/db.sqlite3:/app/puppeteer/db.sqlite3
-      
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
       # каталоги статики для nginx
@@ -59,14 +56,8 @@ services:
       - static_volume:/yt/static
     env_file:
         - .env
-
-    command:
-      #выполняем миграции и запускаем веб сервер
-      # bash -c "./manage.py collectstatic --noinput && ./manage.py makemigrations && ./manage.py migrate && gunicorn -b 0.0.0.0:9000 puppeteer.wsgi:application"
-      # bash -c "./manage.py makemigrations && ./manage.py migrate && ./manage.py collectstatic --noinput --ignore admin && gunicorn --timeout 120 -b 0.0.0.0:9000 puppeteer.wsgi:application --log-level debug --access-logfile /yt/access.log --error-logfile /yt/error.log"
-
-
   nginx:
+    restart: always
     build:
       dockerfile: ./Dockerfile
       context: ./docker/nginx/
@@ -74,8 +65,6 @@ services:
     # image: nginx:latest
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-      
-      # - ./docker/nginx/nginx-ssl.conf:/etc/nginx/conf.d/nginx-ssl.conf
       - ./docker/nginx/certificates:/etc/letsencrypt
       - ./docker/nginx/challenges:/var/www/html
       - static_volume:/yt/static
@@ -85,30 +74,18 @@ services:
       - "443:443"
     depends_on:
       - puppeteer
-      # - certbot
-    # command: ["/bin/bash", "./docker/nginx/wait-cert.sh"]
-    # command: ["/bin/bash", "-c", "nginx -g 'daemon off;'"]
-
   certbot:
+    restart: always
     build:
       dockerfile: ./Dockerfile
       context: ./docker/certbot/
     # image: certbot/certbot
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-      # - ./docker/nginx/nginx-ssl.conf:/etc/nginx/nginx-ssl.conf
       - ./docker/nginx/certificates:/etc/letsencrypt
       - ./docker/nginx/challenges:/var/www/html
       - static_volume:/yt/static
-      # - nginx_volume:/etc/nginx/conf.d
       - /var/run/docker.sock:/var/run/docker.sock # для перезапуска nginx после обновления сертификатов
-      # - ./docker/certbot/restart-nginx.sh:/usr/local/bin/restart-nginx.sh
-    # entrypoint: [
-    #   "certbot", "certonly", "--webroot", "-w", "/var/www/html", "-d", "slow-news.sytes.net",
-    #   "--email", "fanomy90@gmail.com", "--agree-tos", "--no-eff-email", "--keep-until-expiring",
-    #   "--deploy-hook", "/usr/local/bin/restart-nginx.sh"
-    # # ]
-    # entrypoint: ["/usr/local/bin/cert_check.sh"]
     entrypoint: ["/usr/local/bin/cert_init.sh"]
     # entrypoint: ["/bin/sh"]
     depends_on:
@@ -117,23 +94,6 @@ services:
       - celery
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
-    
-  # telbot:
-  #   build:
-  #     dockerfile: ./Dockerfile
-  #     context: ./docker/telbot/
-  #   container_name: telegram_bot
-  #   environment:
-  #     <<: *environment-defaults
-  #   depends_on:
-  #     - puppeteer
-  #     - redis
-  #   volumes:
-  #     - /etc/localtime:/etc/localtime:ro
-  #     - /etc/timezone:/etc/timezone:ro
-  #     - static_volume:/yt/static
-  #   command: ["python", "bot.py"]  # замените на команду для запуска вашего бота
-
 
   celery:
     restart: always
@@ -185,25 +145,6 @@ services:
       DB_HOST: "postgres"
       DB_PORT: 5432  # Убедитесь, что это правильно настроено
 
-  # celery-bot:
-  #   build:
-  #     context: ./
-  #   command: ['celery', '--workdir=.', '-A', 'puppeteer', 'worker']
-  #   volumes:
-  #     - /home/projects/SAVE:/yt/puppeteer/SAVE
-  #     - /home/projects/Slow_news/puppeteer/db.sqlite3:/yt/puppeteer/db.sqlite3  # Монтируем SQLite файл
-  #   environment:
-  #     <<: *environment-defaults
-
-  # контейнер для мониторинга и управления задачами
-  # flower:
-  #   image: mher/flower
-  #   command: ['flower', '--broker=redis://redis:6379/0', '--port=5555']
-  #   restart: always
-  #   ports:
-  #     - "5555:5555"
-  #   depends_on:
-  #     - redis
 volumes:
     postgres_data:
     static_volume:

@@ -85,18 +85,23 @@ class CityAdmin(admin.ModelAdmin):
 class TelegramSubscriberAdmin(admin.ModelAdmin):
     #вызов кастомной форме для админки для динамической загрузки внещних файлов
     form = TelegramSubscriberForm
-    list_display = ('chat_id', 'username', 'subscribed_at','news_sent', 'get_subscribed_categories', 'weather_sent', 'subscribed_weather_city', 'currency_sent', 'get_subscribed_currencies', 'frequency_sending', 'message_format')
+    list_display = ('chat_id', 'username', 'subscribed_at','news_sent', 'get_subscribed_categories', 'weather_sent', 'get_subscribed_cities', 'currency_sent', 'get_subscribed_currencies', 'frequency_sending', 'message_format')
     list_display_links = ('chat_id', 'username')
     #так как передаем кортеж то для одного элемента надо поставить запятую
     search_fields = ('username',)
-    list_editable = ('news_sent', 'currency_sent', 'weather_sent', 'subscribed_weather_city', 'frequency_sending', 'message_format')
+    list_editable = ('news_sent', 'currency_sent', 'weather_sent', 'frequency_sending', 'message_format')
     # Добавляем удобный виджет для редактирования ManyToMany поля
-    filter_horizontal = ('subscribed_to_categories', 'subscribed_to_currency')  # Или filter_vertical
+    filter_horizontal = ('subscribed_to_categories', 'subscribed_weather_city', 'subscribed_to_currency')  # Или filter_vertical
 
     # Метод для отображения категорий в списке
     def get_subscribed_categories(self, obj):
         return ", ".join([cat.name for cat in obj.subscribed_to_categories.all()])
     get_subscribed_categories.short_description = 'Категории новостей'
+
+    # Метод для отображения городов
+    def get_subscribed_cities(self, obj):
+        return ", ".join([city.city_name for city in obj.subscribed_weather_city.all()])
+    get_subscribed_cities.short_description = 'Города для прогноза'
 
     # Отображение валют для подписки
     def get_subscribed_currencies(self, obj):

@@ -96,7 +96,8 @@ class TelegramSubscriber(models.Model):
     currency_sent = models.BooleanField(default=False, verbose_name='Подписка на валюты')
     subscribed_to_currency = models.ManyToManyField('Currency', blank=True, verbose_name='Валюты для курсов')
     weather_sent = models.BooleanField(default=False, verbose_name='Подписка на прогноз погоды')
-    subscribed_weather_city = models.ForeignKey ('City', on_delete=models.SET_NULL, blank=True, null=True, verbose_name='Города для прогноза')
+    #subscribed_weather_city = models.ForeignKey ('City', on_delete=models.SET_NULL, blank=True, null=True, verbose_name='Города для прогноза')
+    subscribed_weather_city = models.ManyToManyField('City', blank=True, verbose_name='Города для прогноза')
     # Настройки формата сообщений (полные или сокращенные)
     MESSAGE_FORMAT_CHOICES = [
         ('full', 'Полные сообщения'),

@@ -96,7 +96,7 @@ def subscribe_menu(call, message_header, subscriber, categories):
     if subscriber:
         print(f"{now} Получен пользователь для подписки: {subscriber.username}")
         subscribed_categories = subscriber.subscribed_to_categories.all()
-        print(f"{now} Получены категории пользователя {subscriber.username} для отписки: {subscribed_categories}")
+        print(f"{now} Получены категории новостей пользователя {subscriber.username} для подписки: {subscribed_categories}")
         def send_message_text(call, message_header, message_botom):
             message_text = (
                 f'{message_header}\n\n'
@@ -144,6 +144,58 @@ def unsubscribe_menu(call, message_header, subscriber, categories):
         keyboard_category.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
         send_message_text(call, message_header, f'У пользователя {subscriber.username} нет подписок')
         #bot.edit_message_text(f'У пользователя {subscriber.username} нет подписок', call.message.chat.id, call.message.message_id, reply_markup=keyboard_category)
+
+#функция для вывода меню городов для подписки на прогноз погоды
+def subscribe_weather_menu(call, message_header, subscriber, cities):
+    print(f"{now} Нажата кнопка {call.data} для настройки {message_header.lower()}")
+    # Создаем клавиатуру
+    keyboard_city = types.InlineKeyboardMarkup(row_width=1)
+    if subscriber:
+        print(f"{now} Получен пользователь для подписки прогноза погоды: {subscriber.username}")
+        subscribed_cities = subscriber.subscribed_weather_city.all()
+        print(f"{now} Получены города {subscribed_cities} на прогноз погоды которых подписан пользователя {subscriber.username}")
+        def send_message_text(call, message_header, message_botom):
+            message_text = (
+                f'{message_header}\n\n'
+                f'{message_botom}\n'
+            )
+            bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_city)
+        for city in cities:
+            if city not in subscribed_cities:
+                keyboard_city.add(types.InlineKeyboardButton(city.city_name, callback_data=f'citySubscribe_{city.id}'))
+        if not keyboard_city.keyboard:
+            keyboard_city.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+            send_message_text(call, message_header, 'Нет доступных городов для подписки на прогноз погоды.')
+        else:
+            keyboard_city.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+            send_message_text(call, message_header, 'Выберите город для подписки на прогноз погоды')
+    else:
+        print(f"{now} Пользователя {call.message.chat.id} еще нет в базе подписчиков")
+        for city in cities:
+            keyboard_city.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+            send_message_text(call, message_header, 'Новый пользователь. Выберите город для подписки на прогноз погоды')
+            bot.edit_message_text(message_header, call.message.chat.id, call.message.message_id, reply_markup=keyboard_city)
+#функия вывода городов для отписки от прогноза погоды
+def unsubscribe_weather_menu(call, message_header, subscriber, cities):
+    print(f"{now} Нажата кнопка {call.data} для настройки {message_header.lower()}")
+    def send_message_text(call, message_header, message_botom):
+        message_text = (
+            f'{message_header}\n\n'
+            f'{message_botom}\n'
+        )
+        bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_city)
+    keyboard_city = types.InlineKeyboardMarkup(row_width=1)
+    # if cities.exists():
+    if cities:
+        print(f"{now} Получены города {cities} пользователя {subscriber.username} для отписки от прогноза погоды")
+        for city in cities:
+            keyboard_city.add(types.InlineKeyboardButton(city.city_name, callback_data=f'cityUnsubscribe_{city.id}'))
+        keyboard_city.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+        send_message_text(call, message_header, 'Выберите город для отписки.')
+    else:
+        print(f"{now} У пользователя {subscriber.username} нет доступных городов для отписки от прогноза погоды")
+        keyboard_city.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+        send_message_text(call, message_header, f'У пользователя {subscriber.username} нет городов для отписки от прогноза погоды')
 
 #функция отправки сообщений с повторной отправкой в случае ошибок
 def send_message_with_retry(subscriber, message, image=None, retries=3, delay=3):
@@ -265,7 +317,7 @@ def callback(call):
         subscriber = TelegramSubscriber.objects.get(chat_id=call.message.chat.id)
         categories = subscriber.subscribed_to_categories.all()
         unsubscribe_menu(call, 'Вы находитесь в разделе выбора категории для отписки от новостей.', subscriber, categories)
-    # Обработка выбора категории для подписки
+    # Обработка выбора категории для отписки
     elif call.data.startswith('newsUnsubscribe_'):
         category_id = call.data.split('_')[1]  # Получаем ID категории из callback_data
         print(f"{now} Нажата кнопка id={category_id} для удаления подписки")
@@ -283,18 +335,50 @@ def callback(call):
         categories = subscriber.subscribed_to_categories.all()
         unsubscribe_menu(call, f'Вы отписались от категории: {category.name}', subscriber, categories)
     #добавить ветку погоды
+    # Обработка ветки подписки на прогноз погоды
     elif call.data == 'key3':
-        keyboard_category = types.InlineKeyboardMarkup(row_width=1)
-        keyboard_category.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
-        #bot.send_message(call.message.chat.id, f'Вы находитесь в разделе подписки на прогноз погоды: ', reply_markup=keyboard_category)
-        bot.edit_message_text(f'Вы находитесь в разделе подписки на прогноз погоды: ', call.message.chat.id, call.message.message_id, reply_markup=keyboard_category)
-
+        subscriber = TelegramSubscriber.objects.filter(chat_id=call.message.chat.id).first()
+        cities = City.objects.all()
+        subscribe_weather_menu(call, 'Вы находитесь в разделе выбора города для подписки на прогноз погоды: ', subscriber, cities)
+    # Обработка города для подписки на прогноз погоды
+    elif call.data.startswith('citySubscribe_'):
+        city_id = call.data.split('_')[1]
+        print(f"{now} Нажата кнопка id={city_id} для добавления города для прогноза погоды")
+        cities = City.objects.all()
+        city = cities.filter(id=city_id).first()
+        if city is None:
+            print(f"{now} Город с id={city_id} не найден")
+            return
+        print(f"{now} Получена город {city} для подписки на прогноз погоды")
+        username = call.message.chat.username if call.message.chat.username else "Неизвестный пользователь"
+        subscriber, created = TelegramSubscriber.objects.get_or_create(chat_id=call.message.chat.id, defaults={'username': username})
+        print(f"{now} Получен пользователь {subscriber.username} для добавления подписки на прогноз погоды")
+        subscriber.subscribed_weather_city.add(city)
+        subscriber.weather_sent = True
+        subscriber.save()
+        print(f"{now} Добавлен город {city} для прогноза погоды для пользователя {subscriber.username}")
+        subscribe_weather_menu(call, f"Добавлен город {city}", subscriber, cities)
+    # Обработка ветки отписки нот прогноза погоды
     elif call.data == 'key4':
-        keyboard_category = types.InlineKeyboardMarkup(row_width=1)
-        keyboard_category.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
-        #bot.send_message(call.message.chat.id, f'Вы находитесь в разделе отписки от прогноза погоды: ', reply_markup=keyboard_category)
-        bot.edit_message_text(f'Вы находитесь в разделе отписки от прогноза погоды: ', call.message.chat.id, call.message.message_id, reply_markup=keyboard_category)
-
+        subscriber = TelegramSubscriber.objects.filter(chat_id=call.message.chat.id).first()
+        cities = subscriber.subscribed_weather_city.all()
+        unsubscribe_weather_menu(call, 'Вы находитесь в разделе выбора города для отписки от прогноза погоды.', subscriber, cities)
+    # Обработка города для отписки на прогноз погоды
+    elif call.data.startswith('cityUnsubscribe_'):
+        city_id = call.data.split('_')[1]
+        print(f"{now} Нажата кнопка id={city_id} для удаления города для отписки от прогноза погоды")
+        city = City.objects.filter(id=city_id).first()
+        if city:
+            print(f"{now} Получен город {city} для удаления из подписки на прогноз погоды пользователя")
+            subscriber = TelegramSubscriber.objects.get(chat_id=call.message.chat.id)
+            print(f"{now} Получен пользователь {subscriber.username} для удаления из подписки")
+            subscriber.subscribed_weather_city.remove(city)
+            if not subscriber.subscribed_to_categories.exists():
+                subscriber.weather_sent = False  # Отписка от прогноза погоды
+            subscriber.save()
+            print(f"{now} Удаление города {city} из подписки на прогноз погоды пользователя {subscriber.username}")
+            cities = subscriber.subscribed_weather_city.all()
+            unsubscribe_weather_menu(call, f'Вы отписались от прогноза погоды на город: {city.city_name}', subscriber, cities)
     #добавить ветку валюты
     elif call.data == 'key5':
         keyboard_category = types.InlineKeyboardMarkup(row_width=1)

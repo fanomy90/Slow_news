@@ -229,7 +229,7 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'news.tasks.send_news_every_hour',
         # 'schedule': crontab(hour=9, minute=0),  # Каждое утро в 9:00
         'schedule': crontab(minute=5, hour='*/1'),  # Каждый час
-        #'schedule': crontab(minute='*/2'),  # Каждые 2 минут
+        #'schedule': crontab(minute='*/2'),  # Каждые 2 минут для теста
     },
     # 'send_news_every_3hour': {
     #     'task': 'news.tasks.send_news_every_3hour',
