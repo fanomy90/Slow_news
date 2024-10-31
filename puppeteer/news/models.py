@@ -46,11 +46,11 @@ class Category(models.Model):
         ordering = ['id']
 
 class Currency(models.Model):
-    currency_name = models.CharField(max_length=255, unique=True, verbose_name='Название валюты')
-    symbol = models.CharField(max_length=10, verbose_name='Символ валюты', blank=True, null=True)  # Например, $, €, ₽
-
+    # currency_name = models.CharField(max_length=255, unique=True, verbose_name='Название валюты')
+    currency_name = models.CharField(max_length=255, verbose_name='Название валюты')
+    symbol = models.CharField(max_length=10, unique=True, verbose_name='Символ валюты', blank=True, null=True)
     def __str__(self):
-        return self.currency_name
+        return f'{self.currency_name} ({self.symbol})'
 
     class Meta:
         verbose_name = 'Валюта'
@@ -60,7 +60,11 @@ class Currency(models.Model):
 class CurrencyRate(models.Model):
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, related_name='rates', verbose_name='Валюта')
     date = models.DateField(verbose_name='Дата курса')  # Дата, за которую указан курс
-    rate = models.DecimalField(max_digits=10, decimal_places=4, verbose_name='Курс валюты')
+    rate = models.DecimalField(max_digits=20, decimal_places=4, verbose_name='Курс валюты')
+
+    @property
+    def symbol(self):
+        return self.currency.symbol
 
     def __str__(self):
         return f'{self.currency} - {self.rate} (на {self.date})'

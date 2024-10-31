@@ -72,7 +72,7 @@ def send_weather_frequency(frequency_sending="every_hour"):
     now = datetime.datetime.now()
     print(f"{now} Запуск подбора подписчиков для прогноза погоды")
     from news.models import TelegramSubscriber, City
-    subscribers = TelegramSubscriber.objects.filter(frequency_sending=frequency_sending)
+    subscribers = TelegramSubscriber.objects.filter(frequency_sending=frequency_sending, weather_sent=True)
     if not subscribers.exists():
         print(f"{now} На рассылку прогноза погоды с периодичностью {frequency_sending} нет подписчиков")
         return

@@ -125,10 +125,8 @@ def parse_date(date_str):
 # def cisoclub_news(task_id):
 # def cisoclub_news(task_id, mode = "security"):
 def cisoclub_news_beat(self, mode=None):
-    
     task_id = self.request.id
     # Запуск асинхронного процесса для отправки статуса задачи
-    
     if not os.path.exists(output_dir):
         print(str(now) + ' не найдена директория для сохранения: ' + output_dir)
     try:
@@ -138,7 +136,6 @@ def cisoclub_news_beat(self, mode=None):
         # получение данных напрямую из БД
         max_existing_pk = get_max_pk()
         existing_titles = get_existing_titles()
-
         # # сделать привязку к разным разделам
         if mode == "security":
             url = 'https://cisoclub.ru/category/news/'

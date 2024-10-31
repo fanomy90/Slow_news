@@ -193,6 +193,12 @@ CELERY_TIMEZONE = 'UTC'
 # }
 
 CELERY_BEAT_SCHEDULE = {
+    #Задача импорта курсов валют
+    'import-daily-currency': {
+        'task': 'news.tasks.download_currency_beat',
+        # 'schedule': crontab(hour=9, minute=0),  # Каждое утро в 9:00
+        'schedule': crontab(minute=10, hour='*/12'),
+    },
     #задача импорта категории Безопасность
     'import-daily-news-every-hour': {
         'task': 'news.tasks.download_a_news_beat',
@@ -224,6 +230,15 @@ CELERY_BEAT_SCHEDULE = {
     #     'schedule': crontab(minute=10, hour='*/1'),  # Каждый час
     #     #'schedule': crontab(minute='*/2'),  # Каждые 2 минут
     # },
+
+    #тестовая рассылка курса валют каждые 2 минуты
+    # 'send-currency-every-hour': {
+    #     'task': 'news.tasks.send_currency_every_hour',
+    #     # 'schedule': crontab(hour=9, minute=0),  # Каждое утро в 9:00
+    #     #'schedule': crontab(minute=5, hour='*/1'),  # Каждый час
+    #     'schedule': crontab(minute='*/2'),  # Каждые 2 минут для теста
+    # },
+    
     #рассылка новостей каждый час
     'send-news-every-hour': {
         'task': 'news.tasks.send_news_every_hour',

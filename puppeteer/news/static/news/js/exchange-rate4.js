@@ -27,7 +27,6 @@ function updateExchangeUI() {
         const containerWidth = marquee.parentElement.offsetWidth;
         marquee.style.animationDuration = `${20 * (marqueeWidth / containerWidth)}s`;
     });
-    // время последнего обновления прогноза
     // получим ланные из локального хранилища
     const ratesRefresh = localStorage.getItem('lastRefresh');
     if (ratesRefresh) {

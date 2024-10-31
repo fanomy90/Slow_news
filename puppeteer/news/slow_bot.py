@@ -36,6 +36,16 @@ def trim_content(content, word_limit=35):
     # Разбиваем текст на слова и обрезаем до word_limit
     words = content.split()[:word_limit]
     return ' '.join(words)  # Объединяем слова обратно в строку
+#пагинация кнопок
+def paginate_buttons(buttons, page, page_size=48):
+    total_pages = (len(buttons) - 1) // page_size + 1
+    start = page * page_size
+    end = start + page_size
+    paginated_buttons = buttons[start:end]
+    has_next_page = page < total_pages - 1
+    has_prev_page = page > 0
+    return paginated_buttons, has_prev_page, has_next_page
+
 #меню кнопок настроек рассылки
 def settings_menu(call, message_header, subscriber):
     print(f"{now} Нажата кнопка {call.data} для настройки {message_header.lower()}")
@@ -93,16 +103,17 @@ def settings_menu(call, message_header, subscriber):
 def subscribe_menu(call, message_header, subscriber, categories):
     print(f"{now} Нажата кнопка {call.data} для настройки {message_header.lower()}")
     keyboard_category = types.InlineKeyboardMarkup(row_width=1)
+    def send_message_text(call, message_header, message_botom):
+        message_text = (
+            f'{message_header}\n\n'
+            f'{message_botom}\n'
+        )
+        bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_category)
     if subscriber:
         print(f"{now} Получен пользователь для подписки: {subscriber.username}")
         subscribed_categories = subscriber.subscribed_to_categories.all()
         print(f"{now} Получены категории новостей пользователя {subscriber.username} для подписки: {subscribed_categories}")
-        def send_message_text(call, message_header, message_botom):
-            message_text = (
-                f'{message_header}\n\n'
-                f'{message_botom}\n'
-            )
-            bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_category)
+
         # Фильтруем категории, исключая уже подписанные
         for category in categories:
             if category not in subscribed_categories:
@@ -125,41 +136,41 @@ def subscribe_menu(call, message_header, subscriber, categories):
 
 def unsubscribe_menu(call, message_header, subscriber, categories):
     print(f"{now} Нажата кнопка {call.data} для настройки {message_header.lower()}")
+    keyboard_category = types.InlineKeyboardMarkup(row_width=1)
     def send_message_text(call, message_header, message_botom):
         message_text = (
             f'{message_header}\n\n'
             f'{message_botom}\n'
         )
         bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_category)
-    keyboard_category = types.InlineKeyboardMarkup(row_width=1)
     if categories.exists():
         print(f"{now} Получены категории пользователя {subscriber.username} для отписки: {categories}")
         for category in categories:
             keyboard_category.add(types.InlineKeyboardButton(category.name, callback_data=f'newsUnsubscribe_{category.id}'))
         keyboard_category.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
         send_message_text(call, message_header, 'Выберите категории для отписки.')
-        #bot.edit_message_text('Выберите категории для отписки', call.message.chat.id, call.message.message_id, reply_markup=keyboard_category)
     else:
         print(f"{now} У пользователя {subscriber.username} нет подписок")
         keyboard_category.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
         send_message_text(call, message_header, f'У пользователя {subscriber.username} нет подписок')
-        #bot.edit_message_text(f'У пользователя {subscriber.username} нет подписок', call.message.chat.id, call.message.message_id, reply_markup=keyboard_category)
 
 #функция для вывода меню городов для подписки на прогноз погоды
 def subscribe_weather_menu(call, message_header, subscriber, cities):
     print(f"{now} Нажата кнопка {call.data} для настройки {message_header.lower()}")
     # Создаем клавиатуру
     keyboard_city = types.InlineKeyboardMarkup(row_width=1)
+    #фунция отправки сообщения пользователю
+    def send_message_text(call, message_header, message_botom):
+        message_text = (
+            f'{message_header}\n\n'
+            f'{message_botom}\n'
+        )
+        bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_city)
     if subscriber:
         print(f"{now} Получен пользователь для подписки прогноза погоды: {subscriber.username}")
         subscribed_cities = subscriber.subscribed_weather_city.all()
         print(f"{now} Получены города {subscribed_cities} на прогноз погоды которых подписан пользователя {subscriber.username}")
-        def send_message_text(call, message_header, message_botom):
-            message_text = (
-                f'{message_header}\n\n'
-                f'{message_botom}\n'
-            )
-            bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_city)
+
         for city in cities:
             if city not in subscribed_cities:
                 keyboard_city.add(types.InlineKeyboardButton(city.city_name, callback_data=f'citySubscribe_{city.id}'))
@@ -172,19 +183,19 @@ def subscribe_weather_menu(call, message_header, subscriber, cities):
     else:
         print(f"{now} Пользователя {call.message.chat.id} еще нет в базе подписчиков")
         for city in cities:
-            keyboard_city.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
             send_message_text(call, message_header, 'Новый пользователь. Выберите город для подписки на прогноз погоды')
             bot.edit_message_text(message_header, call.message.chat.id, call.message.message_id, reply_markup=keyboard_city)
-#функия вывода городов для отписки от прогноза погоды
+        keyboard_city.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+#функия вывод городов для отписки от прогноза погоды
 def unsubscribe_weather_menu(call, message_header, subscriber, cities):
     print(f"{now} Нажата кнопка {call.data} для настройки {message_header.lower()}")
+    keyboard_city = types.InlineKeyboardMarkup(row_width=1)
     def send_message_text(call, message_header, message_botom):
         message_text = (
             f'{message_header}\n\n'
             f'{message_botom}\n'
         )
         bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_city)
-    keyboard_city = types.InlineKeyboardMarkup(row_width=1)
     # if cities.exists():
     if cities:
         print(f"{now} Получены города {cities} пользователя {subscriber.username} для отписки от прогноза погоды")
@@ -196,6 +207,121 @@ def unsubscribe_weather_menu(call, message_header, subscriber, cities):
         print(f"{now} У пользователя {subscriber.username} нет доступных городов для отписки от прогноза погоды")
         keyboard_city.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
         send_message_text(call, message_header, f'У пользователя {subscriber.username} нет городов для отписки от прогноза погоды')
+
+def subscribe_currency_menu(call, message_header, subscriber, currencies, page=0):
+    keyboard_currency = types.InlineKeyboardMarkup(row_width=2)
+    
+    subscribed_currencies = subscriber.subscribed_to_currency.all() if subscriber else []
+    buttons = [
+        types.InlineKeyboardButton(currency.currency_name, callback_data=f'currencySubscribe_{currency.id}')
+        for currency in currencies if currency not in subscribed_currencies
+    ]
+    
+    # Пагинация
+    paginated_buttons, has_prev, has_next = paginate_buttons(buttons, page)
+    for i in range(0, len(paginated_buttons), 2):
+        keyboard_currency.add(*paginated_buttons[i:i+2])
+
+    # Добавляем кнопки для перехода по страницам
+    navigation_buttons = []
+    if has_prev:
+        navigation_buttons.append(types.InlineKeyboardButton('« Назад', callback_data=f'page_{page-1}'))
+    if has_next:
+        navigation_buttons.append(types.InlineKeyboardButton('Далее »', callback_data=f'page_{page+1}'))
+    
+    # Если есть кнопки навигации, добавляем их на клавиатуру
+    if navigation_buttons:
+        keyboard_currency.add(*navigation_buttons)
+    
+    # Кнопка "Назад" в главное меню
+    keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+    
+    message_text = f"{message_header}\n\nВыберите валюту для подписки на курсы валют."
+    bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_currency)
+
+#функция вывода списка валют для подписки на курсы валют
+# def subscribe_currency_menu(call, message_header, subscriber, currencies):
+#     print(f"{now} Нажата кнопка {call.data} для настройки {message_header.lower()}")
+#     # Создаем клавиатуру
+#     keyboard_currency = types.InlineKeyboardMarkup(row_width=4)
+#     def send_message_text(call, message_header, message_botom):
+#         message_text = (
+#             f'{message_header}\n\n'
+#             f'{message_botom}\n'
+#         )
+#         bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_currency)
+#     if subscriber:
+#         print(f"{now} Получен пользователь для подписки курсы валют: {subscriber.username}")
+#         subscribed_currencies = subscriber.subscribed_to_currency.all()
+#         print(f"{now} Получены валюты {subscribed_currencies} на курсы которых подписан пользователя {subscriber.username}")
+#         #фунция отправки сообщения пользователю
+
+#         # Формируем группы кнопок валют для подписки
+#         buttons = [
+#             types.InlineKeyboardButton(currency.currency_name, callback_data=f'currencySubscribe_{currency.id}')
+#             for currency in currencies if currency not in subscribed_currencies
+#         ]
+
+#         # Добавляем кнопки группами
+#         for i in range(0, len(buttons), 4):
+#             keyboard_currency.add(*buttons[i:i+4])
+#         if not buttons:
+#             keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+#             send_message_text(call, message_header, 'Нет доступных валют для подписки на курсы валют.')
+#         else:
+#             keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+#             send_message_text(call, message_header, 'Выберите валюту для подписки на курсы валют.')
+#     else:
+#         print(f"{now} Пользователя {call.message.chat.id} еще нет в базе подписчиков")
+#         buttons = [
+#             types.InlineKeyboardButton(currency.currency_name, callback_data=f'currencySubscribe_{currency.id}')
+#             for currency in currencies
+#         ]
+#         for i in range(0, len(buttons), 4):
+#             keyboard_currency.add(*buttons[i:i+4])
+#         keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+#         send_message_text(call, message_header, 'Новый пользователь. Выберите валюту для подписки на курсы валют.')
+
+
+    #     for currency in currencies:
+    #         #если валюты нет в подписках пользователя то добавляем кнопку с валютой для подписки
+    #         if currency not in subscribed_currencies:
+    #             keyboard_currency.add(types.InlineKeyboardButton(currency.currency_name, callback_data=f'currencySubscribe_{currency.id}'))
+    #     #если не было создано кнопок для подписки выводим сообщение и кнопку назад
+    #     if not keyboard_currency.keyboard:
+    #         keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+    #         send_message_text(call, message_header, 'Нет доступных валют для подписки на курсы валют.')
+    #     #если кнопки с валютами были созданы выводим сообщение для выбора валюты для подписки и кнпоку назад
+    #     else:
+    #         keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+    #         send_message_text(call, message_header, 'Выберите валюту для подписки на курсы валют')
+    # else:
+    #     print(f"{now} Пользователя {call.message.chat.id} еще нет в базе подписчиков")
+    #     for currency in currencies:
+    #         send_message_text(call, message_header, 'Новый пользователь. Выберите валюту для подписки на курсы валют')
+    #         bot.edit_message_text(message_header, call.message.chat.id, call.message.message_id, reply_markup=keyboard_currency)
+    #     keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+
+#функция вывода списка валют для отписки от курсов валют
+def unsubscribe_currency_menu(call, message_header, subscriber, currencies):
+    print(f"{now} Нажата кнопка {call.data} для настройки {message_header.lower()}")
+    keyboard_currency = types.InlineKeyboardMarkup(row_width=2)
+    def send_message_text(call, message_header, message_botom):
+        message_text = (
+            f'{message_header}\n\n'
+            f'{message_botom}\n'
+        )
+        bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_currency)
+    if currencies:
+        print(f"{now} Получены валюты {currencies} пользователя {subscriber.username} для отписки от курсов валют")
+        for currency in currencies:
+            keyboard_currency.add(types.InlineKeyboardButton(currency.currency_name, callback_data=f'currencyUnsubscribe_{currency.id}'))
+        keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+        send_message_text(call, message_header, 'Выберите валюту для отписки.')
+    else:
+        print(f"{now} У пользователя {subscriber.username} нет доступных валют для отписки от курсов валют")
+        keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
+        send_message_text(call, message_header, f'У пользователя {subscriber.username} нет валют для отписки от рассылки курса валют')
 
 #функция отправки сообщений с повторной отправкой в случае ошибок
 def send_message_with_retry(subscriber, message, image=None, retries=3, delay=3):
@@ -219,6 +345,9 @@ def send_message_with_retry(subscriber, message, image=None, retries=3, delay=3)
             else:
                 return False  # Если достигли лимита попыток
 
+
+
+#Стартовое сообщение
 @bot.message_handler(commands=['start'])
 def start_message(message):
     print(f"{now} Команда /start получена")  # Отладочная информация
@@ -232,6 +361,7 @@ def start_message(message):
         reply_markup=keyboard_category
     )
 
+#Основное меню
 @bot.message_handler(content_types=["text"])
 def next_message(message):
     print(f"{now} Получено сообщение: {message.text}")  # Логирование входящих сообщений
@@ -273,11 +403,19 @@ def next_message(message):
     else:
         bot.send_message(message.chat.id, f"Недоступная операция: {message.text}")
         logging.info(f"Недоступная операция: {message.text}")
-        
+
+#Основное меню2
 @bot.callback_query_handler(func=lambda call: True)
 def callback(call):
     from news.models import TelegramSubscriber, Category, Currency, City
-    if call.data == 'key0':
+    #обработка пагинации
+    if call.data.startswith('page_'):
+        page = int(call.data.split('_')[1])
+        subscriber = TelegramSubscriber.objects.filter(chat_id=call.message.chat.id).first()
+        currencies = Currency.objects.all()
+        subscribe_currency_menu(call, 'Вы находитесь в разделе выбора валюты для подписки на курсы валют: ', subscriber, currencies, page)
+        return
+    elif call.data == 'key0':
         keyboard_category = types.InlineKeyboardMarkup(row_width=1)
         keyboard_category.add(types.InlineKeyboardButton('Подписаться на категории новостей', callback_data='key1'),
                         types.InlineKeyboardButton('Отписаться от категории новостей', callback_data='key2'),
@@ -293,7 +431,7 @@ def callback(call):
         categories = Category.objects.all()
         print(f"{now} Получены категории для подписки: {categories}")
         subscribe_menu(call, 'Вы находитесь в разделе выбора подписки на категорию новостей.', subscriber, categories)
-    # Обработка выбора категории для подписки
+    # Обработка выбора категории для подписки на новости
     elif call.data.startswith('newsSubscribe_'):
         category_id = call.data.split('_')[1]  # Получаем ID категории из callback_data
         print(f"{now} Нажата кнопка id={category_id} для добавления подписки")
@@ -313,6 +451,7 @@ def callback(call):
         subscriber.save()
         print(f"{now} Добавлена категория {category} подписки пользователя {subscriber.username}")
         subscribe_menu(call, f"Добавлена категория {category}", subscriber, categories)
+    #ветка отписки от категории новостей
     elif call.data == 'key2':
         subscriber = TelegramSubscriber.objects.get(chat_id=call.message.chat.id)
         categories = subscriber.subscribed_to_categories.all()
@@ -335,7 +474,7 @@ def callback(call):
         categories = subscriber.subscribed_to_categories.all()
         unsubscribe_menu(call, f'Вы отписались от категории: {category.name}', subscriber, categories)
     #добавить ветку погоды
-    # Обработка ветки подписки на прогноз погоды
+    # Меню подписки на прогноз погоды
     elif call.data == 'key3':
         subscriber = TelegramSubscriber.objects.filter(chat_id=call.message.chat.id).first()
         cities = City.objects.all()
@@ -357,8 +496,8 @@ def callback(call):
         subscriber.weather_sent = True
         subscriber.save()
         print(f"{now} Добавлен город {city} для прогноза погоды для пользователя {subscriber.username}")
-        subscribe_weather_menu(call, f"Добавлен город {city}", subscriber, cities)
-    # Обработка ветки отписки нот прогноза погоды
+        subscribe_weather_menu(call, f"Добавлен город {city.city_name}", subscriber, cities)
+    # Меню отписки от прогноза погоды
     elif call.data == 'key4':
         subscriber = TelegramSubscriber.objects.filter(chat_id=call.message.chat.id).first()
         cities = subscriber.subscribed_weather_city.all()
@@ -373,25 +512,67 @@ def callback(call):
             subscriber = TelegramSubscriber.objects.get(chat_id=call.message.chat.id)
             print(f"{now} Получен пользователь {subscriber.username} для удаления из подписки")
             subscriber.subscribed_weather_city.remove(city)
-            if not subscriber.subscribed_to_categories.exists():
+            if not subscriber.subscribed_weather_city.exists():
                 subscriber.weather_sent = False  # Отписка от прогноза погоды
             subscriber.save()
             print(f"{now} Удаление города {city} из подписки на прогноз погоды пользователя {subscriber.username}")
             cities = subscriber.subscribed_weather_city.all()
             unsubscribe_weather_menu(call, f'Вы отписались от прогноза погоды на город: {city.city_name}', subscriber, cities)
-    #добавить ветку валюты
+    #Ветка рассылки курса валют
+    #Меню выбора валют для подписки
     elif call.data == 'key5':
-        keyboard_category = types.InlineKeyboardMarkup(row_width=1)
-        keyboard_category.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
-        #bot.send_message(call.message.chat.id, f'Вы находитесь в разделе подписки на курсы валют ', reply_markup=keyboard_category)
-        bot.edit_message_text(f'Вы находитесь в разделе подписки на курсы валют ', call.message.chat.id, call.message.message_id, reply_markup=keyboard_category)
+        subscriber = TelegramSubscriber.objects.filter(chat_id=call.message.chat.id).first()
+        currencies = Currency.objects.all()
+        subscribe_currency_menu(call, 'Вы находитесь в разделе выбора валюты для подписки на курсы валют: ', subscriber, currencies)
 
+    # Обработка выбора подписки на валюты для рассылки
+    elif call.data.startswith('currencySubscribe_'):
+        #получим идентификатор валюты из нажатой кнопки
+        currency_id = call.data.split('_')[1]
+        print(f"{now} Нажата кнопка id={currency_id} для добавления валюты для рассылки курса валют")
+        currencies = Currency.objects.all()
+        currency = currencies.filter(id=currency_id).first()
+        #если валюта не найдена
+        if currency is None:
+            print(f"{now} Валюту с id={currency_id} не найден")
+            return
+        print(f"{now} Получена валюта {currency} для подписки на курсы валют")
+        #получаем пользователя из сообщения и получаем пользователья из базы данных или создаем его
+        username = call.message.chat.username if call.message.chat.username else "Неизвестный пользователь"
+        subscriber, created = TelegramSubscriber.objects.get_or_create(chat_id=call.message.chat.id, defaults={'username': username})
+        print(f"{now} Получен пользователь {subscriber.username} для добавления подписки на курсы валют")
+        subscriber.subscribed_to_currency.add(currency)
+        subscriber.currency_sent = True
+        subscriber.save()
+        print(f"{now} Добавлена валюта {currency} для рассылки курса валют для пользователя {subscriber.username}")
+        subscribe_currency_menu(call, f"Добавлена валюта {currency.currency_name}", subscriber, currencies)
+
+    #Меню выбора валют для подписки
     elif call.data == 'key6':
-        keyboard_category = types.InlineKeyboardMarkup(row_width=1)
-        keyboard_category.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
-        #bot.send_message(call.message.chat.id, f'Вы находитесь в разделе отписки от курсов валют ', reply_markup=keyboard_category)
-        bot.edit_message_text(f'Вы находитесь в разделе отписки от курсов валют ', call.message.chat.id, call.message.message_id, reply_markup=keyboard_category)
-    #добавить ветку рассылки
+        subscriber = TelegramSubscriber.objects.filter(chat_id=call.message.chat.id).first()
+        # currencies = Currency.objects.all()
+        currencies = subscriber.subscribed_to_currency.all()
+        unsubscribe_currency_menu(call, 'Вы находитесь в разделе выбора валюты для отпписки от курса валют: ', subscriber, currencies)
+    # Обработка выбора отписки на валюты для рассылки
+    elif call.data.startswith('currencyUnsubscribe_'):
+        currency_id = call.data.split('_')[1]
+        print(f"{now} Нажата кнопка id={currency_id} для удаления валюты для отписки от рассылки курса валют")
+        currency = Currency.objects.filter(id=currency_id).first()
+        if currency:
+            print(f"{now} Получена валюта {currency} для удаления из подписки на рассылку курса валют")
+            subscriber = TelegramSubscriber.objects.get(chat_id=call.message.chat.id)
+            print(f"{now} Получен пользователь {subscriber.username} для удаления валюты из рассылки валют")
+            subscriber.subscribed_to_currency.remove(currency)
+            #если не осталось подписок на валюты то отключаем рассылку
+            if not subscriber.subscribed_to_currency.exists():
+                subscriber.currency_sent = False  # Отписка от прогноза погоды
+            subscriber.save()
+            print(f"{now} Удаление валюты {currency} из подписки на рассылку курса валют пользователя {subscriber.username}")
+            currencies = subscriber.subscribed_to_currency.all()
+            unsubscribe_currency_menu(call, f'Вы отписались от валюты: {currency.currency_name}', subscriber, currencies)
+
+
+    #Меню расширенных настроек рассылки 
     elif call.data == 'key7':
         print(f"{now} Нажата кнопка {call.data} для настройки рассылки сообщений")
         # Получаем подписчика
