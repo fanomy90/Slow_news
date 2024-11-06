@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 
 class News(models.Model):
     #через verbose_name задали наименование поля для отображения в админ панеле
@@ -28,6 +29,17 @@ class News(models.Model):
         verbose_name_plural = 'Новости'
         #сортировка по времени создания и заголовку, она применится и на основной части сайта
         ordering = ['-date', 'id', 'time_create', 'title']
+
+#модель для контроля отправки новости подписчику
+class NewsSent(models.Model):
+    subscriber = models.ForeignKey('TelegramSubscriber', on_delete=models.CASCADE, verbose_name="Подписчик")
+    news = models.ForeignKey('News', on_delete=models.CASCADE, verbose_name="Новости")
+    sent_at = models.DateTimeField(default=timezone.now, verbose_name="Дата отправки")
+
+    class Meta:
+        verbose_name = 'Отпарвленная новость'
+        verbose_name_plural = 'Отправленные новости'
+        unique_together = ('subscriber', 'news')
 
 #сделаем нормализацию - привяжем вторичную модель по категориям
 class Category(models.Model):
@@ -74,6 +86,7 @@ class CurrencyRate(models.Model):
         verbose_name_plural = 'Курсы валют'
         ordering = ['-date']  # Сортировка по дате (от новых к старым)
         unique_together = ['currency', 'date']  # Уникальность записи на определенную дату для конкретной валюты
+        
 class City(models.Model):
     city_name = models.CharField(max_length=100, verbose_name="Название города")
     city_latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True, verbose_name="Широта")

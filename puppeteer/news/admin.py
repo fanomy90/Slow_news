@@ -43,6 +43,16 @@ class NewsAdmin(admin.ModelAdmin):
         return obj.cat.name  # Возвращаем имя категории
     get_category_name.short_description = 'Категория'  # Задаем название столбца в админке
 
+class NewsSentAdmin(admin.ModelAdmin):
+    #вывод дополнительных полей для отображения записей БД в админке
+    list_display = ('id', 'subscriber', 'news', 'sent_at')
+    #Доп поля с ссылками для перехода для редактирования записи БД
+    list_display_links = ('id', 'subscriber', 'news')
+    #Доп поля по которым можно произвести поиск
+    search_fields = ('subscriber__username', 'news__title', 'sent_at')
+    #Возможность фильтрации записей в админке по публикации и дате создания
+    list_filter = ('subscriber', 'news', 'sent_at')
+
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'slug', 'name')
     list_display_links = ('id', 'name')
@@ -126,6 +136,7 @@ class TelegramSubscriberAdmin(admin.ModelAdmin):
 
 
 admin.site.register(News, NewsAdmin)
+admin.site.register(NewsSent, NewsSentAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(TelegramSubscriber, TelegramSubscriberAdmin)
 admin.site.register(Currency, CurrencyAdmin)

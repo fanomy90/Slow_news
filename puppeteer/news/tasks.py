@@ -162,10 +162,10 @@ def send_daily_news():
     send_news()
 
 #тест рассылки курсов валют
-@shared_task
-def send_currency_every_hour():
-    print(f"{datetime.now()} старт задачи рассылки курса валют")
-    send_currency_frequency("every_hour")
+# @shared_task
+# def send_currency_every_hour():
+#     print(f"{datetime.now()} старт задачи рассылки курса валют")
+#     send_currency_frequency("every_hour")
 
 
 @shared_task

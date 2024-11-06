@@ -10,16 +10,7 @@ KEY_PATH="/etc/letsencrypt/live/slow-news.sytes.net/privkey.pem"
 domains="slow-news.sytes.net"
 staging=0 # установить в 1 для тестирования работы сертификатов, 0 для выпуска рабочих сертификатов
 email="fanomy90@gmail.com"
-
 data_path="./data/certbot"
-# убрать
-# if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
-#     echo "### Downloading recommended TLS parameters ..."
-#     mkdir -p "$data_path/conf"
-#     curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf > "$data_path/conf/options-ssl-nginx.conf"
-#     curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem > "$data_path/conf/ssl-dhparams.pem"
-#     echo
-# fi
 
 # создадим сертификат заглушку
 gen_dummy_certs() {
@@ -95,22 +86,6 @@ while true; do
         fi
     else
         log_message "Проверка актуальности сертификатов для $domains..."
-        # вариант проверки c обращение к lets encrypt в режиме симуляции обновления
-        # certbot renew --dry-run
-        # if [ $? -eq 0 ]; then
-        #     log_message "Сертификаты для $domains актуальны (симуляция обновления)."
-        # else
-        #     log_message "Обновление сертификатов для $domains..."
-        #     certbot renew
-        #     if [ $? -eq 0 ]; then
-        #         log_message "Сертификаты для $domains успешно обновлены. Перезапуск Nginx..."
-        #         #установка флага перезапуска nginx
-        #         touch /tmp/renewed
-        #     else
-        #         log_message "Ошибка при обновлении сертификатов для $domains."
-        #     fi
-        # fi
-        # вариант проверки без обращения к lets encrypt
         if openssl x509 -checkend 86400 -noout -in "$CERT_PATH"; then
             log_message "Сертификаты актуальны."
         else
@@ -124,8 +99,7 @@ while true; do
             fi
         fi
     fi
-
-    # Проверка флага обновления и перезагрузка Nginx, если необходимо
+    # Проверка флага обновления и перезагрузка Nginx
     if [ -f /tmp/renewed ]; then
         log_message "Перезапуск Nginx..."
         # docker exec nginx nginx -s reload

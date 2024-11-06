@@ -239,69 +239,6 @@ def subscribe_currency_menu(call, message_header, subscriber, currencies, page=0
     message_text = f"{message_header}\n\nВыберите валюту для подписки на курсы валют."
     bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_currency)
 
-#функция вывода списка валют для подписки на курсы валют
-# def subscribe_currency_menu(call, message_header, subscriber, currencies):
-#     print(f"{now} Нажата кнопка {call.data} для настройки {message_header.lower()}")
-#     # Создаем клавиатуру
-#     keyboard_currency = types.InlineKeyboardMarkup(row_width=4)
-#     def send_message_text(call, message_header, message_botom):
-#         message_text = (
-#             f'{message_header}\n\n'
-#             f'{message_botom}\n'
-#         )
-#         bot.edit_message_text(message_text, call.message.chat.id, call.message.message_id, reply_markup=keyboard_currency)
-#     if subscriber:
-#         print(f"{now} Получен пользователь для подписки курсы валют: {subscriber.username}")
-#         subscribed_currencies = subscriber.subscribed_to_currency.all()
-#         print(f"{now} Получены валюты {subscribed_currencies} на курсы которых подписан пользователя {subscriber.username}")
-#         #фунция отправки сообщения пользователю
-
-#         # Формируем группы кнопок валют для подписки
-#         buttons = [
-#             types.InlineKeyboardButton(currency.currency_name, callback_data=f'currencySubscribe_{currency.id}')
-#             for currency in currencies if currency not in subscribed_currencies
-#         ]
-
-#         # Добавляем кнопки группами
-#         for i in range(0, len(buttons), 4):
-#             keyboard_currency.add(*buttons[i:i+4])
-#         if not buttons:
-#             keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
-#             send_message_text(call, message_header, 'Нет доступных валют для подписки на курсы валют.')
-#         else:
-#             keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
-#             send_message_text(call, message_header, 'Выберите валюту для подписки на курсы валют.')
-#     else:
-#         print(f"{now} Пользователя {call.message.chat.id} еще нет в базе подписчиков")
-#         buttons = [
-#             types.InlineKeyboardButton(currency.currency_name, callback_data=f'currencySubscribe_{currency.id}')
-#             for currency in currencies
-#         ]
-#         for i in range(0, len(buttons), 4):
-#             keyboard_currency.add(*buttons[i:i+4])
-#         keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
-#         send_message_text(call, message_header, 'Новый пользователь. Выберите валюту для подписки на курсы валют.')
-
-
-    #     for currency in currencies:
-    #         #если валюты нет в подписках пользователя то добавляем кнопку с валютой для подписки
-    #         if currency not in subscribed_currencies:
-    #             keyboard_currency.add(types.InlineKeyboardButton(currency.currency_name, callback_data=f'currencySubscribe_{currency.id}'))
-    #     #если не было создано кнопок для подписки выводим сообщение и кнопку назад
-    #     if not keyboard_currency.keyboard:
-    #         keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
-    #         send_message_text(call, message_header, 'Нет доступных валют для подписки на курсы валют.')
-    #     #если кнопки с валютами были созданы выводим сообщение для выбора валюты для подписки и кнпоку назад
-    #     else:
-    #         keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
-    #         send_message_text(call, message_header, 'Выберите валюту для подписки на курсы валют')
-    # else:
-    #     print(f"{now} Пользователя {call.message.chat.id} еще нет в базе подписчиков")
-    #     for currency in currencies:
-    #         send_message_text(call, message_header, 'Новый пользователь. Выберите валюту для подписки на курсы валют')
-    #         bot.edit_message_text(message_header, call.message.chat.id, call.message.message_id, reply_markup=keyboard_currency)
-    #     keyboard_currency.add(types.InlineKeyboardButton('Назад', callback_data='key0'))
-
 #функция вывода списка валют для отписки от курсов валют
 def unsubscribe_currency_menu(call, message_header, subscriber, currencies):
     print(f"{now} Нажата кнопка {call.data} для настройки {message_header.lower()}")

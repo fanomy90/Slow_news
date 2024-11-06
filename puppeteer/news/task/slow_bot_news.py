@@ -4,6 +4,7 @@ import sys
 import logging
 import datetime
 from django.db import transaction
+from django.utils import timezone
 # Получаем путь к корневой директории проекта
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Добавляем корневую директорию в PYTHONPATH
@@ -11,6 +12,7 @@ sys.path.append(project_root)
 # Укажите переменную окружения для настроек Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'puppeteer.settings')
 import django
+
 django.setup()
 now = datetime.datetime.now()
 #ограничение на максимальную длинну сообщения
@@ -39,10 +41,6 @@ def split_message(full_content, max_length=MAX_MESSAGE_LENGTH):
             split_at = max_length
         yield full_content[:split_at]
         full_content = full_content[split_at:].strip()
-
-#получить подписчиков на новости
-# def get_subscribers_to_news(subscribers, category, message_format):
-#     return subscribers.filter(subscribed_to_categories=category, message_format=message_format)
 
 #сборка сообщения перед отправкой
 def prepare_and_send_news(subscribers, article, category_style, content, image, message_format, is_first_message=True):
@@ -75,7 +73,8 @@ def prepare_and_send_news(subscribers, article, category_style, content, image, 
             print(f"{now} Ошибка при отправке сообщения категории {article.cat.name} пользователю {subscriber.username}")
 
 def send_news_frequency(frequency_sending="every_hour"):
-    from news.models import TelegramSubscriber, News, Category
+    from news.models import TelegramSubscriber, News, Category, NewsSent
+    now = timezone.now()
     # Получаем всех подписчиков с указанной частотой рассылки
     subscribers = TelegramSubscriber.objects.filter(frequency_sending=frequency_sending)
     if not subscribers.exists():
@@ -96,7 +95,12 @@ def send_news_frequency(frequency_sending="every_hour"):
     # Прокручиваем категории и обрабатываем новости
     for category in categories:
         # Получаем новости, которые ещё не отправлены
-        news_articles = News.objects.filter(cat=category, is_published=True, is_sent=False)
+        news_articles = News.objects.filter(
+            cat=category, 
+            is_published=True, 
+            is_sent=False).exclude(
+                newssent__subscriber__in=subscribers
+            )
         if not news_articles.exists():
             print(f"{now} В категории {category.name} нет новостей для отправки.")
             continue
@@ -124,8 +128,15 @@ def send_news_frequency(frequency_sending="every_hour"):
         # Отмечаем новости как отправленные
         for article in news_articles:
             try:
-                article.is_sent = True
-                article.save()
-                print(f"{now} Новость {article.title} помечена как отправленная.")
+                # article.is_sent = True
+                # article.save()
+                # print(f"{now} Новость {article.title} помечена как отправленная.")
+                #добавляем метку отправки новости конкретному пользователю
+                for subscriber in subscribers:
+                    NewsSent.objects.create(subscriber=subscriber, news=article, sent_at=now)
+                if not remaining_subscribers.exists():
+                    article.is_sent = True
+                    article.save()
+                    print(f"{now} Новость {article.title} помечена как отправленная для пользователя {subscriber.username} в {now}.")
             except Exception as e:
                 print(f"{now} Ошибка при сохранении новости {article.title}: {str(e)}")
