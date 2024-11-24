@@ -21,6 +21,8 @@ import django
 django.setup()
 bot = TeleBot('5659259939:AAG5XXvMKpVzHC7YqZ2INM8wJ7ryu4gVdZU')
 #убрать после перехода на расширенную подписку
+
+#вспомогательные функции
 def trim_author(text):
     if text:
         # Ищем индекс первого вхождения двух пробелов
@@ -283,7 +285,7 @@ def send_message_with_retry(subscriber, message, image=None, retries=3, delay=3)
                 return False  # Если достигли лимита попыток
 
 
-
+#обработки сообщений телеграмм бота
 #Стартовое сообщение
 @bot.message_handler(commands=['start'])
 def start_message(message):
